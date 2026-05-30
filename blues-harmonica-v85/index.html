@@ -1,0 +1,2761 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>布鲁斯口琴生成工具 V85 (稳定架构版)</title>
+  
+  <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mp4-muxer@3/build/mp4-muxer.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/webm-muxer@3/build/webm-muxer.js"></script>
+  
+  <script type="module">
+    import { Midi } from 'https://cdn.jsdelivr.net/npm/@tonejs/midi@2.0.28/+esm';
+    window.Midi = Midi;
+  </script>
+
+  <script>
+    var Module = {
+      locateFile: function(path) {
+        if (path.endsWith('.wasm')) {
+          return 'https://cdn.jsdelivr.net/npm/js-synthesizer@1.11.0/externals/' + path;
+        }
+        return path;
+      }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/js-synthesizer@1.11.0/externals/libfluidsynth-2.4.6-with-libsndfile.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-synthesizer@1.11.0/dist/js-synthesizer.min.js"></script>
+
+  <style>
+    :root {
+      --text: #1e293b; --muted: #64748b; --accent: #3b82f6;
+      --blow: #0ea5e9; --draw: #ec4899;
+      --good: #10b981; --warn: #f59e0b; --danger: #ef4444;
+      
+      --glass-bg: rgba(255, 255, 255, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.6);
+      --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+      --glass-blur: blur(20px);
+
+      --vg-blow-bg: rgba(14,165,233,0.7);
+      --vg-blow-border: #7dd3fc;
+      --vg-blow-shadow: rgba(14,165,233,0.3);
+      --vg-draw-bg: rgba(236,72,153,0.7);
+      --vg-draw-border: #f9a8d4;
+      --vg-draw-shadow: rgba(236,72,153,0.3);
+      --vg-ob-border: #0284c7;
+      --vg-staccato: #1e293b;
+    }
+    
+    * { box-sizing: border-box; }
+    html, body { height: 100vh; margin: 0; padding: 0; overflow: hidden; font-family: Inter, system-ui, sans-serif; color: var(--text); background-color: #f1f5f9; position: relative; }
+    
+    .bg-orbs { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; pointer-events: none; }
+    .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.6; animation: float 20s infinite ease-in-out alternate; }
+    .orb-1 { width: 50vw; height: 50vw; background: #bae6fd; top: -10vw; left: -10vw; }
+    .orb-2 { width: 60vw; height: 60vw; background: #fbcfe8; bottom: -15vw; right: -5vw; animation-delay: -5s; }
+    @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(30px, 20px) scale(1.05); } }
+
+    input, select, textarea, button { font: inherit; outline: none; color: var(--text); }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 4px; }
+    
+    .app-layout { display: flex; flex-direction: column; height: 100%; width: 100vw; padding: 16px; gap: 16px; }
+
+    .glass-panel { background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); border-radius: 16px; }
+
+    .topbar { flex: 0 0 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; border-radius: 24px; }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand .logo-orb { width: 14px; height: 14px; border-radius: 50%; background: linear-gradient(135deg, #38bdf8, #818cf8); box-shadow: 0 0 12px rgba(56,189,248,0.5); }
+    .brand h1 { margin: 0; font-size: 16px; font-weight: 800; letter-spacing: 0.02em; color: #0f172a;}
+    
+    .topbar-actions { display: flex; align-items: center; gap: 8px; height: 32px; }
+    .topbar-actions input { width: 160px; height: 100%; font-size: 12px; font-weight: 800; padding: 0 10px; background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; transition: all 0.2s; color: #0f172a; box-sizing: border-box; margin: 0;}
+    .topbar-actions input:focus { background: #fff; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(59,130,246,0.2); }
+    .topbar-actions button { font-size: 12px; height: 100%; padding: 0 14px; border-radius: 8px; box-shadow: none; white-space: nowrap; box-sizing: border-box; margin: 0; display: inline-flex; align-items: center; justify-content: center;}
+
+    .workspace { flex: 1; display: flex; flex-direction: row; gap: 16px; overflow: hidden; position: relative; }
+    
+    .canvas-section { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+    .device-stage { flex: 1; min-height: 0; aspect-ratio: 9 / 16; border-radius: 16px; display: flex; align-items: center; justify-content: center; padding: 6px; overflow: hidden; position: relative; transition: aspect-ratio 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .device-frame { position: relative; width: 100%; height: 100%; border-radius: 10px; overflow: hidden; background: #000; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+    #previewCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: block; cursor: pointer; }
+    
+    .theme-modal.center-modal { 
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1); transform-origin: center center; width: 480px; z-index: 202;
+      background: rgba(255,255,255,0.98); padding: 16px; border-radius: 16px; box-shadow: 0 15px 50px rgba(0,0,0,0.15);
+      max-height: 70vh; overflow-y: auto; scrollbar-width: thin;
+      opacity: 1; transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: auto;
+    }
+    .theme-modal.center-modal.hidden { opacity: 0; transform: translate(-50%, -45%) scale(0.95); pointer-events: none; }
+    
+    .theme-modal .close-btn { 
+        cursor: pointer; color: var(--muted); font-size: 16px; font-weight: bold; 
+        border:none; background:transparent; padding: 4px 8px; border-radius: 6px; transition: background 0.15s;
+    }
+    .theme-modal .close-btn:hover { background: rgba(0,0,0,0.05); color: #0f172a; }
+    .theme-modal .close-btn.danger-hover:hover { color: var(--danger); background: rgba(239,68,68,0.1); }
+
+    .segment-group { display: flex; background: rgba(0, 0, 0, 0.15); border-radius: 8px; padding: 4px; gap: 4px; width: 100%; flex-wrap: wrap; }
+    .segment-group input[type="radio"] { display: none; }
+    .segment-group label { flex: 1; text-align: center; margin: 0; padding: 6px 4px; border-radius: 6px; cursor: pointer; color: var(--muted); font-size: 11px; font-weight: 700; transition: all 0.2s ease; white-space: nowrap; }
+    .segment-group input[type="radio"]:checked + label { background: rgba(255, 255, 255, 0.9); color: #0f172a; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); }
+
+    .transport-bar { flex: 0 0 auto; width: 100%; max-width: 680px; margin-top: 16px; padding: 10px 16px; border-radius: 100px; display: flex; align-items: center; gap: 16px; }
+    .transport-controls { display: flex; align-items: center; gap: 8px; }
+    .transport-timeline { flex: 1; display: flex; align-items: center; gap: 12px; font-variant-numeric: tabular-nums; font-size: 12px; font-weight: 600; color: #334155; }
+    input[type="range"] { flex: 1; height: 6px; -webkit-appearance: none; background: rgba(0,0,0,0.08); border-radius: 3px; cursor: pointer; }
+    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: #fff; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.15), inset 0 0 0 1px rgba(0,0,0,0.05); }
+    
+    button, .custom-file-btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(0, 0, 0, 0.1); color: #334155;
+      border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 600; cursor: pointer;
+      transition: all 0.2s ease; text-decoration: none;
+    }
+    button:hover, .custom-file-btn:hover { background: #fff; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.06); }
+    button:active, .custom-file-btn:active { transform: translateY(1px); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+    
+    .primary { background: linear-gradient(135deg, #38bdf8, #818cf8); border-color: transparent; color: white; box-shadow: 0 4px 12px rgba(56,189,248,0.3); }
+    .primary:hover { background: linear-gradient(135deg, #0ea5e9, #6366f1); color: white; }
+    .good { background: #d1fae5; border-color: #a7f3d0; color: #065f46; }
+    .warn { background: #fef3c7; border-color: #fde68a; color: #92400e; }
+    .danger { background: #fee2e2; border-color: #fecaca; color: #991b1b; }
+    .icon-btn { padding: 8px 16px; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);}
+
+    .sidebar { flex: 0 0 440px; height: 100%; display: flex; flex-direction: column; overflow: hidden; padding: 16px; gap: 12px; }
+    .sidebar-body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 6px; margin-right: -6px; }
+    
+    .status-top { height: auto; min-height: 0; flex-shrink: 0; font-size: 12px; color: var(--good); margin: 0; font-weight: 700; line-height: 1.5; padding: 10px 14px; border-radius: 12px; background: rgba(255,255,255,0.9); border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 10px rgba(0,0,0,0.03);}
+
+    .panel-section { padding: 16px; background: rgba(255,255,255,0.4); border: 1px solid rgba(0,0,0,0.06); border-radius: 12px; flex-shrink: 0; display: flex; flex-direction: column;}
+    .panel-title { margin: 0 0 12px 0; font-size: 12px; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+    .panel-title::before { content: ''; display: block; width: 4px; height: 12px; background: #3b82f6; border-radius: 2px; }
+
+    input[type="text"], input[type="number"], select, textarea { width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1); background: rgba(255,255,255,0.7); font-size: 12px; font-weight: 600; transition: all 0.2s; color: #1e293b; }
+    input:focus, select:focus, textarea:focus { border-color: #38bdf8; background: #ffffff; outline: none; box-shadow: 0 0 0 2px rgba(56,189,248,0.2); }
+    label { display: block; margin-bottom: 4px; font-size: 11px; color: #475569; font-weight: 700;}
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .row-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    
+    #waveCanvas { width: 100%; height: 60px; background: #ffffff; border: 1px solid rgba(0,0,0,0.08); border-radius: 8px; cursor: crosshair; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+
+    .vg-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .vg-item { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px; background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.05); border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);}
+    .vg-graphic { width: 36px; height: 48px; position: relative; background: rgba(0,0,0,0.04); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);}
+    .vg-label { font-size: 11px; color: var(--muted); font-weight: 800; text-align: center; }
+    
+    .v-block { width: 16px; border-radius: 6px; position: absolute; border: 1.5px solid rgba(255,255,255,0.9); }
+    .v-block::before { content:''; position:absolute; left: 50%; transform: translateX(-50%); width: 4px; border-radius:2px; z-index: 1; background: rgba(255,255,255,0.4); }
+    .v-block::after { content:''; position:absolute; left: 1px; right: 1px; height: 6px; background: #fff; border-radius: 3px; z-index: 2;}
+
+    .v-blow { background: var(--vg-blow-bg); height: 36px; top: 6px; box-shadow: 0 4px 10px var(--vg-blow-shadow); border-color: var(--vg-blow-border);}
+    .v-blow::after { bottom: 1px; } 
+    .v-draw { background: var(--vg-draw-bg); height: 36px; bottom: 6px; box-shadow: 0 4px 10px var(--vg-draw-shadow); border-color: var(--vg-draw-border);}
+    .v-draw::after { top: 1px; } 
+
+    .v-bend .v-block { overflow: hidden; }
+    .v-bend .v-block span { position:absolute; top:4px; bottom:4px; left:0; right:0; background:repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(0,0,0,0.3) 3px, rgba(0,0,0,0.3) 6px); z-index: 3;}
+    .v-ob { border: 2px dashed var(--vg-ob-border); background: transparent; box-shadow: none; }
+    .v-ob::before, .v-ob::after { display: none; }
+    .v-staccato::after { content:''; position:absolute; width: 24px; height: 5px; background: var(--vg-staccato); left:-4px; bottom:-7px; border-radius: 3px; z-index: 4;}
+    .v-accent::after { content:''; position:absolute; border-left:8px solid transparent; border-right:8px solid transparent; border-bottom:8px solid var(--vg-staccato); top:-10px; left:0px; z-index: 4; background: transparent;}
+
+    .event-list { flex: 1; min-height: 0; overflow-y: auto; border: 1px solid rgba(0,0,0,0.08); border-radius: 8px; background: rgba(255,255,255,0.6); box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);}
+    .event-row { padding: 4px 8px; border-bottom: 1px solid rgba(0,0,0,0.04); transition: background 0.15s; display: flex; align-items: center; }
+    .event-row:hover { background: rgba(255,255,255,0.9); }
+    .event-row.selected { background: rgba(56,189,248,0.15); border-left: 3px solid var(--blow); }
+    .event-row input { background: rgba(255,255,255,0.8); border: 1px solid rgba(0,0,0,0.1); border-radius: 4px; color:#0f172a; outline:none; transition: all 0.2s;}
+    .event-row input:focus { border-color: var(--accent); background:#fff; box-shadow: 0 0 0 2px rgba(59,130,246,0.2);}
+    .mono { font-family: ui-monospace, monospace; color: var(--accent); font-weight: 800;}
+
+    details.fold { border: 1px solid rgba(0,0,0,0.06); border-radius: 12px; background: rgba(255,255,255,0.4); margin: 0; flex-shrink: 0; overflow: hidden; transition: background 0.2s; }
+    details.fold:hover { background: rgba(255,255,255,0.6); }
+    details.fold summary { padding: 12px 16px; cursor: pointer; font-size: 13px; font-weight: 800; color: #0f172a; display: flex; justify-content: space-between; user-select: none; list-style: none; }
+    details.fold summary::-webkit-details-marker { display: none; }
+    details.fold summary::after { content: '▼'; color: var(--muted); font-size: 10px; transition: transform 0.2s;}
+    details.fold[open] summary::after { transform: rotate(180deg); color: var(--accent); }
+    .fold-body { padding: 0 16px 16px 16px; border-top: 1px solid rgba(0,0,0,0.04); margin-top: 4px; padding-top: 12px;}
+
+    .progress-bar-container { width: 100%; height: 12px; background: rgba(0,0,0,0.05); border-radius: 6px; overflow: hidden; margin: 16px 0; }
+    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #38bdf8, #818cf8); width: 0%; transition: width 0.1s linear; }
+    .blink-warn { color: var(--danger); font-weight: 800; }
+    
+    .mini-export-widget {
+        position: absolute; bottom: 24px; right: 24px; z-index: 300;
+        background: rgba(255,255,255,0.95); border: 1px solid rgba(0,0,0,0.1);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15); border-radius: 50px;
+        padding: 10px 20px; display: flex; align-items: center; gap: 12px;
+        cursor: pointer; backdrop-filter: blur(10px); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .mini-export-widget:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.2); }
+    .mini-export-widget.hidden { opacity: 0; transform: translateY(20px) scale(0.9); pointer-events: none; }
+    .mini-export-widget .spinner { 
+        width: 16px; height: 16px; border: 3px solid rgba(59,130,246,0.3); 
+        border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; 
+    }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    #exportAlertBox { display: none; margin-top: 12px; padding: 12px; border-radius: 8px; font-size: 12px; font-weight: 700; line-height: 1.5; word-wrap: break-word; text-align: left; }
+  </style>
+</head>
+
+<body>
+  <div class="bg-orbs"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
+
+  <div class="app-layout">
+    <header class="topbar glass-panel">
+      <div class="brand">
+        <div class="logo-orb"></div>
+        <h1>布鲁斯口琴生成器 V85</h1>
+      </div>
+      <div class="topbar-actions">
+        <input id="titleInput" type="text" placeholder="输入工程名称..." value="未命名工程" />
+        <button id="exportBackupBtn" class="good" title="导出保存为 JSON 文件">💾 备份全量工程</button>
+        <button id="clearDataBtn" class="danger" title="重置工具状态">🗑️ 清空重置</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      
+      <div id="miniExportWidget" class="mini-export-widget hidden" title="点击还原渲染面板">
+          <div class="spinner"></div>
+          <span id="miniProgressText" style="font-size:13px; font-weight:800; color:var(--accent); font-variant-numeric: tabular-nums;">0%</span>
+      </div>
+
+      <div id="exportModal" class="glass-panel theme-modal center-modal hidden">
+        <div style="position: absolute; top: 12px; right: 16px; display: flex; gap: 4px;">
+            <button class="close-btn" id="exportMinimizeBtn" title="最小化到角落继续渲染">➖</button>
+            <button class="close-btn danger-hover" id="exportCloseBtn" title="关闭窗口">❌</button>
+        </div>
+        <h3 class="panel-title" style="margin-top:0;">🎬 离线超清导出引擎</h3>
+        
+        <div id="exportFormStage">
+            <p style="font-size: 11px; color: var(--muted); margin-bottom: 16px; line-height: 1.5;">
+                <span class="blink-warn">⚠️ 导出期间请勿最小化浏览器或切换网页标签，以防掉帧。</span>
+            </p>
+            <div class="grid-2">
+                <div><label>视频宽度 (px)</label><input id="expWidth" type="number" value="1080" step="2" /></div>
+                <div><label>视频高度 (px)</label><input id="expHeight" type="number" value="1920" step="2" /></div>
+                
+                <div style="grid-column: span 2;">
+                    <label>离线编码架构 (WebCodecs + PCM Muxing)</label>
+                    <select id="expRenderMode">
+                        <option value="webcodecs_mp4_audio" style="color:var(--accent); font-weight:bold;">🎬 工业级离线渲染 (MP4 视听合轨 / 完美60帧)</option>
+                        <option value="webcodecs_webm_audio">🎬 工业级离线渲染 (WebM 视听合轨 / 高画质)</option>
+                    </select>
+                </div>
+
+                <div><label>起始时间 (秒)</label><input id="expStart" type="number" value="0" step="0.1" /></div>
+                <div><label>结束时间 (秒)</label><input id="expEnd" type="number" value="0" step="0.1" /></div>
+            </div>
+            
+            <div class="row-actions" style="margin-top: 16px;">
+                <button id="expSetFullRangeBtn" class="good" style="flex:1;">获取完整歌曲时长</button>
+                <button id="expStartBtn" class="primary" style="flex:1;">🔴 开始离线合成压制</button>
+            </div>
+        </div>
+
+        <div id="exportProgressStage" style="display: none; text-align: center; padding: 10px 0;">
+            <h4 id="expTitleIng" style="margin: 0; color: var(--accent); font-weight: 800;">🚀 正在执行渲染任务</h4>
+            <p style="font-size:11px; color:var(--muted); margin-top:4px;">您可以点击右上角的 ➖ 最小化此窗口，互不干扰。</p>
+            
+            <div id="exportAlertBox"></div>
+
+            <div class="progress-bar-container">
+                <div id="expProgressBar" class="progress-bar-fill"></div>
+            </div>
+            <p id="expProgressText" style="font-size: 13px; font-variant-numeric: tabular-nums; font-weight: 800; color: var(--text);">0% ( 0.0s / 0.0s )</p>
+            <div class="row-actions" style="justify-content: center; margin-top: 20px;">
+                <button id="expPauseResumeBtn" class="warn">⏸ 暂停</button>
+                <button id="expCancelBtn" class="danger">⏹ 中止并放弃</button>
+            </div>
+        </div>
+      </div>
+
+      <section class="canvas-section">
+        <div class="device-stage glass-panel" id="deviceStage">
+          <div class="device-frame">
+            <canvas id="previewCanvas"></canvas>
+          </div>
+        </div>
+        
+        <div class="transport-bar glass-panel">
+          <div class="transport-controls">
+            <button id="playPauseBtn" class="icon-btn primary" style="width: 84px; justify-content: center;">▶ 播放</button>
+            <button id="stopBtn" class="icon-btn">⏹</button>
+          </div>
+          <div class="transport-timeline">
+            <span id="timeReadout" style="width: 48px;">0.00s</span>
+            <input id="seekRange" type="range" min="0" max="1000" value="0" step="1" />
+            <span id="beatReadout" style="width: 44px; text-align:right; color:var(--accent);" title="当前位于乐谱的第几拍">0.0b</span>
+          </div>
+        </div>
+      </section>
+
+      <aside class="sidebar glass-panel">
+        
+        <div id="xmlStatus" class="status-top">✨ 初始化就绪。请导入工程或乐谱文件。支持 XML/MIDI/TextGrid。</div>
+        
+        <div class="sidebar-body">
+            <details class="fold" open>
+              <summary>1. 乐谱修正</summary>
+              <div class="fold-body">
+                <label class="custom-file-btn primary" style="width:100%; margin-bottom: 12px; padding: 10px;">
+                  <input id="xmlFileInput" type="file" accept=".xml,.musicxml,.mxl,.textgrid,.TextGrid,.json,.mid,.midi" style="display:none;" />📂 导入乐谱 (XML/MIDI/备份)
+                </label>
+
+                <div id="midiImportPanel" style="display:none; padding: 12px; background: rgba(0,0,0,0.03); border: 1px solid var(--accent); border-radius: 8px; margin-bottom: 12px;">
+                    <div style="font-weight: 800; font-size: 12px; margin-bottom: 8px; color: var(--accent);">🎛️ MIDI 高级清洗引擎</div>
+                    <label>目标提取轨道</label>
+                    <select id="midiTrackSelect" style="margin-bottom: 8px;"></select>
+                    
+                    <label style="display:flex; align-items:center; gap:6px; cursor:pointer; margin-bottom: 8px; line-height:1.2;">
+                        <input type="checkbox" id="midiMonoToggle" checked /> 
+                        <span>开启天际线单音提取<br><span style="font-size:10px;color:var(--muted);font-weight:normal;">自动过滤不兼容的和弦与交叠死音</span></span>
+                    </label>
+
+                    <label style="margin-top: 8px;">绝对网格量化 (Quantization)</label>
+                    <select id="midiQuantizeSelect" style="margin-bottom: 10px;">
+                        <option value="0">关闭 (保留原始律动)</option>
+                        <option value="0.25" selected>1/16拍 (十六分音符)</option>
+                        <option value="0.5">1/8拍 (八分音符)</option>
+                        <option value="0.3333333333333333">1/12拍 (三连音)</option>
+                    </select>
+
+                    <div style="display:flex; gap:8px;">
+                        <button id="midiConfirmBtn" class="primary" style="flex:1;">✅ 确认排谱</button>
+                        <button id="midiCancelBtn" class="warn">取消</button>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div>
+                        <label title="平移源谱绝对音高，用于对齐伴奏。">源谱半音偏移</label>
+                        <input id="sourceTransposeInput" type="number" value="0" step="1" />
+                    </div>
+                    <div>
+                        <label title="整体平移八度，用于适配口琴有限的音域。">排谱八度偏移</label>
+                        <input id="octaveShiftInput" type="number" min="-3" max="3" step="1" value="0" />
+                    </div>
+                    <div><label>基准拍速 (BPM)</label><input id="bpmInput" type="number" min="10" max="300" step="1" value="90" /></div>
+                    <div><label>流速基准 (px/s)</label><input id="ppsInput" type="number" min="60" max="600" step="1" value="180" /></div>
+                </div>
+              </div>
+            </details>
+
+            <details class="fold" open>
+              <summary>2. 硬件映射</summary>
+              <div class="fold-body">
+                <div class="grid-2">
+                  <div><label>目标口琴调性</label><select id="keyInput"></select></div>
+                  <div>
+                      <label>调音排列 (Tuning)</label>
+                      <select id="tuningInput">
+                          <option value="standard">Standard 标准</option>
+                          <option value="paddy">Paddy 帕迪调音</option>
+                      </select>
+                  </div>
+                  <div><label>口琴孔数</label><input id="holesInput" type="number" min="4" max="16" step="1" value="10" /></div>
+                  <div>
+                      <label>画板音符显示</label>
+                      <select id="noteDisplayModeInput">
+                          <option value="absolute">绝对音名 (C, D)</option>
+                          <option value="relative">简谱相对 (1, 2)</option>
+                      </select>
+                  </div>
+                  <div style="grid-column: span 2;">
+                      <label>简谱把位基准</label>
+                      <select id="relativePositionInput" disabled>
+                          <option value="1st">1st 第一把位</option>
+                          <option value="2nd">2nd 第二把位</option>
+                          <option value="3rd">3rd 第三把位</option>
+                          <option value="4th">4th 第四把位</option>
+                          <option value="5th">5th 第五把位</option>
+                          <option value="12th">12th 十二把位</option>
+                      </select>
+                  </div>
+                </div>
+                <button id="autoArrangeBtn" class="primary" style="width:100%; margin-top:10px; padding: 8px;">✨ 自动寻找最易配置</button>
+              </div>
+            </details>
+
+            <details class="fold" open>
+              <summary>3. 伴奏渲染</summary>
+              <div class="fold-body">
+                <div class="grid-2" style="margin-bottom: 8px;">
+                  <label class="custom-file-btn primary" title="导入 MP3/WAV 作为伴奏或对轨参考">
+                    <input id="audioFileInput" type="file" accept="audio/*" style="display:none;" />🎵 导入伴奏
+                  </label>
+                  <label class="custom-file-btn primary" title="支持 .sf2 / .sf3，用于根据乐谱离线生成高质量试听">
+                    <input id="sfFileInput" type="file" accept=".sf2,.sf3" style="display:none;" />🎹 导入 SF2
+                  </label>
+                </div>
+                <div style="margin-top: 8px; margin-bottom: 8px;">
+                    <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+                        <input type="checkbox" id="humanizeToggle" checked /> 🤖 开启拟人化渲染 (力度与微小抖动)
+                    </label>
+                </div>
+                <button id="generateSynthBtn" class="custom-file-btn good" style="width:100%; padding:10px; border: 2px dashed #10b981;">
+                    ✨ 压制本地试听轨
+                </button>
+                <audio id="audioEl" preload="metadata" style="display:none;"></audio>
+              </div>
+            </details>
+            
+            <details class="fold" open>
+              <summary>4. 播放导出</summary>
+              <div class="fold-body">
+                <div class="grid-2" style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(0,0,0,0.05);">
+                    <div style="grid-column: span 2;"><label>前导缓冲 (s)</label><input id="leadInInput" type="number" min="0" max="30" step="0.01" value="1" /></div>
+                </div>
+
+                <label style="margin-bottom: 6px; display:block;">波形锚点动态对轨</label>
+                <canvas id="waveCanvas"></canvas>
+                <div class="grid-2" style="margin-top: 8px; margin-bottom: 12px;">
+                  <div><input id="anchorBeatInput" type="number" step="0.01" min="0" placeholder="目标拍位 (如 0)" /></div>
+                  <div><input id="anchorTimeInput" type="number" step="0.01" min="0" placeholder="绝对秒数 (s)" /></div>
+                </div>
+                <div class="row-actions" style="margin-bottom: 16px;">
+                  <button id="addAnchorFromCurrentBtn" class="good">当前游标填入</button>
+                  <button id="addAnchorManualBtn">保存锚点</button>
+                  <button id="clearAnchorsBtn" class="warn">重置</button>
+                </div>
+                
+                <button id="btnOpenExportModal" class="primary" style="width: 100%; padding: 10px; font-size: 13px;">🎬 打开离线合成中心</button>
+              </div>
+            </details>
+
+            <details class="fold" style="margin-top: 8px;" open>
+              <summary>5. 画布与视觉配置</summary>
+              <div class="fold-body">
+                <div class="grid-2">
+                  <div style="grid-column: span 2;">
+                    <label>画布裁剪比例</label>
+                    <div class="segment-group">
+                      <input type="radio" name="aspectRatio" id="ar_9_16" value="9/16" checked>
+                      <label for="ar_9_16">📱 竖屏 9:16</label>
+                      <input type="radio" name="aspectRatio" id="ar_4_3" value="4/3">
+                      <label for="ar_4_3">📺 横屏 4:3</label>
+                    </div>
+                  </div>
+                  <div style="grid-column: span 2;">
+                    <label>画布渲染主题</label>
+                    <div class="segment-group">
+                      <input type="radio" name="theme" id="th_candy" value="candy" checked>
+                      <label for="th_candy">🍬 Candy</label>
+                      <input type="radio" name="theme" id="th_hamu" value="hamu">
+                      <label for="th_hamu" style="color: #8B7365; font-weight: 900;">🦊 Hamu</label>
+                      <input type="radio" name="theme" id="th_light" value="lightMono">
+                      <label for="th_light">⚪ Light</label>
+                      <input type="radio" name="theme" id="th_custom" value="custom">
+                      <label for="th_custom" style="color:#6366f1; font-weight:900;">🛠️ 自定义</label>
+                    </div>
+                  </div>
+
+                  <div id="customSkinPanel" style="display:none; grid-column: span 2; padding: 12px; background: rgba(0,0,0,0.03); border: 1px dashed var(--accent); border-radius: 8px; margin-top: 4px;">
+                    <div style="font-weight: 800; font-size: 11px; margin-bottom: 8px; color: var(--accent);">🛠️ 自定义对齐与材质引擎</div>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                      <div>
+                        <label>自定义色块材质体系</label>
+                        <select id="customBlockStyleInput" style="width: 100%;">
+                            <option value="ios26">🪞 iOS26 高光发散玻璃 (专属)</option>
+                            <option value="hamu">🦊 复古降饱和质感 (附玻璃化)</option>
+                            <option value="candy">🍬 糖果降饱和质感</option>
+                            <option value="lightMono">⚪ 亮色降饱和质感</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label>色条总宽 (<span id="cwVal">1.00</span>x)</label>
+                        <div style="display:flex; align-items:center; gap:4px;">
+                          <button id="cwDec" class="icon-btn" style="padding:4px 8px; min-width: 28px; font-size: 11px;">◀</button>
+                          <input id="laneWidthScaleInput" type="range" min="0.5" max="2.0" step="0.001" value="1.0" style="flex:1; margin:0; min-width: 0;" />
+                          <button id="cwInc" class="icon-btn" style="padding:4px 8px; min-width: 28px; font-size: 11px;">▶</button>
+                        </div>
+                      </div>
+                      <div>
+                        <label>占空比 (<span id="cdVal">0.88</span>)</label>
+                        <div style="display:flex; align-items:center; gap:4px;">
+                          <button id="cdDec" class="icon-btn" style="padding:4px 8px; min-width: 28px; font-size: 11px;">◀</button>
+                          <input id="blockDutyCycleInput" type="range" min="0.2" max="1.0" step="0.01" value="0.88" style="flex:1; margin:0; min-width: 0;" />
+                          <button id="cdInc" class="icon-btn" style="padding:4px 8px; min-width: 28px; font-size: 11px;">▶</button>
+                        </div>
+                      </div>
+                      <div>
+                        <label>吹气线微调 (<span id="cbVal">0</span>px)</label>
+                        <div style="display:flex; align-items:center; gap:4px;">
+                          <button id="cbDec" class="icon-btn" style="padding:4px 8px; min-width: 28px; font-size: 11px;">◀</button>
+                          <input id="hitPosBlowInput" type="range" min="-150" max="150" step="1" value="0" style="flex:1; margin:0; min-width: 0;" />
+                          <button id="cbInc" class="icon-btn" style="padding:4px 8px; min-width: 28px; font-size: 11px;">▶</button>
+                        </div>
+                      </div>
+                      <div>
+                        <label>吸气线微调 (<span id="cdrawVal">0</span>px)</label>
+                        <div style="display:flex; align-items:center; gap:4px;">
+                          <button id="cdrawDec" class="icon-btn" style="padding:4px 8px; min-width: 28px; font-size: 11px;">◀</button>
+                          <input id="hitPosDrawInput" type="range" min="-150" max="150" step="1" value="0" style="flex:1; margin:0; min-width: 0;" />
+                          <button id="cdrawInc" class="icon-btn" style="padding:4px 8px; min-width: 28px; font-size: 11px;">▶</button>
+                        </div>
+                      </div>
+                      <div>
+                        <label>整体左右平移 (<span id="cpanVal">0</span>px)</label>
+                        <div style="display:flex; align-items:center; gap:4px;">
+                          <button id="cpanDec" class="icon-btn" style="padding:4px 8px; min-width: 28px; font-size: 11px;">◀</button>
+                          <input id="lanePanOffsetInput" type="range" min="-300" max="300" step="1" value="0" style="flex:1; margin:0; min-width: 0;" />
+                          <button id="cpanInc" class="icon-btn" style="padding:4px 8px; min-width: 28px; font-size: 11px;">▶</button>
+                        </div>
+                      </div>
+                      <div style="margin-top: 4px;">
+                        <label>替换静态口琴图板 (支持 PNG透明图)</label>
+                        <div style="display:flex; gap:6px;">
+                          <label class="custom-file-btn primary" style="flex:1; padding:8px;">
+                            <input id="harpImageInput" type="file" accept="image/png,image/webp" style="display:none;" />上传参照图
+                          </label>
+                          <button id="clearHarpImageBtn" class="warn" style="padding:8px 14px;">清除</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style="grid-column: span 2;">
+                    <label>自定义全屏底图</label>
+                    <div style="display:flex; gap:6px;">
+                      <label class="custom-file-btn primary" style="flex:1; padding:8px;">
+                        <input id="bgImageInput" type="file" accept="image/*,.heic,.heif" style="display:none;" />上传底图
+                      </label>
+                      <button id="clearBgBtn" class="warn" style="padding:8px 14px;">清除</button>
+                    </div>
+                    <div id="bgStatus" style="display:none; color: var(--accent); font-size: 11px; margin-top: 6px; font-weight:700;"></div>
+                  </div>
+                  <div>
+                    <label>底图高斯模糊: <span id="blurVal">0</span>px</label>
+                    <input id="bgBlurInput" type="range" min="0" max="60" value="0" step="1" style="width:100%; margin-top:2px;" />
+                  </div>
+                  <div>
+                    <label>底图遮罩滤镜</label>
+                    <div style="display:flex; gap:4px; margin-top:2px;">
+                      <div class="segment-group" style="flex:1;">
+                        <input type="radio" name="maskColor" id="mk_black" value="black" checked>
+                        <label for="mk_black">暗角</label>
+                        <input type="radio" name="maskColor" id="mk_white" value="white">
+                        <label for="mk_white">明亮</label>
+                      </div>
+                      <input id="maskOpacityInput" type="range" min="0" max="1" value="0" step="0.05" style="flex:1;" />
+                    </div>
+                  </div>
+                  <div style="grid-column: span 2; margin-top: 4px;">
+                    <label>视图纵向缩放比例 (Scale: <span id="scaleVal">1.0</span>x)</label>
+                    <input id="barScaleInput" type="range" min="0.5" max="3" value="1" step="0.1" style="width:100%;" />
+                  </div>
+                </div>
+              </div>
+            </details>
+
+            <div class="panel-section" style="flex: none; min-height: 250px; height: 35vh; margin-top: 8px; display: flex; flex-direction: column;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+                <h3 class="panel-title" style="margin:0;">事件记录 (全景行内编辑)</h3>
+                <button id="undoBtn" style="display:none; font-size:11px; padding:4px 8px; background:transparent; border:1px solid var(--muted); border-radius:4px; cursor:pointer;">↩️ 撤销删除</button>
+              </div>
+              <div id="eventList" class="event-list" style="flex: 1;"></div>
+            </div>
+        </div>
+
+      </aside>
+    </main>
+  </div>
+
+  <script>
+    // ==========================================
+    // 1. 核心映射常数字典与主题配置
+    // ==========================================
+    const LOCAL_STORAGE_KEY = 'blues_harmonica_cache_v85';
+    
+    const NOTE_NAMES = ["C", "Db", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"];
+    const KEY_TO_ROOT_MIDI = { "G": 55, "Ab": 56, "A": 57, "Bb": 58, "B": 59, "C": 60, "Db": 61, "D": 62, "Eb": 63, "E": 64, "F": 65, "F#": 66 };
+    
+    const SEMITONE_ACTION_MAP = {
+      0:  { dir: 'blow', hole: 1, tech: [] }, 1:  { dir: 'draw', hole: 1, tech: ['bend'] }, 2:  { dir: 'draw', hole: 1, tech: [] }, 3:  { dir: 'blow', hole: 1, tech: ['overblow'] }, 
+      4:  { dir: 'blow', hole: 2, tech: [] }, 5:  { dir: 'draw', hole: 2, tech: ['bend'] }, 6:  { dir: 'draw', hole: 2, tech: ['bend'] }, 7:  { dir: 'draw', hole: 2, tech: [] }, 
+      8:  { dir: 'draw', hole: 3, tech: ['bend'] }, 9:  { dir: 'draw', hole: 3, tech: ['bend'] }, 10: { dir: 'draw', hole: 3, tech: ['bend'] }, 11: { dir: 'draw', hole: 3, tech: [] },       
+      12: { dir: 'blow', hole: 4, tech: [] }, 13: { dir: 'draw', hole: 4, tech: ['bend'] }, 14: { dir: 'draw', hole: 4, tech: [] }, 15: { dir: 'blow', hole: 4, tech: ['overblow'] }, 
+      16: { dir: 'blow', hole: 5, tech: [] }, 17: { dir: 'draw', hole: 5, tech: [] }, 18: { dir: 'blow', hole: 5, tech: ['overblow'] }, 
+      19: { dir: 'blow', hole: 6, tech: [] }, 20: { dir: 'draw', hole: 6, tech: ['bend'] }, 21: { dir: 'draw', hole: 6, tech: [] }, 22: { dir: 'blow', hole: 6, tech: ['overblow'] }, 
+      23: { dir: 'draw', hole: 7, tech: [] }, 24: { dir: 'blow', hole: 7, tech: [] }, 25: { dir: 'draw', hole: 7, tech: ['overdraw'] }, 
+      26: { dir: 'draw', hole: 8, tech: [] }, 27: { dir: 'blow', hole: 8, tech: ['bend'] }, 28: { dir: 'blow', hole: 8, tech: [] }, 
+      29: { dir: 'draw', hole: 9, tech: [] }, 30: { dir: 'blow', hole: 9, tech: ['bend'] }, 31: { dir: 'blow', hole: 9, tech: [] }, 32: { dir: 'draw', hole: 9, tech: ['overdraw'] }, 
+      33: { dir: 'draw', hole: 10, tech: [] }, 34: { dir: 'blow', hole: 10, tech: ['bend'] }, 35: { dir: 'blow', hole: 10, tech: ['bend'] }, 36: { dir: 'blow', hole: 10, tech: [] }, 37: { dir: 'draw', hole: 10, tech: ['overdraw'] } 
+    };
+
+    function getActionMap(tuning) {
+        const map = JSON.parse(JSON.stringify(SEMITONE_ACTION_MAP));
+        if (tuning === 'paddy') {
+            delete map[8];
+            map[9] = { dir: 'blow', hole: 3, tech: [] }; 
+            map[10] = { dir: 'draw', hole: 3, tech: ['bend'] }; 
+        }
+        return map;
+    }
+
+    function getHarpBase(tuning) {
+        return {
+            blow: tuning === 'paddy' ? [0, 4, 9, 12, 16, 19, 24, 28, 31, 36] : [0, 4, 7, 12, 16, 19, 24, 28, 31, 36],
+            draw: [2, 7, 11, 14, 17, 21, 23, 26, 29, 33]
+        };
+    }
+
+    const POS_OFFSETS = { '1st': 0, '2nd': 7, '3rd': 2, '4th': 9, '5th': 4, '12th': 5 };
+    const JIANPU_MAP = ['1', 'b2', '2', 'b3', '3', '4', 'b5', '5', 'b6', '6', 'b7', '7'];
+
+    const THEMES = {
+      candy: { 
+        bgTop: '#e2e8f0', bgMid: '#f8fafc', bgBot: '#e2e8f0', railBlow: 'rgba(14,165,233,0.04)', railDraw: 'rgba(236,72,153,0.04)', gridLine: 'rgba(0,0,0,0.06)', gridStrong: 'rgba(0,0,0,0.18)', 
+        barBaseBlow: 'rgba(14,165,233,0.7)', barBorderBlow: 'rgba(125,211,252,1)', barCoreBlow: 'rgba(186,230,253,0.9)', blowGlow: 'rgba(14,165,233,0.4)', barBaseDraw: 'rgba(236,72,153,0.7)', barBorderDraw: 'rgba(249,168,212,1)', barCoreDraw: 'rgba(251,207,232,0.9)', drawGlow: 'rgba(236,72,153,0.4)', chordBlow: 'rgba(14,165,233,0.9)', chordDraw: 'rgba(236,72,153,0.9)', bendMark: 'rgba(0,0,0,0.25)', obMark: 'rgba(255,255,255,1)', staccato: '#1e293b', lyricColor: '#0f172a', lyricShadow: '#ffffff', 
+        harShadow: 'rgba(0,0,0,0.28)', harTopGrad: ['#94a3b8', '#f1f5f9', '#ffffff', '#e2e8f0'], harBotGrad: ['#94a3b8', '#64748b', '#cbd5e1', '#475569'],
+        harComb: '#1e293b', harEngraving: 'rgba(15, 23, 42, 0.6)', harHole: '#000000', harHoleTextTop: '#475569', harNoteBlow: '#0284c7', harNoteDraw: '#be185d',
+        whiteRGB: '255,255,255', blackRGB: '0,0,0'
+      },
+      hamu: { 
+        bgTop: '#e8dfd3', bgMid: '#f2ebe1', bgBot: '#e8dfd3', railBlow: 'rgba(140,161,182,0.15)', railDraw: 'rgba(168,166,161,0.15)', gridLine: 'rgba(92,77,67,0.15)', gridStrong: 'rgba(92,77,67,0.3)', 
+        barBaseBlow: '#8CA1B6', barBorderBlow: '#5C4D43', barCoreBlow: '#F2EBE1', blowGlow: 'rgba(140,161,182,0.4)', barBaseDraw: '#DBCFBF', barBorderDraw: '#5C4D43', barCoreDraw: '#F2EBE1', drawGlow: 'rgba(219,207,191,0.4)', chordBlow: '#8CA1B6', chordDraw: '#DBCFBF', bendMark: 'rgba(92,77,67,0.5)', obMark: 'rgba(242,235,225,0.9)', staccato: '#5C4D43', lyricColor: '#5C4D43', lyricShadow: '#F2EBE1', 
+        harShadow: 'rgba(92,77,67,0.25)', harTopGrad: ['#DBCFBF', '#F2EBE1', '#F2EBE1', '#A8A6A1'], harBotGrad: ['#A8A6A1', '#8B7365', '#DBCFBF', '#5C4D43'],
+        harComb: '#5C4D43', harEngraving: 'rgba(92,77,67,0.6)', harHole: '#5C4D43', harHoleTextTop: '#8B7365', harNoteBlow: '#8CA1B6', harNoteDraw: '#8B7365',
+        whiteRGB: '242,235,225', blackRGB: '92,77,67'
+      },
+      lightMono: { 
+        bgTop: '#f1f5f9', bgMid: '#ffffff', bgBot: '#f1f5f9', railBlow: 'rgba(0,0,0,0.02)', railDraw: 'rgba(0,0,0,0.01)', gridLine: 'rgba(0,0,0,0.04)', gridStrong: 'rgba(0,0,0,0.1)', barBaseBlow: 'rgba(241,245,249,0.9)', barBorderBlow: '#cbd5e1', barCoreBlow: '#ffffff', blowGlow: 'rgba(0,0,0,0.08)', barBaseDraw: 'rgba(226,232,240,0.9)', barBorderDraw: '#94a3b8', barCoreDraw: '#ffffff', drawGlow: 'rgba(0,0,0,0.08)', chordBlow: 'rgba(148,163,184,0.8)', chordDraw: 'rgba(100,116,139,0.8)', bendMark: 'rgba(0,0,0,0.15)', obMark: 'rgba(100,100,100,0.8)', staccato: '#334155', lyricColor: '#0f172a', lyricShadow: '#ffffff', 
+        harShadow: 'rgba(0,0,0,0.18)', harTopGrad: ['#64748b', '#e2e8f0', '#ffffff', '#cbd5e1'], harBotGrad: ['#94a3b8', '#64748b', '#cbd5e1', '#475569'], 
+        harComb: '#0f172a', harEngraving: 'rgba(15, 23, 42, 0.6)', harHole: '#050505', harHoleTextTop: '#475569', harNoteBlow: '#475569', harNoteDraw: '#64748b',
+        whiteRGB: '255,255,255', blackRGB: '0,0,0'
+      }
+    };
+    
+    THEMES.custom = {
+      ...THEMES.candy,
+      barBaseBlow: 'rgba(92, 138, 158, 0.4)',
+      barBorderBlow: 'rgba(170, 196, 208, 0.7)',
+      barCoreBlow: 'rgba(209, 222, 229, 0.6)',
+      blowGlow: 'rgba(92, 138, 158, 0.15)',
+      barBaseDraw: 'rgba(162, 113, 137, 0.4)',
+      barBorderDraw: 'rgba(213, 188, 202, 0.7)',
+      barCoreDraw: 'rgba(231, 218, 226, 0.6)',
+      drawGlow: 'rgba(162, 113, 137, 0.15)',
+      chordBlow: 'rgba(92, 138, 158, 0.6)',
+      chordDraw: 'rgba(162, 113, 137, 0.6)'
+    };
+
+    const els = {
+      titleInput: document.getElementById('titleInput'), 
+      keyInput: document.getElementById('keyInput'), 
+      tuningInput: document.getElementById('tuningInput'),
+      octaveShiftInput: document.getElementById('octaveShiftInput'), 
+      holesInput: document.getElementById('holesInput'), leadInInput: document.getElementById('leadInInput'), barScaleInput: document.getElementById('barScaleInput'), 
+      bpmInput: document.getElementById('bpmInput'), ppsInput: document.getElementById('ppsInput'), sourceTransposeInput: document.getElementById('sourceTransposeInput'), 
+      noteDisplayModeInput: document.getElementById('noteDisplayModeInput'), relativePositionInput: document.getElementById('relativePositionInput'),
+      
+      aspectRatioInput: document.getElementById('aspectRatioInput'), bgImageInput: document.getElementById('bgImageInput'), clearBgBtn: document.getElementById('clearBgBtn'), 
+      bgBlurInput: document.getElementById('bgBlurInput'), blurVal: document.getElementById('blurVal'), scaleVal: document.getElementById('scaleVal'), 
+      maskColorInput: document.getElementById('maskColorInput'), maskOpacityInput: document.getElementById('maskOpacityInput'), bgStatus: document.getElementById('bgStatus'),
+      autoArrangeBtn: document.getElementById('autoArrangeBtn'), 
+      
+      customSkinPanel: document.getElementById('customSkinPanel'),
+      customBlockStyleInput: document.getElementById('customBlockStyleInput'),
+      laneWidthScaleInput: document.getElementById('laneWidthScaleInput'), cwVal: document.getElementById('cwVal'),
+      blockDutyCycleInput: document.getElementById('blockDutyCycleInput'), cdVal: document.getElementById('cdVal'),
+      hitPosBlowInput: document.getElementById('hitPosBlowInput'), cbVal: document.getElementById('cbVal'),
+      hitPosDrawInput: document.getElementById('hitPosDrawInput'), cdrawVal: document.getElementById('cdrawVal'),
+      lanePanOffsetInput: document.getElementById('lanePanOffsetInput'), cpanVal: document.getElementById('cpanVal'),
+      harpImageInput: document.getElementById('harpImageInput'), clearHarpImageBtn: document.getElementById('clearHarpImageBtn'),
+
+      exportBackupBtn: document.getElementById('exportBackupBtn'), clearDataBtn: document.getElementById('clearDataBtn'), xmlStatus: document.getElementById('xmlStatus'), 
+      xmlFileInput: document.getElementById('xmlFileInput'), audioFileInput: document.getElementById('audioFileInput'), audioEl: document.getElementById('audioEl'), 
+      sfFileInput: document.getElementById('sfFileInput'),
+      eventList: document.getElementById('eventList'), undoBtn: document.getElementById('undoBtn'),
+      playPauseBtn: document.getElementById('playPauseBtn'), stopBtn: document.getElementById('stopBtn'),
+      timeReadout: document.getElementById('timeReadout'), beatReadout: document.getElementById('beatReadout'), seekRange: document.getElementById('seekRange'), 
+      previewCanvas: document.getElementById('previewCanvas'), deviceStage: document.getElementById('deviceStage'), waveCanvas: document.getElementById('waveCanvas'), 
+      addAnchorFromCurrentBtn: document.getElementById('addAnchorFromCurrentBtn'), addAnchorManualBtn: document.getElementById('addAnchorManualBtn'), clearAnchorsBtn: document.getElementById('clearAnchorsBtn'),
+      anchorBeatInput: document.getElementById('anchorBeatInput'), anchorTimeInput: document.getElementById('anchorTimeInput'),
+      
+      btnOpenExportModal: document.getElementById('btnOpenExportModal'), exportModal: document.getElementById('exportModal'), exportCloseBtn: document.getElementById('exportCloseBtn'), exportMinimizeBtn: document.getElementById('exportMinimizeBtn'),
+      expWidth: document.getElementById('expWidth'), expHeight: document.getElementById('expHeight'), expRenderMode: document.getElementById('expRenderMode'),
+      expStart: document.getElementById('expStart'), expEnd: document.getElementById('expEnd'), expSetFullRangeBtn: document.getElementById('expSetFullRangeBtn'),
+      expStartBtn: document.getElementById('expStartBtn'), exportFormStage: document.getElementById('exportFormStage'), exportProgressStage: document.getElementById('exportProgressStage'),
+      exportAlertBox: document.getElementById('exportAlertBox'),
+      expProgressBar: document.getElementById('expProgressBar'), expProgressText: document.getElementById('expProgressText'), expTitleIng: document.getElementById('expTitleIng'),
+      expPauseResumeBtn: document.getElementById('expPauseResumeBtn'), expCancelBtn: document.getElementById('expCancelBtn'),
+      miniExportWidget: document.getElementById('miniExportWidget'), miniProgressText: document.getElementById('miniProgressText'),
+      generateSynthBtn: document.getElementById('generateSynthBtn')
+    };
+
+    Object.keys(KEY_TO_ROOT_MIDI).forEach(key => {
+      const opt = document.createElement('option'); opt.value = opt.textContent = key;
+      if (key === 'C') opt.selected = true; els.keyInput?.appendChild(opt);
+    });
+
+    const state = {
+      project: makeEmptyProject(), 
+      rawXmlNotes: null, correctedNotes: null, selectedEventId: null, raf: null, lastDrawTs: 0, previewClock: 0, 
+      isPlaying: false, playingWithoutAudio: false, isDraggingSlider: false, waveform: null, audioBuffer: null, sfBuffer: null,
+      undoStack: [],
+      skin: { 
+        theme: 'candy', bgImageObj: null, bgImageData: null, bgBlur: 0, maskColor: 'black', maskOpacity: 0,
+        customOpts: { blockStyle: 'ios26', laneWidthScale: 1.0, blockDutyCycle: 0.88, hitPosBlowOffset: 0, hitPosDrawOffset: 0, lanePanOffset: 0, harpImageObj: null, harpImageData: null } 
+      },
+      staticCached: false 
+    };
+
+    window._exportState = { active: false, paused: false, canceled: false, renderTimer: null, mediaRecorder: null, isRealtime: false, realtimeCanvas: null, realtimeCtx: null };
+    
+    let tempMidiData = null;
+    let tempMidiFileName = "";
+    window._isJSSynthInitialized = false;
+
+    const createBufferCanvas = (w, h) => { if (typeof OffscreenCanvas !== 'undefined') return new OffscreenCanvas(w, h); const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+    const bgCanvas = createBufferCanvas(720, 1280);
+    const fgCanvas = createBufferCanvas(720, 1280);
+    const trackCanvas = createBufferCanvas(720, 1280);
+
+    function saveToLocal() { 
+        try { 
+            const dataToSave = {
+                project: state.project,
+                rawXmlNotes: state.rawXmlNotes,
+                correctedNotes: state.correctedNotes,
+                skin: {
+                    theme: state.skin.theme,
+                    bgBlur: state.skin.bgBlur,
+                    maskColor: state.skin.maskColor,
+                    maskOpacity: state.skin.maskOpacity,
+                    bgImageData: state.skin.bgImageData,
+                    customOpts: {
+                        blockStyle: state.skin.customOpts.blockStyle,
+                        laneWidthScale: state.skin.customOpts.laneWidthScale,
+                        blockDutyCycle: state.skin.customOpts.blockDutyCycle,
+                        hitPosBlowOffset: state.skin.customOpts.hitPosBlowOffset,
+                        hitPosDrawOffset: state.skin.customOpts.hitPosDrawOffset,
+                        lanePanOffset: state.skin.customOpts.lanePanOffset,
+                        harpImageData: state.skin.customOpts.harpImageData
+                    }
+                }
+            };
+            try {
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
+            } catch (e) {
+                if(e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+                    console.warn("localStorage 容量溢出，放弃保存图片数据。");
+                    dataToSave.skin.bgImageData = null;
+                    dataToSave.skin.customOpts.harpImageData = null;
+                    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
+                    if (els.bgStatus) { setStatus(els.bgStatus, '⚠️ 警告：缓存溢出，由于图片过大，本次存档去除了底图/口琴图数据。', 'warn'); els.bgStatus.style.display = 'block';}
+                }
+            }
+        } catch(e) {} 
+    }
+    
+    function loadFromLocal() { 
+        try { 
+            const data = localStorage.getItem(LOCAL_STORAGE_KEY); 
+            if (data) return JSON.parse(data); 
+        } catch(e) {} 
+        return null; 
+    }
+
+    function makeEmptyProject() { 
+      return { title: '未命名工程', sourceTranspose: 0, harmonica: { key: 'C', holes: 10, tuning: 'standard' }, timing: { bpm: 90, timeSig: [4, 4], leadInSec: 1 }, display: { pixelsPerSecond: 180, barScale: 1, lanePadding: 10, aspectRatio: '9/16', noteMode: 'absolute', relativePosition: '2nd' }, anchors: [{ beat: 0, timeSec: 1 }], score: [] }; 
+    }
+    function normalizeProject(p) {
+      if (!p) return makeEmptyProject();
+      p.sourceTranspose = p.sourceTranspose || 0; p.harmonica = p.harmonica || { key: 'C', holes: 10, tuning: 'standard' };
+      p.harmonica.tuning = p.harmonica.tuning || 'standard';
+      p.timing = p.timing || { bpm: 90, timeSig: [4, 4], leadInSec: 1 }; p.display = p.display || { pixelsPerSecond: 180, barScale: 1, lanePadding: 10, aspectRatio: '9/16', noteMode: 'absolute', relativePosition: '2nd' };
+      p.anchors = p.anchors || [{ beat: 0, timeSec: p.timing.leadInSec || 1 }]; p.score = p.score || []; return p;
+    }
+    
+    function clampNum(v, min, max, fb) { const n = Number(v); return Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : fb; }
+    function setStatus(el, msg, type='ok') { if(el) { el.innerHTML = msg; el.style.color = type==='error'?'var(--danger)': (type==='warn'?'var(--warn)':'var(--good)'); } }
+
+    function updateUndoBtn() {
+      if (els.undoBtn) {
+        if (state.undoStack.length > 0) {
+            els.undoBtn.style.display = 'inline-flex';
+            els.undoBtn.innerText = `↩️ 撤销 (${state.undoStack.length})`;
+        } else {
+            els.undoBtn.style.display = 'none';
+        }
+      }
+    }
+
+    if (els.undoBtn) els.undoBtn.onclick = () => {
+        const e = state.undoStack.pop();
+        if (e) {
+            state.project.score.push(e);
+            state.project.score.sort((a,b) => a.startBeat - b.startBeat);
+            saveToLocal();
+            updateUndoBtn();
+            renderEventList();
+            draw();
+        }
+    };
+
+    function updateCorrectedNotes() {
+        if (!state.rawXmlNotes) return;
+        const transpose = parseInt(els.sourceTransposeInput.value) || 0; 
+        state.project.sourceTranspose = transpose;
+        state.correctedNotes = state.rawXmlNotes.map(n => ({ ...n, midi: n.midi + transpose }));
+    }
+
+    function populateForm() {
+      const p = state.project;
+      if(els.titleInput) els.titleInput.value = p.title; if(els.sourceTransposeInput) els.sourceTransposeInput.value = p.sourceTranspose;
+      if(els.keyInput) els.keyInput.value = p.harmonica.key; 
+      if(els.tuningInput) els.tuningInput.value = p.harmonica.tuning; 
+      if(els.holesInput) els.holesInput.value = p.harmonica.holes; if(els.leadInInput) els.leadInInput.value = p.timing.leadInSec;
+      if(els.barScaleInput) els.barScaleInput.value = p.display.barScale; if(els.scaleVal) els.scaleVal.textContent = p.display.barScale.toFixed(1);
+      if(els.bpmInput) els.bpmInput.value = p.timing.bpm; if(els.ppsInput) els.ppsInput.value = p.display.pixelsPerSecond;
+      if(els.octaveShiftInput) els.octaveShiftInput.value = p.display.octaveShift || 0; 
+      
+      p.display.aspectRatio = p.display.aspectRatio || '9/16';
+      p.display.noteMode = p.display.noteMode || 'absolute';
+      p.display.relativePosition = p.display.relativePosition || '2nd';
+      
+      if (els.noteDisplayModeInput) els.noteDisplayModeInput.value = p.display.noteMode;
+      if (els.relativePositionInput) els.relativePositionInput.value = p.display.relativePosition;
+      if (els.relativePositionInput) els.relativePositionInput.disabled = (p.display.noteMode === 'absolute');
+      
+      if (els.customBlockStyleInput) els.customBlockStyleInput.value = state.skin.customOpts.blockStyle || 'ios26';
+
+      const arRadio = document.querySelector(`input[name="aspectRatio"][value="${p.display.aspectRatio}"]`); if (arRadio) arRadio.checked = true;
+      updateCanvasAspectRatio(p.display.aspectRatio);
+      updateCorrectedNotes(); renderEventList(); draw();
+    }
+
+    function syncThemeToLegend() {
+      const root = document.documentElement; 
+      let selectedTheme = state.skin.theme;
+      if (selectedTheme === 'custom') {
+          selectedTheme = state.skin.customOpts.blockStyle || 'candy';
+          if(selectedTheme === 'ios26' || selectedTheme === 'hamu') selectedTheme = 'candy'; 
+      }
+      const t = THEMES[selectedTheme] || THEMES['candy'];
+      
+      root.style.setProperty('--vg-blow-bg', t.barBaseBlow); root.style.setProperty('--vg-blow-border', t.barBorderBlow); root.style.setProperty('--vg-blow-shadow', t.blowGlow);
+      root.style.setProperty('--vg-draw-bg', t.barBaseDraw); root.style.setProperty('--vg-draw-border', t.barBorderDraw); root.style.setProperty('--vg-draw-shadow', t.drawGlow);
+      root.style.setProperty('--vg-ob-border', t.obMark); root.style.setProperty('--vg-staccato', t.staccato);
+    }
+
+    function updateCanvasAspectRatio(ratio) {
+      const isHoriz = ratio === '4/3';
+      if (els.deviceStage) els.deviceStage.style.aspectRatio = isHoriz ? '4 / 3' : '9 / 16';
+      state.staticCached = false;
+    }
+
+    function applyDisplayAndSkin() {
+      const p = state.project;
+      p.title = els.titleInput.value || p.title; p.harmonica.holes = clampNum(els.holesInput.value, 4, 16, p.harmonica.holes);
+      p.timing.leadInSec = clampNum(els.leadInInput.value, 0, 60, p.timing.leadInSec);
+      let anchor0 = p.anchors.find(a => Math.abs(a.beat - 0) < 0.001);
+      if (anchor0) anchor0.timeSec = p.timing.leadInSec; else if (p.anchors.length === 0) p.anchors.push({beat: 0, timeSec: p.timing.leadInSec});
+      p.display.barScale = clampNum(els.barScaleInput.value, 0.5, 3, p.display.barScale); p.display.pixelsPerSecond = clampNum(els.ppsInput.value, 60, 600, p.display.pixelsPerSecond);
+      
+      const arChecked = document.querySelector('input[name="aspectRatio"]:checked'); if (arChecked) p.display.aspectRatio = arChecked.value;
+      const thChecked = document.querySelector('input[name="theme"]:checked'); if (thChecked) state.skin.theme = thChecked.value;
+      const mkChecked = document.querySelector('input[name="maskColor"]:checked'); if (mkChecked) state.skin.maskColor = mkChecked.value;
+      state.skin.bgBlur = parseInt(els.bgBlurInput.value) || 0; els.blurVal.textContent = state.skin.bgBlur;
+      state.skin.maskOpacity = parseFloat(els.maskOpacityInput.value) || 0;
+      
+      state.skin.customOpts.blockStyle = els.customBlockStyleInput.value;
+      state.skin.customOpts.laneWidthScale = parseFloat(els.laneWidthScaleInput.value); els.cwVal.textContent = state.skin.customOpts.laneWidthScale.toFixed(3);
+      state.skin.customOpts.blockDutyCycle = parseFloat(els.blockDutyCycleInput.value); els.cdVal.textContent = state.skin.customOpts.blockDutyCycle.toFixed(2);
+      state.skin.customOpts.hitPosBlowOffset = parseInt(els.hitPosBlowInput.value); els.cbVal.textContent = state.skin.customOpts.hitPosBlowOffset;
+      state.skin.customOpts.hitPosDrawOffset = parseInt(els.hitPosDrawInput.value); els.cdrawVal.textContent = state.skin.customOpts.hitPosDrawOffset;
+      state.skin.customOpts.lanePanOffset = parseInt(els.lanePanOffsetInput.value); els.cpanVal.textContent = state.skin.customOpts.lanePanOffset;
+
+      state.staticCached = false;
+      syncThemeToLegend(); draw(); renderWaveform(); saveToLocal();
+    }
+
+    function applyForm() {
+      const p = state.project;
+      p.title = els.titleInput.value || p.title; p.harmonica.key = els.keyInput.value; 
+      p.harmonica.tuning = els.tuningInput.value;
+      p.harmonica.holes = clampNum(els.holesInput.value, 4, 16, p.harmonica.holes); p.timing.bpm = clampNum(els.bpmInput.value, 20, 320, p.timing.bpm); 
+      p.timing.leadInSec = clampNum(els.leadInInput.value, 0, 60, p.timing.leadInSec);
+      let anchor0 = p.anchors.find(a => Math.abs(a.beat - 0) < 0.001);
+      if (anchor0) anchor0.timeSec = p.timing.leadInSec; else if (p.anchors.length === 0) p.anchors.push({beat: 0, timeSec: p.timing.leadInSec});
+      p.display.pixelsPerSecond = clampNum(els.ppsInput.value, 60, 600, p.display.pixelsPerSecond);
+      p.display.barScale = clampNum(els.barScaleInput.value, 0.5, 3, p.display.barScale);
+      p.display.octaveShift = parseInt(els.octaveShiftInput.value) || 0;
+      
+      state.staticCached = false;
+      if (state.correctedNotes) remapRawNotesToScore(); else { draw(); renderWaveform(); }
+      saveToLocal();
+    }
+
+    if(els.sourceTransposeInput) els.sourceTransposeInput.addEventListener('change', () => { updateCorrectedNotes(); if(state.correctedNotes) remapRawNotesToScore(); });
+    ['titleInput', 'holesInput', 'leadInInput', 'bgBlurInput', 'maskOpacityInput', 'laneWidthScaleInput', 'blockDutyCycleInput', 'hitPosBlowInput', 'hitPosDrawInput', 'lanePanOffsetInput'].forEach(id => { if(els[id]) els[id].addEventListener('input', applyDisplayAndSkin); });
+    ['keyInput', 'tuningInput', 'octaveShiftInput', 'bpmInput', 'ppsInput', 'customBlockStyleInput'].forEach(id => { if(els[id]) els[id].addEventListener('change', applyForm); });
+    if(els.barScaleInput) els.barScaleInput.addEventListener('input', (e) => { if(els.scaleVal) els.scaleVal.textContent = parseFloat(e.target.value).toFixed(1); applyDisplayAndSkin(); });
+
+    if(els.noteDisplayModeInput) {
+        els.noteDisplayModeInput.addEventListener('change', () => {
+            state.project.display.noteMode = els.noteDisplayModeInput.value;
+            els.relativePositionInput.disabled = (state.project.display.noteMode === 'absolute');
+            state.staticCached = false;
+            saveToLocal(); draw();
+        });
+    }
+    if(els.relativePositionInput) {
+        els.relativePositionInput.addEventListener('change', () => {
+            state.project.display.relativePosition = els.relativePositionInput.value;
+            state.staticCached = false;
+            saveToLocal(); draw();
+        });
+    }
+
+    document.querySelectorAll('input[name="aspectRatio"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        const isHoriz = e.target.value === '4/3'; updateCanvasAspectRatio(e.target.value);
+        const currentW = parseInt(els.expWidth.value) || 1080;
+        if (isHoriz) els.expHeight.value = Math.round(currentW * 3 / 4); else els.expHeight.value = Math.round(currentW * 16 / 9);
+        applyDisplayAndSkin();
+      });
+    });
+
+    document.querySelectorAll('input[name="theme"], input[name="maskColor"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            if (e.target.name === 'theme') {
+                els.customSkinPanel.style.display = (e.target.value === 'custom') ? 'block' : 'none';
+            }
+            applyDisplayAndSkin();
+        });
+    });
+
+    if(els.bgImageInput) els.bgImageInput.onchange = async (e) => {
+      const file = e.target.files?.[0]; if(!file) return;
+      setStatus(els.bgStatus, '正在读取并处理底图...', 'ok'); let processFile = file; const fileName = file.name.toLowerCase();
+      if (fileName.endsWith('.heic') || fileName.endsWith('.heif')) {
+        setStatus(els.bgStatus, '⏳ 正在转换 HEIC...', 'warn');
+        if (typeof heic2any === 'undefined') { setStatus(els.bgStatus, '❌ 缺少 HEIC 解码库。', 'error'); return; }
+        try { const convertedBlob = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.8 }); processFile = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob; } 
+        catch(err) { setStatus(els.bgStatus, '❌ HEIC 转换失败。', 'error'); return; }
+      }
+      const url = URL.createObjectURL(processFile); const img = new Image(); 
+      img.onload = () => { state.skin.bgImageObj = img; state.staticCached = false; setStatus(els.bgStatus, '✅ 底图应用成功。', 'good'); draw(); els.bgStatus.style.display = 'block';}; 
+      img.onerror = () => { setStatus(els.bgStatus, '❌ 底图加载失败。', 'error'); els.bgStatus.style.display = 'block';}; 
+      img.src = url;
+      
+      const reader = new FileReader();
+      reader.onload = (ev) => { state.skin.bgImageData = ev.target.result; saveToLocal(); };
+      reader.readAsDataURL(processFile);
+    };
+    if(els.clearBgBtn) els.clearBgBtn.onclick = () => { state.skin.bgImageObj = null; state.skin.bgImageData = null; els.bgImageInput.value = ''; state.staticCached = false; draw(); setStatus(els.bgStatus, '已清除底图。'); els.bgStatus.style.display = 'block'; saveToLocal(); };
+
+    if(els.harpImageInput) els.harpImageInput.onchange = (e) => {
+        const file = e.target.files?.[0]; if(!file) return;
+        const url = URL.createObjectURL(file); const img = new Image();
+        img.onload = () => { state.skin.customOpts.harpImageObj = img; state.staticCached = false; draw(); };
+        img.src = url;
+        
+        const reader = new FileReader();
+        reader.onload = (ev) => { state.skin.customOpts.harpImageData = ev.target.result; saveToLocal(); };
+        reader.readAsDataURL(file);
+    };
+    if(els.clearHarpImageBtn) els.clearHarpImageBtn.onclick = () => {
+        state.skin.customOpts.harpImageObj = null; state.skin.customOpts.harpImageData = null; els.harpImageInput.value = ''; state.staticCached = false; draw(); saveToLocal();
+    };
+
+    function audioBufferToWav(buffer) {
+        const numChannels = buffer.numberOfChannels;
+        const sampleRate = buffer.sampleRate;
+        const format = 1; 
+        const bitDepth = 16;
+        const result = new Float32Array(buffer.length * numChannels);
+        const channels = [];
+        for (let i=0; i<numChannels; i++) channels.push(buffer.getChannelData(i));
+        let offset = 0;
+        for (let i=0; i<buffer.length; i++) {
+            for (let channel=0; channel<numChannels; channel++) {
+                let s = Math.max(-1, Math.min(1, channels[channel][i]));
+                result[offset++] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+            }
+        }
+        const dataLength = result.length * 2;
+        const bufferLen = 44 + dataLength;
+        const view = new DataView(new ArrayBuffer(bufferLen));
+        const writeString = (v, offset) => { for(let i=0; i<v.length; i++) view.setUint8(offset + i, v.charCodeAt(i)); };
+        
+        writeString('RIFF', 0); view.setUint32(4, 36 + dataLength, true);
+        writeString('WAVE', 8); writeString('fmt ', 12);
+        view.setUint32(16, 16, true); view.setUint16(20, format, true); view.setUint16(22, numChannels, true);
+        view.setUint32(24, sampleRate, true); view.setUint32(28, sampleRate * numChannels * 2, true);
+        view.setUint16(32, numChannels * 2, true); view.setUint16(34, bitDepth, true);
+        writeString('data', 36); view.setUint32(40, dataLength, true);
+        
+        const int16View = new Int16Array(view.buffer, 44);
+        int16View.set(result);
+        return new Blob([view], { type: 'audio/wav' });
+    }
+
+    if(els.sfFileInput) {
+        els.sfFileInput.onchange = async (e) => {
+            const file = e.target.files?.[0]; if(!file) return;
+            setStatus(els.xmlStatus, '⏳ 正在将音色库加载至物理内存...', 'warn');
+            try {
+                state.sfBuffer = await file.arrayBuffer();
+                setStatus(els.xmlStatus, `✅ 本地音色库就绪: ${file.name}`, 'good');
+            } catch (err) {
+                setStatus(els.xmlStatus, `❌ 加载音色库失败: ${err.message}`, 'error');
+            }
+            els.sfFileInput.value = '';
+        };
+    }
+
+    if(els.generateSynthBtn) {
+        els.generateSynthBtn.onclick = async () => {
+            if (!state.correctedNotes || state.correctedNotes.length === 0) {
+                setStatus(els.xmlStatus, '❌ 没有可合成的音符。请先导入乐谱文件。', 'error'); return;
+            }
+            if (!state.sfBuffer) {
+                setStatus(els.xmlStatus, '❌ 请先点击上方按钮，导入本地的 .sf2 音色文件。', 'error'); return;
+            }
+            
+            const btn = els.generateSynthBtn; const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ 正在启动 FluidSynth 引擎...'; btn.disabled = true;
+
+            try {
+                if (typeof JSSynth === 'undefined') throw new Error("引擎核心未能挂载，请检查网络设置或使用代理。");
+                
+                if (!window._isJSSynthInitialized) {
+                    if (typeof JSSynth.waitForReady === 'function') { await JSSynth.waitForReady(); } 
+                    else if (typeof JSSynth.init === 'function') { await JSSynth.init(); }
+                    window._isJSSynthInitialized = true;
+                }
+                const synth = new JSSynth.Synthesizer();
+                synth.init(44100);
+                await synth.loadSFont(state.sfBuffer);
+
+                const bpm = state.project.timing.bpm;
+                const octaveShift = parseInt(els.octaveShiftInput.value) || 0;
+                const isHumanize = document.getElementById('humanizeToggle').checked;
+                
+                let events = [];
+                let noteIntervals = {};
+                
+                state.correctedNotes.forEach(note => {
+                    const startSec = beatToSec(note.startBeat, state.project);
+                    const durSec = (note.durationBeats * 60) / bpm;
+                    const finalMidi = note.midi + (octaveShift * 12);
+                    
+                    let renderStart = startSec;
+                    let velocity = 100;
+                    
+                    if (isHumanize) {
+                        renderStart += (Math.random() * 0.03 - 0.015);
+                        renderStart = Math.max(0, renderStart);
+                        velocity = Math.floor(90 + (Math.random() * 30 - 15));
+                    }
+
+                    if (!noteIntervals[finalMidi]) noteIntervals[finalMidi] = [];
+                    noteIntervals[finalMidi].push({ on: renderStart, off: renderStart + durSec, vel: velocity });
+                });
+
+                Object.keys(noteIntervals).forEach(midi => {
+                    let intervals = noteIntervals[midi];
+                    intervals.sort((a, b) => a.on - b.on);
+                    for (let i = 0; i < intervals.length; i++) {
+                        if (i < intervals.length - 1 && intervals[i].off >= intervals[i+1].on) {
+                            intervals[i].off = Math.max(intervals[i].on + 0.005, intervals[i+1].on - 0.005);
+                        }
+                        events.push({ time: intervals[i].on, type: 'on', midi: parseInt(midi), velocity: intervals[i].vel });
+                        events.push({ time: intervals[i].off, type: 'off', midi: parseInt(midi) });
+                    }
+                });
+
+                events.sort((a, b) => a.time - b.time || (a.type === 'off' ? -1 : 1));
+
+                btn.innerHTML = '⏳ 正在超音速离线压制波形...';
+
+                const totalFrames = Math.ceil((endT(state.project) + 1.0) * 44100);
+                const leftBuf = new Float32Array(totalFrames);
+                const rightBuf = new Float32Array(totalFrames);
+                const RENDER_SIZE = 1024; 
+                
+                let tempLeft = new Float32Array(RENDER_SIZE);
+                let tempRight = new Float32Array(RENDER_SIZE);
+                
+                let currentFrame = 0; let eventIndex = 0;
+
+                while (currentFrame < totalFrames) {
+                    const currentTime = currentFrame / 44100.0;
+                    while (eventIndex < events.length && events[eventIndex].time <= currentTime) {
+                        const ev = events[eventIndex];
+                        if (ev.type === 'on') synth.midiNoteOn(0, ev.midi, ev.velocity || 100); 
+                        if (ev.type === 'off') synth.midiNoteOff(0, ev.midi);
+                        eventIndex++;
+                    }
+                    
+                    const framesToRender = Math.min(RENDER_SIZE, totalFrames - currentFrame);
+                    synth.render([tempLeft, tempRight], framesToRender);
+                    
+                    leftBuf.set(tempLeft.subarray(0, framesToRender), currentFrame);
+                    rightBuf.set(tempRight.subarray(0, framesToRender), currentFrame);
+                    currentFrame += framesToRender;
+                }
+                
+                synth.close(); 
+
+                const offlineCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(2, totalFrames, 44100);
+                const audioBuffer = offlineCtx.createBuffer(2, totalFrames, 44100);
+                audioBuffer.copyToChannel(leftBuf, 0);
+                audioBuffer.copyToChannel(rightBuf, 1);
+                
+                state.audioBuffer = audioBuffer; 
+                const wavBlob = audioBufferToWav(audioBuffer);
+                els.audioEl.src = URL.createObjectURL(wavBlob);
+                state.waveform = computeWaveform(audioBuffer, 800); renderWaveform();
+                
+                setStatus(els.xmlStatus, '✅ <b>本地 .sf2 高质量渲染完毕！</b><br>您可以直接点击右下角按钮，合成带有伴奏声音的序列。', 'good');
+            } catch (err) {
+                console.error(err);
+                setStatus(els.xmlStatus, `❌ 合成失败: ${err.message}`, 'error');
+            } finally {
+                btn.innerHTML = originalText; btn.disabled = false;
+            }
+        };
+    }
+
+    document.getElementById('midiCancelBtn').onclick = () => {
+        document.getElementById('midiImportPanel').style.display = 'none';
+        tempMidiData = null;
+        setStatus(els.xmlStatus, `已取消 MIDI 导入。`);
+    };
+
+    document.getElementById('midiConfirmBtn').onclick = () => {
+        if (!tempMidiData) return;
+        try {
+            const trackIdx = parseInt(document.getElementById('midiTrackSelect').value);
+            const track = tempMidiData.tracks[trackIdx];
+            const useMono = document.getElementById('midiMonoToggle').checked;
+            const quantizeGrid = parseFloat(document.getElementById('midiQuantizeSelect').value);
+
+            let bpm = 90;
+            if (tempMidiData.header.tempos.length > 0) {
+                bpm = tempMidiData.header.tempos[0].bpm;
+            }
+
+            let processedNotes = track.notes;
+
+            if (useMono) {
+                let events = [];
+                track.notes.forEach(n => {
+                    events.push({ time: n.time, type: 'on', midi: n.midi });
+                    events.push({ time: n.time + n.duration, type: 'off', midi: n.midi });
+                });
+                events.sort((a, b) => a.time - b.time || (a.type === 'off' ? -1 : 1));
+
+                let activeNotes = new Map();
+                let currentPitch = null;
+                let currentPitchStartTime = 0;
+                let skylineNotes = [];
+
+                events.forEach(ev => {
+                    if (ev.type === 'on') {
+                        activeNotes.set(ev.midi, (activeNotes.get(ev.midi) || 0) + 1);
+                    } else {
+                        let c = activeNotes.get(ev.midi);
+                        if (c > 1) activeNotes.set(ev.midi, c - 1);
+                        else activeNotes.delete(ev.midi);
+                    }
+
+                    let maxPitch = activeNotes.size > 0 ? Math.max(...Array.from(activeNotes.keys())) : null;
+
+                    if (maxPitch !== currentPitch) {
+                        if (currentPitch !== null) {
+                            let dur = ev.time - currentPitchStartTime;
+                            if (dur > 0.005) { 
+                                skylineNotes.push({
+                                    midi: currentPitch,
+                                    time: currentPitchStartTime,
+                                    duration: dur
+                                });
+                            }
+                        }
+                        currentPitch = maxPitch;
+                        currentPitchStartTime = ev.time;
+                    }
+                });
+                processedNotes = skylineNotes;
+            }
+
+            let rawNotes = processedNotes.map(note => {
+                let sBeat = note.time * (bpm / 60);
+                let eBeat = (note.time + note.duration) * (bpm / 60);
+
+                if (quantizeGrid > 0) {
+                    sBeat = Math.round(sBeat / quantizeGrid) * quantizeGrid;
+                    eBeat = Math.round(eBeat / quantizeGrid) * quantizeGrid;
+                    let dBeats = eBeat - sBeat;
+                    
+                    if (dBeats < quantizeGrid) dBeats = quantizeGrid; 
+
+                    return {
+                        midi: note.midi,
+                        startBeat: sBeat,
+                        durationBeats: dBeats,
+                        lyric: ""
+                    };
+                } else {
+                    return {
+                        midi: note.midi,
+                        startBeat: Math.round(sBeat * 1000) / 1000,
+                        durationBeats: note.duration * (bpm / 60),
+                        lyric: ""
+                    };
+                }
+            });
+
+            if (useMono && quantizeGrid > 0) {
+                rawNotes.sort((a, b) => a.startBeat - b.startBeat);
+                let resolvedNotes = [];
+                for (let i = 0; i < rawNotes.length; i++) {
+                    let curr = rawNotes[i];
+                    if (resolvedNotes.length > 0) {
+                        let prev = resolvedNotes[resolvedNotes.length - 1];
+                        if (Math.abs(curr.startBeat - prev.startBeat) < 0.001) {
+                             if (curr.midi > prev.midi) {
+                                 resolvedNotes[resolvedNotes.length - 1] = curr;
+                             }
+                             continue;
+                        } else if (curr.startBeat < prev.startBeat + prev.durationBeats) {
+                             prev.durationBeats = curr.startBeat - prev.startBeat;
+                             if(prev.durationBeats < 0.05) prev.durationBeats = 0.05; 
+                        }
+                    }
+                    resolvedNotes.push(curr);
+                }
+                rawNotes = resolvedNotes;
+            }
+
+            state.project.title = tempMidiFileName; if(els.titleInput) els.titleInput.value = tempMidiFileName;
+            state.rawXmlNotes = rawNotes; 
+            state.project.timing.bpm = Math.round(bpm); 
+            if(els.bpmInput) els.bpmInput.value = Math.round(bpm);
+            
+            updateCorrectedNotes(); saveToLocal(); autoSelectBestHarmonica(); 
+            setStatus(els.xmlStatus, `✅ 成功解析并清洗 MIDI！<br>提取并量化了 ${rawNotes.length} 个干净音符。`, 'good');
+            
+            document.getElementById('midiImportPanel').style.display = 'none';
+            tempMidiData = null;
+            state.undoStack = []; updateUndoBtn();
+        } catch(e) {
+            console.error(e);
+            setStatus(els.xmlStatus, `❌ MIDI 提取失败: ${e.message}`, 'error');
+        }
+    };
+
+    function parseTextGrid(text, bpm) {
+        const tiers = []; const lines = text.split('\n'); let currentTier = null; let currentInterval = null;
+        for (let line of lines) {
+            line = line.trim();
+            if (line.match(/^item\s*\[(\d+)\]:$/)) { currentTier = { name: '', intervals: [] }; tiers.push(currentTier); currentInterval = null; } 
+            else if (line.startsWith('name =') && currentTier && !currentInterval) currentTier.name = line.split('=')[1].trim().replace(/"/g, '');
+            else if (line.match(/^intervals\s*\[\d+\]:$/)) { currentInterval = {}; if(currentTier) currentTier.intervals.push(currentInterval); } 
+            else if (line.startsWith('xmin =') && currentInterval) currentInterval.xmin = parseFloat(line.split('=')[1]);
+            else if (line.startsWith('xmax =') && currentInterval) currentInterval.xmax = parseFloat(line.split('=')[1]);
+            else if (line.startsWith('text =') && currentInterval) currentInterval.text = line.split('=')[1].trim().replace(/"/g, '');
+        }
+        let pitchTier = tiers.find(t => t.name === '音高'); if (!pitchTier && tiers.length >= 4) pitchTier = tiers[3]; 
+        let lyricTier = tiers.find(t => t.name === '汉字' || t.name === '字' || t.name === '词'); if (!lyricTier && tiers.length >= 2) lyricTier = tiers[1]; 
+        if (!pitchTier) throw new Error("未找到表示'音高'的层级轨道");
+
+        const rawNotes = []; const secPerBeat = 60 / bpm;
+        pitchTier.intervals.forEach(interval => {
+            const txt = interval.text; if (!txt || ['rest', 'silence', 'sp', '0'].includes(txt)) return;
+            const pitchMatch = txt.match(/^([A-G])([#b♭]?)(\d+)$/i);
+            if (pitchMatch) {
+                const stepOffsets = { 'C':0, 'D':2, 'E':4, 'F':5, 'G':7, 'A':9, 'B':11 };
+                let alter = 0; if (pitchMatch[2] === '#') alter = 1; if (pitchMatch[2] === 'b' || pitchMatch[2] === '♭') alter = -1;
+                const midi = 12 * (parseInt(pitchMatch[3]) + 1) + stepOffsets[pitchMatch[1].toUpperCase()] + alter;
+                let lyric = "";
+                if (lyricTier) {
+                    const midTime = (interval.xmin + interval.xmax) / 2;
+                    const matchLyric = lyricTier.intervals.find(l => midTime >= l.xmin && midTime <= l.xmax);
+                    if (matchLyric && !['silence', 'sp', '0', 'rest'].includes(matchLyric.text)) lyric = matchLyric.text;
+                }
+                rawNotes.push({ midi: midi, startBeat: interval.xmin / secPerBeat, durationBeats: (interval.xmax - interval.xmin) / secPerBeat, lyric: lyric });
+            }
+        });
+        if (rawNotes.length === 0) throw new Error("音高轨道中未提取到有效音高");
+        return { rawNotes, bpm }; 
+    }
+
+    function parseMusicXML(xmlText) {
+      const parser = new DOMParser(); const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+      if (xmlDoc.getElementsByTagName('parsererror').length > 0) throw new Error("XML文件结构损坏或不合法");
+
+      let bpm = 90; const soundNodes = xmlDoc.getElementsByTagName('sound'); 
+      if (soundNodes.length > 0 && soundNodes[0].getAttribute('tempo')) bpm = parseInt(soundNodes[0].getAttribute('tempo')) || 90;
+      else { const pmNodes = xmlDoc.getElementsByTagName('per-minute'); if (pmNodes.length > 0) bpm = parseInt(pmNodes[0].textContent) || 90; }
+
+      const rawNotes = []; const parts = xmlDoc.getElementsByTagName('part');
+      if (parts.length > 0) {
+        let globalBeat = 0; const measures = parts[0].getElementsByTagName('measure'); let currentDivisions = 1;
+        Array.from(measures).forEach(measure => {
+          let measureCursor = 0; let maxCursorInMeasure = 0;
+          Array.from(measure.children).forEach(node => {
+            const nodeName = node.nodeName.replace(/.*:/, ''); 
+            if (nodeName === 'attributes') { const divNodes = node.getElementsByTagName('divisions'); if (divNodes.length > 0) currentDivisions = parseInt(divNodes[0].textContent) || 1; } 
+            else if (nodeName === 'note') {
+              const durNodes = node.getElementsByTagName('duration'); const durBeats = durNodes.length > 0 ? (parseInt(durNodes[0].textContent) / currentDivisions) : 0;
+              const isChord = node.getElementsByTagName('chord').length > 0; if (isChord) measureCursor -= durBeats; 
+              const isRest = node.getElementsByTagName('rest').length > 0; const pitchNodes = node.getElementsByTagName('pitch');
+              if (!isRest && pitchNodes.length > 0) {
+                const stepNodes = pitchNodes[0].getElementsByTagName('step'); const octNodes = pitchNodes[0].getElementsByTagName('octave');
+                if (stepNodes.length > 0 && octNodes.length > 0) {
+                    const alterNodes = pitchNodes[0].getElementsByTagName('alter'); const alter = alterNodes.length > 0 ? parseInt(alterNodes[0].textContent) : 0;
+                    const stepOffsets = { 'C':0, 'D':2, 'E':4, 'F':5, 'G':7, 'A':9, 'B':11 };
+                    if (stepOffsets[stepNodes[0].textContent] !== undefined) {
+                        const midi = 12 * (parseInt(octNodes[0].textContent) + 1) + stepOffsets[stepNodes[0].textContent] + alter;
+                        const lyricNodes = node.getElementsByTagName('lyric'); let lyricText = '';
+                        if (lyricNodes.length > 0) { const textNodes = lyricNodes[0].getElementsByTagName('text'); if (textNodes.length > 0) lyricText = textNodes[0].textContent; }
+                        rawNotes.push({ midi, startBeat: globalBeat + measureCursor, durationBeats: durBeats, lyric: lyricText });
+                    }
+                }
+              }
+              measureCursor += durBeats; maxCursorInMeasure = Math.max(maxCursorInMeasure, measureCursor);
+            } 
+            else if (nodeName === 'backup') { const durNodes = node.getElementsByTagName('duration'); if (durNodes.length > 0) measureCursor -= (parseInt(durNodes[0].textContent) / currentDivisions); } 
+            else if (nodeName === 'forward') { const durNodes = node.getElementsByTagName('duration'); if (durNodes.length > 0) measureCursor += (parseInt(durNodes[0].textContent) / currentDivisions); }
+          });
+          globalBeat += maxCursorInMeasure; 
+        });
+      }
+      if (rawNotes.length === 0) throw new Error("未提取到任何有效音符");
+      return { bpm, rawNotes };
+    }
+
+    function evaluateDifficulty(notes, harpKey, octaveShift, tuning) {
+      let score = 0; let stats = { total: notes.length, natural: 0, bend: 0, over: 0, out: 0 };
+      const rootMidi = KEY_TO_ROOT_MIDI[harpKey];
+      const actionMap = getActionMap(tuning);
+      notes.forEach(note => {
+        const offset = note.midi + (octaveShift * 12) - rootMidi; 
+        const action = actionMap[offset];
+        if (!action) { score += 1000; stats.out++; } 
+        else {
+          if (action.tech.length === 0) stats.natural++; 
+          else if (action.tech.includes('bend')) { score += 10; stats.bend++; } 
+          else if (action.tech.includes('overblow') || action.tech.includes('overdraw')) { score += 100; stats.over++; }
+        }
+      });
+      return { score, stats };
+    }
+
+    function remapRawNotesToScore() {
+      if (!state.correctedNotes) return;
+      const key = els.keyInput.value; 
+      const tuning = els.tuningInput.value;
+      const rootMidi = KEY_TO_ROOT_MIDI[key] || 60; 
+      const octaveShift = parseInt(els.octaveShiftInput.value) * 12;
+      const score = [];
+      const actionMap = getActionMap(tuning);
+      
+      state.correctedNotes.forEach((note, i) => {
+        const offset = note.midi + octaveShift - rootMidi; 
+        const action = actionMap[offset];
+        if (action) {
+          const existing = score.find(e => Math.abs(e.startBeat - note.startBeat) < 0.01 && e.dir === action.dir && Math.abs(e.durationBeats - note.durationBeats) < 0.01 );
+          if (existing) {
+            if (!existing.holes.includes(action.hole)) existing.holes.push(action.hole);
+            if (action.tech.length > 0 && !existing.techniques.includes(action.tech[0])) existing.techniques.push(...action.tech);
+            if (!existing.techniques.includes('chord')) existing.techniques.push('chord');
+            if (note.lyric) existing.lyric = (existing.lyric ? existing.lyric + " " : "") + note.lyric;
+          } else { score.push({ id: 'xml_' + i, startBeat: note.startBeat, durationBeats: note.durationBeats, dir: action.dir, holes: [action.hole], techniques: [...action.tech], lyric: note.lyric || '', articulation: null }); }
+        }
+      });
+      state.project.score = score.sort((a,b) => a.startBeat - b.startBeat);
+      state.project.harmonica.key = key; 
+      state.project.harmonica.tuning = tuning;
+      els.titleInput.value = state.project.title; renderEventList(); draw(); saveToLocal();
+    }
+
+    function autoSelectBestHarmonica() {
+      if (!state.correctedNotes || state.correctedNotes.length === 0) return;
+      const keys = Object.keys(KEY_TO_ROOT_MIDI);
+      let best = null; let minScore = Infinity;
+      
+      const currentShift = parseInt(els.octaveShiftInput.value) || 0;
+      const currentTuning = els.tuningInput.value;
+      
+      keys.forEach(k => {
+          const result = evaluateDifficulty(state.correctedNotes, k, currentShift, currentTuning);
+          if (result.score < minScore) { 
+              minScore = result.score; 
+              best = { key: k, shift: currentShift, stats: result.stats, score: result.score }; 
+          } 
+      });
+      
+      if (best) {
+         els.keyInput.value = best.key; 
+         remapRawNotesToScore();
+         let diffBadge = "<span style='color:var(--good)'>🟢 极易</span>";
+         if (best.stats.over > 0 || best.stats.out > 0) diffBadge = "<span style='color:var(--danger)'>🔴 极难</span>"; else if (best.stats.bend > 0) diffBadge = "<span style='color:var(--warn)'>🟡 进阶</span>";
+         setStatus(els.xmlStatus, `<b>✅ 自动寻调成功</b><br>🎯 推荐配置：${best.key}调口琴 (基于当前八度设定)<br>📊 技巧：自然音 ${best.stats.natural} | 压音 ${best.stats.bend} | 超音 ${best.stats.over}<br>🏅 难度：${diffBadge}`);
+      }
+    }
+    
+    if(els.autoArrangeBtn) els.autoArrangeBtn.onclick = autoSelectBestHarmonica;
+
+    if(els.xmlFileInput) els.xmlFileInput.onchange = async (e) => {
+      const file = e.target.files?.[0]; if(!file) return; setStatus(els.xmlStatus, '正在解析导入的数据...', 'ok');
+      try {
+        let textContent = ""; const fileName = file.name.toLowerCase(); const pureName = file.name.replace(/\.[^/.]+$/, "");
+        
+        if (fileName.endsWith('.mid') || fileName.endsWith('.midi')) {
+            if (typeof window.Midi === 'undefined') throw new Error("缺少 @tonejs/midi 解析库支持，请检查网络连接。");
+            
+            const arrayBuffer = await file.arrayBuffer();
+            tempMidiData = new window.Midi(arrayBuffer);
+            tempMidiFileName = pureName;
+            
+            if (tempMidiData.tracks.length === 0) throw new Error("该 MIDI 文件中没有包含音符轨道。");
+            
+            const select = document.getElementById('midiTrackSelect');
+            select.innerHTML = '';
+            let bestTrackIdx = 0;
+            let maxNotes = 0;
+
+            tempMidiData.tracks.forEach((track, idx) => {
+                const noteCount = track.notes.length;
+                if (noteCount > 0) {
+                    const opt = document.createElement('option');
+                    opt.value = idx;
+                    opt.textContent = `[轨道 ${idx}] ${track.name || '未命名'} (含 ${noteCount} 个音符)`;
+                    select.appendChild(opt);
+                    if (noteCount > maxNotes) {
+                        maxNotes = noteCount;
+                        bestTrackIdx = idx;
+                    }
+                }
+            });
+
+            if (select.options.length === 0) throw new Error("未能从 MIDI 轨道中提取到有效音符。");
+            select.value = bestTrackIdx; 
+
+            document.getElementById('midiImportPanel').style.display = 'block';
+            setStatus(els.xmlStatus, `⏳ <b>解析到 MIDI 多轨数据</b><br>请在下方【MIDI 高级清洗引擎】中选择要提取的旋律轨。`, 'warn');
+            els.xmlFileInput.value = '';
+            return;
+        }
+
+        if (fileName.endsWith('.mxl')) {
+            if (typeof JSZip === 'undefined') throw new Error("缺少 JSZip 解压库支持");
+            const zip = await JSZip.loadAsync(file); let rootFilePath = null;
+            if (zip.file("META-INF/container.xml")) {
+                const containerStr = await zip.file("META-INF/container.xml").async("text"); const doc = new DOMParser().parseFromString(containerStr, "text/xml");
+                const rootfile = doc.querySelector("rootfile"); if (rootfile) rootFilePath = rootfile.getAttribute("full-path");
+            }
+            if (!rootFilePath) { const xmlFiles = Object.keys(zip.files).filter(name => name.endsWith('.xml') && !name.includes('META-INF')); if (xmlFiles.length > 0) rootFilePath = xmlFiles[0]; }
+            if (!rootFilePath || !zip.file(rootFilePath)) throw new Error("MXL包中未找到有效的 XML 乐谱");
+            textContent = await zip.file(rootFilePath).async("text");
+        } else { textContent = await file.text(); }
+
+        if (fileName.endsWith('.json')) {
+            const parsed = JSON.parse(textContent);
+            if (parsed.project && parsed.rawXmlNotes !== undefined) {
+                state.project = normalizeProject(parsed.project);
+                state.rawXmlNotes = parsed.rawXmlNotes;
+                state.correctedNotes = parsed.correctedNotes;
+                if(parsed.skin) {
+                    state.skin.theme = parsed.skin.theme || 'candy';
+                    state.skin.bgBlur = parsed.skin.bgBlur || 0;
+                    state.skin.maskColor = parsed.skin.maskColor || 'black';
+                    state.skin.maskOpacity = parsed.skin.maskOpacity || 0;
+                    if(parsed.skin.customOpts) state.skin.customOpts = {...state.skin.customOpts, ...parsed.skin.customOpts};
+                    
+                    if(parsed.skin.bgImageData) {
+                        state.skin.bgImageData = parsed.skin.bgImageData;
+                        const img = new Image();
+                        img.onload = () => { state.skin.bgImageObj = img; state.staticCached = false; draw(); };
+                        img.src = state.skin.bgImageData;
+                    }
+                    if(parsed.skin.customOpts && parsed.skin.customOpts.harpImageData) {
+                        const img = new Image();
+                        img.onload = () => { state.skin.customOpts.harpImageObj = img; state.staticCached = false; draw(); };
+                        img.src = parsed.skin.customOpts.harpImageData;
+                    }
+                }
+            } else {
+                state.project = normalizeProject(parsed); state.rawXmlNotes = null; state.correctedNotes = null;
+            }
+            saveToLocal(); populateForm(); setStatus(els.xmlStatus, `✅ 已成功恢复工程备份: ${state.project.title}。`); 
+            els.xmlFileInput.value = ''; state.undoStack = []; updateUndoBtn(); return;
+        }
+        if (textContent.startsWith('PK')) throw new Error("检测到未命名的压缩包，请确保是合法的格式");
+        if (textContent.includes('Object class = "TextGrid"')) {
+            const parsedData = parseTextGrid(textContent, state.project.timing.bpm); state.project.title = pureName; if(els.titleInput) els.titleInput.value = pureName;
+            state.rawXmlNotes = parsedData.rawNotes; updateCorrectedNotes(); saveToLocal(); autoSelectBestHarmonica(); 
+            els.xmlFileInput.value = ''; state.undoStack = []; updateUndoBtn(); return;
+        }
+        if (!textContent.trim().startsWith('<')) throw new Error("文件内容无法识别为 XML 结构");
+        const parsedData = parseMusicXML(textContent); 
+        state.project.title = pureName; if(els.titleInput) els.titleInput.value = pureName;
+        state.rawXmlNotes = parsedData.rawNotes; state.project.timing.bpm = parsedData.bpm; if(els.bpmInput) els.bpmInput.value = parsedData.bpm;
+        updateCorrectedNotes(); saveToLocal(); autoSelectBestHarmonica(); 
+        state.undoStack = []; updateUndoBtn();
+      } catch(err) { console.error(err); setStatus(els.xmlStatus, `❌ 解析失败: ${err.message}`, 'error'); }
+      els.xmlFileInput.value = '';
+    };
+
+    if (els.exportBackupBtn) els.exportBackupBtn.onclick = () => {
+      state.project.title = els.titleInput.value || "export";
+      
+      const dataToExport = {
+            project: state.project,
+            rawXmlNotes: state.rawXmlNotes,
+            correctedNotes: state.correctedNotes,
+            skin: {
+                theme: state.skin.theme,
+                bgBlur: state.skin.bgBlur,
+                maskColor: state.skin.maskColor,
+                maskOpacity: state.skin.maskOpacity,
+                bgImageData: state.skin.bgImageData,
+                customOpts: {
+                    blockStyle: state.skin.customOpts.blockStyle,
+                    laneWidthScale: state.skin.customOpts.laneWidthScale,
+                    blockDutyCycle: state.skin.customOpts.blockDutyCycle,
+                    hitPosBlowOffset: state.skin.customOpts.hitPosBlowOffset,
+                    hitPosDrawOffset: state.skin.customOpts.hitPosDrawOffset,
+                    lanePanOffset: state.skin.customOpts.lanePanOffset,
+                    harpImageData: state.skin.customOpts.harpImageData
+                }
+            }
+        };
+
+      const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' }); 
+      const url = URL.createObjectURL(blob); 
+      const a = document.createElement('a'); 
+      a.href = url; a.download = state.project.title + '_V85_备份.json'; 
+      a.click(); setStatus(els.xmlStatus, `✅ 已成功导出包含图片数据的全量工程备份文件。`);
+    };
+
+    if (els.clearDataBtn) els.clearDataBtn.onclick = () => {
+      if (els.clearDataBtn.innerText === "🗑️ 清空重置") { els.clearDataBtn.innerText = "⚠️ 点击确认清空"; setTimeout(() => { if(els.clearDataBtn) els.clearDataBtn.innerText = "🗑️ 清空重置"; }, 3000); return; }
+      if(els.exportBackupBtn) els.exportBackupBtn.onclick();
+      
+      localStorage.removeItem(LOCAL_STORAGE_KEY); 
+      state.project = normalizeProject(makeEmptyProject()); 
+      state.rawXmlNotes = null; state.correctedNotes = null;
+      state.skin.bgImageObj = null; state.skin.bgImageData = null;
+      state.skin.customOpts.harpImageObj = null; state.skin.customOpts.harpImageData = null;
+      els.bgImageInput.value = ''; els.harpImageInput.value = '';
+      
+      if(els.audioEl.src) { els.audioEl.pause(); els.audioEl.removeAttribute('src'); } state.waveform = null; state.audioBuffer = null; populateForm(); setStatus(els.xmlStatus, '✅ 本地缓存已清空，工程已重置。');
+      els.clearDataBtn.innerText = "🗑️ 清空重置";
+      state.undoStack = []; updateUndoBtn();
+    };
+
+    function getAnchors(p) { return [...(p.anchors || [])].sort((a,b) => a.beat - b.beat); }
+    function beatToSec(b, p) {
+      const ancs = getAnchors(p), spb = 60/p.timing.bpm;
+      if(!ancs.length) return p.timing.leadInSec + b*spb;
+      if(b <= ancs[0].beat) return ancs[0].timeSec + (b - ancs[0].beat)*spb;
+      for(let i=0; i<ancs.length-1; i++) { if(b>=ancs[i].beat && b<=ancs[i+1].beat) return ancs[i].timeSec + (b-ancs[i].beat)/(Math.max(0.001, ancs[i+1].beat-ancs[i].beat))*(ancs[i+1].timeSec-ancs[i].timeSec); }
+      return ancs[ancs.length-1].timeSec + (b - ancs[ancs.length-1].beat)*spb;
+    }
+    function secToBeat(t, p) {
+      const ancs = getAnchors(p), spb = 60/p.timing.bpm;
+      if(!ancs.length) return (t - p.timing.leadInSec)/spb;
+      if(t <= ancs[0].timeSec) return ancs[0].beat + (t - ancs[0].timeSec)/spb;
+      for(let i=0; i<ancs.length-1; i++) { if(t>=ancs[i].timeSec && t<=ancs[i+1].timeSec) return ancs[i].beat + (t-ancs[i].timeSec)/(Math.max(0.001, ancs[i+1].timeSec-ancs[i].timeSec))*(ancs[i+1].beat-ancs[i].beat); }
+      return ancs[ancs.length-1].beat + (t - ancs[ancs.length-1].timeSec)/spb;
+    }
+
+    function curT() { 
+      const audioSrc = els.audioEl.getAttribute('src');
+      return (audioSrc && audioSrc.startsWith('blob:')) ? els.audioEl.currentTime : state.previewClock; 
+    }
+    function maxB(p) { return (p.score||[]).reduce((max, e) => Math.max(max, e.startBeat+e.durationBeats), 0); }
+    function endT(p) { return Math.max(beatToSec(maxB(p)+2, p), Number.isFinite(els.audioEl.duration)?els.audioEl.duration:1); }
+    
+    function syncUI() {
+      const t = curT(); if(els.timeReadout) els.timeReadout.textContent = t.toFixed(2) + 's';
+      if(els.beatReadout) els.beatReadout.textContent = secToBeat(t, state.project).toFixed(1) + 'b';
+      if (!state.isDraggingSlider && els.seekRange) els.seekRange.value = String(Math.round((t/endT(state.project))*1000));
+    }
+    function setT(sec) { const t = Math.max(0, sec); if(els.audioEl.getAttribute('src')) els.audioEl.currentTime = t; state.previewClock = t; draw(); renderWaveform(); syncUI(); }
+
+    function updatePlayButtonUI() {
+      if(!els.playPauseBtn) return;
+      if (state.isPlaying) { els.playPauseBtn.innerHTML = '⏸ 暂停'; els.playPauseBtn.classList.remove('primary'); els.playPauseBtn.style.background = 'rgba(255,255,255,0.8)'; } 
+      else { els.playPauseBtn.innerHTML = '▶ 播放'; els.playPauseBtn.classList.add('primary'); els.playPauseBtn.style.background = ''; }
+    }
+    
+    function play() { 
+      if(!state.raf) state.raf=requestAnimationFrame(tick); 
+      const audioSrc = els.audioEl.getAttribute('src');
+      if(audioSrc && audioSrc.startsWith('blob:')) {
+          els.audioEl.play().catch(e => {
+              console.warn('Audio playback prevented by browser:', e);
+              state.playingWithoutAudio = true;
+          });
+          state.playingWithoutAudio = false;
+      } else {
+          state.playingWithoutAudio = true; 
+      }
+      state.isPlaying = true; 
+      updatePlayButtonUI(); 
+    }
+    
+    function pause() { 
+      const audioSrc = els.audioEl.getAttribute('src');
+      if(audioSrc && audioSrc.startsWith('blob:')) els.audioEl.pause(); 
+      state.playingWithoutAudio = false; 
+      state.isPlaying = false; 
+      updatePlayButtonUI(); 
+    }
+    function togglePlay() { if (state.isPlaying) pause(); else play(); }
+
+    function renderEventList() {
+      if(!els.eventList) return; els.eventList.innerHTML = '';
+      state.project.score.forEach(e => {
+        const row = document.createElement('div'); row.className = 'event-row' + (e.id === state.selectedEventId ? ' selected' : '');
+        row.id = 'event-row-' + e.id; 
+        const sum = (e.techniques.map(t=>{return{bend:'压',overblow:'OB',overdraw:'OD',slide:'滑',sweep:'扫',chord:'和'}[t]||t;}).join('+'))||'通';
+        
+        row.innerHTML = `
+            <div style="width: 24px; text-align:center; font-weight:800; color:var(--${e.dir}); cursor:pointer;" class="clk-zone">${e.dir==='blow'?'吹':'吸'}</div>
+            <div style="width: 36px; font-size:11px; cursor:pointer;" class="clk-zone">[${e.holes.join(',')}]</div>
+            <div style="width: 20px; font-size:10px; color:var(--muted); cursor:pointer; margin-right:4px;" class="clk-zone">${sum}</div>
+            <input type="number" step="0.05" class="inline-start" value="${e.startBeat}" title="起始拍位置" style="width: 54px; font-size:11px; height:24px; text-align:center; margin-right:4px;" />
+            <input type="number" step="0.05" min="0.05" class="inline-dur" value="${e.durationBeats}" title="持续时长(拍)" style="width: 48px; font-size:11px; height:24px; text-align:center; margin-right:4px;" />
+            <input type="text" class="inline-lyric" value="${e.lyric||''}" placeholder="词" style="flex:1; font-size:11px; height:24px; min-width:40px; margin-right:4px;" />
+            <button class="icon-btn danger inline-del" style="padding:0; font-size:12px; height:24px; width:24px; min-width:24px; display:flex; align-items:center; justify-content:center;" title="删除此音符">✖</button>
+        `;
+
+        row.querySelectorAll('.clk-zone').forEach(el => {
+            el.onclick = () => { 
+                 if (state.selectedEventId !== e.id) {
+                     state.selectedEventId = e.id; 
+                     if(els.anchorBeatInput) els.anchorBeatInput.value = e.startBeat.toFixed(2); 
+                     setT(beatToSec(e.startBeat, state.project)); 
+                     renderEventList(); 
+                     draw(); 
+                 } else {
+                     state.selectedEventId = null;
+                     renderEventList(); 
+                     draw();
+                 }
+            };
+        });
+
+        const iStart = row.querySelector('.inline-start');
+        const iDur = row.querySelector('.inline-dur');
+        const iLyric = row.querySelector('.inline-lyric');
+        const btnDel = row.querySelector('.inline-del');
+
+        const updateModel = () => {
+             e.startBeat = Math.max(0, parseFloat(iStart.value) || 0);
+             e.durationBeats = Math.max(0.05, parseFloat(iDur.value) || 0.05);
+             e.lyric = iLyric.value || '';
+             draw(); saveToLocal();
+        };
+
+        iStart.addEventListener('change', () => { updateModel(); state.project.score.sort((a,b)=>a.startBeat-b.startBeat); renderEventList(); });
+        iDur.addEventListener('input', updateModel);
+        iLyric.addEventListener('input', updateModel);
+
+        btnDel.onclick = (ev) => {
+             ev.stopPropagation();
+             state.undoStack.push(JSON.parse(JSON.stringify(e)));
+             state.project.score = state.project.score.filter(x => x.id !== e.id);
+             if (state.selectedEventId === e.id) state.selectedEventId = null;
+             saveToLocal();
+             updateUndoBtn();
+             renderEventList();
+             draw();
+        };
+
+        els.eventList.appendChild(row);
+      });
+    }
+
+    function roundRectCustom(ctx, x, y, w, h, rTL, rTR, rBR, rBL) {
+      ctx.beginPath();
+      ctx.moveTo(x + rTL, y);
+      ctx.lineTo(x + w - rTR, y);
+      ctx.arcTo(x + w, y, x + w, y + h, rTR);
+      ctx.lineTo(x + w, y + h - rBR);
+      ctx.arcTo(x + w, y + h, x, y + h, rBR);
+      ctx.lineTo(x + rBL, y + h);
+      ctx.arcTo(x, y + h, x, y, rBL);
+      ctx.lineTo(x, y + rTL);
+      ctx.arcTo(x, y, x + w, y, rTL);
+      ctx.closePath();
+    }
+
+    function drawTrapHalfRound(ctx, yBase, yTip, leftBase, rightBase, leftTip, rightTip, r) {
+      ctx.beginPath();
+      ctx.moveTo(leftBase, yBase);
+      ctx.lineTo(rightBase, yBase);
+      ctx.arcTo(rightTip, yTip, leftTip, yTip, r);
+      ctx.arcTo(leftTip, yTip, leftBase, yBase, r);
+      ctx.closePath();
+    }
+
+    function roundRect(ctx, x, y, w, h, r) {
+      if (w < 2 * r) r = w / 2;
+      if (h < 2 * r) r = h / 2;
+      ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+    }
+
+    function drawGlassNote(ctx, x, y, width, height, isBlow, e, activeEvId) {
+        const r = 8;
+        ctx.save();
+        
+        ctx.shadowColor = 'rgba(255, 255, 255, 0.4)';
+        ctx.shadowBlur = 12;
+        ctx.shadowOffsetY = 2;
+        
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+        roundRect(ctx, x, y, width, height, r);
+        ctx.fill();
+        
+        ctx.shadowColor = 'transparent'; 
+        
+        const glossGrad = ctx.createLinearGradient(x, y, x, y + height);
+        glossGrad.addColorStop(0, 'rgba(255, 255, 255, 0.4)'); 
+        glossGrad.addColorStop(0.25, 'rgba(255, 255, 255, 0.08)');
+        glossGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.02)');
+        glossGrad.addColorStop(1, 'rgba(255, 255, 255, 0.15)'); 
+        ctx.fillStyle = glossGrad;
+        roundRect(ctx, x, y, width, height, r);
+        ctx.fill();
+
+        const borderGrad = ctx.createLinearGradient(x, y, x + width, y + height);
+        borderGrad.addColorStop(0, 'rgba(255, 255, 255, 0.85)');
+        borderGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.2)');
+        borderGrad.addColorStop(1, 'rgba(255, 255, 255, 0.55)');
+        ctx.strokeStyle = borderGrad;
+        ctx.lineWidth = 1.2;
+        roundRect(ctx, x, y, width, height, r);
+        ctx.stroke();
+
+        if(e.techniques.includes('bend')) { 
+            ctx.save(); ctx.beginPath(); roundRect(ctx, x+1, y+1, width-2, height-2, r-1); ctx.clip();
+            ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 3;
+            ctx.beginPath();
+            for(let d = -height; d < width + height; d += 8) {
+                ctx.moveTo(x + d, y); ctx.lineTo(x + d - height, y + height);
+            }
+            ctx.stroke(); ctx.restore();
+        }
+        
+        if(e.techniques.includes('overblow')||e.techniques.includes('overdraw')) { 
+            ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 2; ctx.setLineDash([4,4]); 
+            ctx.strokeRect(x + 2, y + 2, width - 4, height - 4); ctx.setLineDash([]); ctx.lineWidth = 1; 
+        }
+        
+        if(e.articulation === 'staccato') { 
+            ctx.fillStyle = 'rgba(255,255,255,0.8)'; 
+            if(isBlow) roundRect(ctx, x + width/2 - 10, y + height - 6, 20, 4, 2); 
+            else roundRect(ctx, x + width/2 - 10, y+2, 20, 4, 2); 
+            ctx.fill(); 
+        }
+        
+        if(e.articulation === 'accent') { 
+            ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.beginPath(); 
+            if(isBlow) { ctx.moveTo(x+width/2, y+height-2); ctx.lineTo(x+width/2-6, y+height-10); ctx.lineTo(x+width/2+6, y+height-10); } 
+            else { ctx.moveTo(x+width/2, y+2); ctx.lineTo(x+width/2-6, y+10); ctx.lineTo(x+width/2+6, y+10); } 
+            ctx.fill(); 
+        }
+        
+        if(e.id === activeEvId) { 
+            ctx.strokeStyle = '#fde047'; ctx.lineWidth = 2.5; roundRect(ctx, x, y, width, height, r); ctx.stroke(); 
+        }
+
+        if(e.lyric && height > 24) {
+            ctx.font = `900 ${Math.max(16, width*0.45)}px Inter, sans-serif`; ctx.textAlign = 'center'; ctx.lineJoin = 'round';
+            const lyY = isBlow ? y + height - 20 : y + 32;
+            ctx.shadowColor = 'rgba(0,0,0,0.8)'; ctx.shadowBlur = 4; ctx.shadowOffsetY = 1;
+            ctx.fillStyle = '#ffffff'; ctx.fillText(e.lyric, x + width/2, lyY); 
+            ctx.shadowColor = 'transparent'; 
+            ctx.textAlign = 'left';
+        }
+        ctx.restore();
+    }
+
+    function drawHamuGlassNote(ctx, x, y, width, height, theme, isBlow, e, activeEvId) {
+        const r = 8; 
+        const baseColor = isBlow ? theme.barBaseBlow : theme.barBaseDraw;
+        
+        ctx.save();
+        ctx.globalAlpha = 0.55; 
+        ctx.fillStyle = baseColor;
+        ctx.beginPath();
+        roundRect(ctx, x, y, width, height, r);
+        ctx.fill();
+        
+        ctx.globalAlpha = 1.0; 
+        
+        const margin = 2.5; 
+        const glossX = x + margin;
+        const glossY = y + margin;
+        const glossW = width - margin * 2;
+        const glossH = height * 0.4;            
+        const glossR = Math.max(0, r - margin); 
+        
+        const glossGrad = ctx.createLinearGradient(0, glossY, 0, glossY + glossH);
+        glossGrad.addColorStop(0, 'rgba(255, 255, 255, 0.9)'); 
+        glossGrad.addColorStop(1, 'rgba(255, 255, 255, 0.0)');
+        
+        ctx.fillStyle = glossGrad;
+        ctx.beginPath();
+        roundRect(ctx, glossX, glossY, glossW, glossH, glossR);
+        ctx.fill();
+        
+        const rimGrad = ctx.createLinearGradient(0, y + height - height * 0.2, 0, y + height);
+        rimGrad.addColorStop(0, 'transparent');
+        rimGrad.addColorStop(1, 'rgba(255, 255, 255, 0.85)'); 
+        ctx.strokeStyle = rimGrad;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        roundRect(ctx, x + 1, y + 1, width - 2, height - 2, r - 1);
+        ctx.stroke();
+
+        if(e.techniques.includes('bend')) { 
+            ctx.save(); ctx.beginPath(); roundRect(ctx, x+1, y+1, width-2, height-2, r-1); ctx.clip();
+            ctx.strokeStyle = 'rgba(255,255,255,0.6)'; ctx.lineWidth = 2;
+            ctx.beginPath();
+            for(let d = -height; d < width + height; d += 8) {
+                ctx.moveTo(x + d, y); ctx.lineTo(x + d - height, y + height);
+            }
+            ctx.stroke(); ctx.restore();
+        }
+        
+        if(e.techniques.includes('overblow')||e.techniques.includes('overdraw')) { 
+            ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 2.5; ctx.setLineDash([4,4]); 
+            ctx.beginPath(); roundRect(ctx, x + 2, y + 2, width - 4, height - 4, r-2); ctx.stroke();
+            ctx.setLineDash([]); ctx.lineWidth = 1; 
+        }
+        
+        if(e.articulation === 'staccato') { 
+            ctx.fillStyle = 'rgba(255,255,255,0.8)'; 
+            if(isBlow) roundRect(ctx, x + width/2 - 10, y + height - 8, 20, 4, 2); 
+            else roundRect(ctx, x + width/2 - 10, y+4, 20, 4, 2); 
+            ctx.fill(); 
+        }
+        
+        if(e.articulation === 'accent') { 
+            ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.beginPath(); 
+            if(isBlow) { ctx.moveTo(x+width/2, y+height-2); ctx.lineTo(x+width/2-6, y+height-10); ctx.lineTo(x+width/2+6, y+height-10); } 
+            else { ctx.moveTo(x+width/2, y+2); ctx.lineTo(x+width/2-6, y+10); ctx.lineTo(x+width/2+6, y+10); } 
+            ctx.fill(); 
+        }
+        
+        if(e.id === activeEvId) { 
+            ctx.strokeStyle = '#fde047'; ctx.lineWidth = 3; 
+            ctx.beginPath(); roundRect(ctx, x, y, width, height, r); ctx.stroke(); 
+        }
+
+        if(e.lyric && height > 20) {
+            ctx.font = `900 ${Math.max(14, width*0.4)}px Inter, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            const lyY = y + height / 2; 
+            ctx.shadowColor = 'rgba(0,0,0,0.3)'; ctx.shadowBlur = 4; ctx.shadowOffsetY = 1;
+            ctx.fillStyle = '#ffffff'; ctx.fillText(e.lyric, x + width/2, lyY); 
+            ctx.shadowColor = 'transparent'; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+        }
+        ctx.restore();
+    }
+
+    function drawModernNote(ctx, x, y, width, height, theme, isBlow, e, activeEvId) {
+      const r = 6; const baseColor = isBlow ? theme.barBaseBlow : theme.barBaseDraw; const borderColor = isBlow ? theme.barBorderBlow : theme.barBorderDraw;
+      const coreColor = isBlow ? theme.barCoreBlow : theme.barCoreDraw; const glowColor = isBlow ? theme.blowGlow : theme.drawGlow;
+      
+      if (glowColor !== 'transparent') {
+          ctx.fillStyle = glowColor; roundRect(ctx, x - 3, y - 3, width + 6, height + 6, r + 2); ctx.fill();
+      }
+      ctx.fillStyle = baseColor; roundRect(ctx, x, y, width, height, r); ctx.fill();
+
+      const spineW = 4; const spineX = x + (width - spineW) / 2; const spineGrad = ctx.createLinearGradient(0, y, 0, y + height);
+      if (isBlow) { spineGrad.addColorStop(0, 'transparent'); spineGrad.addColorStop(1, coreColor); } else { spineGrad.addColorStop(0, coreColor); spineGrad.addColorStop(1, 'transparent'); }
+      ctx.fillStyle = spineGrad; roundRect(ctx, spineX, y + 2, spineW, height - 4, spineW/2); ctx.fill();
+      ctx.strokeStyle = borderColor; ctx.lineWidth = 1.5; roundRect(ctx, x, y, width, height, r); ctx.stroke();
+
+      const headH = Math.min(height, 8); ctx.fillStyle = `rgba(${theme.whiteRGB}, 0.9)`;
+      if (isBlow) roundRect(ctx, x + 1.5, y + height - headH, width - 3, headH - 1.5, r-1); else roundRect(ctx, x + 1.5, y + 1.5, width - 3, headH - 1.5, r-1); ctx.fill();
+
+      if(e.techniques.includes('bend')) { 
+          ctx.save();
+          ctx.beginPath();
+          roundRect(ctx, x+1.5, y+1.5, width-3, height-3, r-1);
+          ctx.clip();
+          ctx.strokeStyle = theme.bendMark; 
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          for(let d = -height; d < width + height; d += 6) {
+              ctx.moveTo(x + d, y);
+              ctx.lineTo(x + d - height, y + height);
+          }
+          ctx.stroke();
+          ctx.restore();
+      }
+      
+      if(e.techniques.includes('overblow')||e.techniques.includes('overdraw')) { ctx.strokeStyle = theme.obMark; ctx.lineWidth = 2.5; ctx.setLineDash([5,5]); ctx.strokeRect(x + 1, y + 1, width - 2, height - 2); ctx.setLineDash([]); ctx.lineWidth = 1; }
+      if(e.articulation === 'staccato') { ctx.fillStyle = theme.staccato; if(isBlow) roundRect(ctx, x + width/2 - 12, y + height - 6, 24, 6, 3); else roundRect(ctx, x + width/2 - 12, y, 24, 6, 3); ctx.fill(); }
+      if(e.articulation === 'accent') { ctx.fillStyle = theme.staccato; ctx.beginPath(); if(isBlow) { ctx.moveTo(x+width/2, y+height); ctx.lineTo(x+width/2-8, y+height-12); ctx.lineTo(x+width/2+8, y+height-12); } else { ctx.moveTo(x+width/2, y); ctx.lineTo(x+width/2-8, y+12); ctx.lineTo(x+width/2+8, y+12); } ctx.fill(); }
+      
+      if(e.id === activeEvId) { ctx.strokeStyle = '#fde047'; ctx.lineWidth = 3; roundRect(ctx, x, y, width, height, r); ctx.stroke(); }
+
+      if(e.lyric && height > 24) {
+          ctx.font = `900 ${Math.max(16, width*0.45)}px Inter, sans-serif`; ctx.textAlign = 'center'; ctx.lineJoin = 'round';
+          const lyY = isBlow ? y + height - 20 : y + 32;
+          ctx.lineWidth = 4; ctx.strokeStyle = theme.lyricShadow; ctx.strokeText(e.lyric, x + width/2, lyY); ctx.fillStyle = theme.lyricColor; ctx.fillText(e.lyric, x + width/2, lyY); ctx.textAlign = 'left';
+      }
+    }
+
+    function drawHitEffect(ctx, cx, yLine, lw, theme, isBlow) {
+      const effectColor = isBlow ? theme.barBorderBlow : theme.barBorderDraw;
+      const effectW = lw * 0.95; 
+
+      ctx.save();
+      // 废弃昂贵的 globalCompositeOperation = 'screen'
+
+      const lineH = 3;
+      const yPos = isBlow ? yLine - lineH : yLine;
+
+      const tailH = 35;
+      const grad = ctx.createLinearGradient(0, isBlow ? yLine : yLine, 0, isBlow ? yLine + tailH : yLine - tailH);
+      grad.addColorStop(0, effectColor);
+      grad.addColorStop(1, 'transparent');
+      
+      ctx.globalAlpha = 0.6;
+      ctx.fillStyle = grad;
+      ctx.fillRect(cx - effectW/2, isBlow ? yLine : yLine - tailH, effectW, tailH);
+
+      // 使用多层递减的不透明度图形，代替高斯模糊 (shadowBlur)
+      ctx.fillStyle = effectColor;
+      
+      // 1. 外围柔和漫反射光 (低不透明度，面积最大)
+      ctx.globalAlpha = 0.2;
+      roundRect(ctx, cx - effectW / 2 - 2, yPos - 2, effectW + 4, lineH + 4, 3);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(cx, yLine, 8, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 2. 内圈高光晕影 (中等不透明度，面积贴近本体)
+      ctx.globalAlpha = 0.5;
+      roundRect(ctx, cx - effectW / 2 - 1, yPos - 1, effectW + 2, lineH + 2, 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(cx, yLine, 6, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 3. 极亮的物理核心 (无透明度纯白)
+      ctx.globalAlpha = 1.0;
+      ctx.fillStyle = '#ffffff';
+      
+      roundRect(ctx, cx - effectW / 2, yPos, effectW, lineH, 1.5);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(cx, yLine, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function getLayoutMetrics(w, h, p, skinConf) {
+        const hitY = h * 0.5;
+        const holes = p.harmonica.holes;
+        const isCustom = skinConf.theme === 'custom';
+        const c = isCustom && skinConf.customOpts ? skinConf.customOpts : { blockStyle: 'ios26', laneWidthScale: 1.0, blockDutyCycle: 0.88, hitPosBlowOffset: 0, hitPosDrawOffset: 0, lanePanOffset: 0, harpImageObj: null };
+
+        const harBaseW = w - 80;
+        const harLeft = (w - harBaseW) / 2;
+        const harRight = harLeft + harBaseW;
+        
+        const staticPtLip = hitY - 15;
+        const staticPbLip = hitY + 15;
+
+        const harStatic = {
+            t: hitY - 68, 
+            pt_curve: staticPtLip - 9, 
+            pt_lip: staticPtLip, 
+            mt: hitY - 10, 
+            mb: hitY + 10,
+            pb_lip: staticPbLip, 
+            pb_curve: staticPbLip + 9, 
+            b: hitY + 48, 
+            r: 8
+        };
+
+        const laneTargetW = harBaseW * c.laneWidthScale; 
+        const laneLeft = ((w - laneTargetW) / 2) + (c.lanePanOffset || 0);
+        const laneRight = laneLeft + laneTargetW;
+        
+        const laneTotalW = laneTargetW / holes;
+        const laneLw = laneTotalW * c.blockDutyCycle;
+        const lanePad = holes > 1 ? (laneTargetW - holes * laneLw) / (holes - 1) : 0;
+
+        const blowLip = isCustom ? staticPtLip + c.hitPosBlowOffset : staticPtLip;
+        const drawLip = isCustom ? staticPbLip + c.hitPosDrawOffset : staticPbLip;
+
+        return { 
+            left: laneLeft, right: laneRight, lw: laneLw, pad: lanePad, 
+            blowLip, drawLip, 
+            holes, hitY,
+            harBaseW, harLeft, harRight, harStatic,
+            isCustom, customImg: isCustom ? c.harpImageObj : null 
+        };
+    }
+
+    function updateStaticCaches(w, h, p, skinConf) {
+        if (bgCanvas.width !== w || bgCanvas.height !== h) { 
+            bgCanvas.width = w; bgCanvas.height = h; 
+            fgCanvas.width = w; fgCanvas.height = h; 
+            trackCanvas.width = w; trackCanvas.height = h;
+        }
+        const bgCtx = bgCanvas.getContext('2d'); const fgCtx = fgCanvas.getContext('2d');
+        bgCtx.clearRect(0,0,w,h); fgCtx.clearRect(0,0,w,h);
+        
+        const theme = THEMES[skinConf.theme] || THEMES['candy'];
+        
+        if (skinConf.theme === 'chroma') {
+            bgCtx.fillStyle = theme.bgMid; bgCtx.fillRect(0, 0, w, h);
+        } else {
+            if (skinConf.bgImageObj) {
+                bgCtx.save(); if (skinConf.bgBlur > 0) bgCtx.filter = `blur(${skinConf.bgBlur}px)`;
+                const imgAspect = skinConf.bgImageObj.width / skinConf.bgImageObj.height; const canvasAspect = w / h; 
+                let drawW, drawH, drawX, drawY;
+                if (canvasAspect > imgAspect) { drawW = w; drawH = w / imgAspect; drawX = 0; drawY = (h - drawH) / 2; } 
+                else { drawH = h; drawW = h * imgAspect; drawY = 0; drawX = (w - drawW) / 2; }
+                bgCtx.drawImage(skinConf.bgImageObj, drawX, drawY, drawW, drawH); bgCtx.restore();
+            } else {
+                const bg = bgCtx.createLinearGradient(0,0,0,h); bg.addColorStop(0, theme.bgTop); bg.addColorStop(0.5, theme.bgMid); bg.addColorStop(1, theme.bgBot); 
+                bgCtx.fillStyle = bg; bgCtx.fillRect(0,0,w,h);
+            }
+            if (skinConf.maskOpacity > 0) { 
+               bgCtx.fillStyle = skinConf.maskColor === 'black' ? `rgba(0,0,0,${skinConf.maskOpacity})` : `rgba(255,255,255,${skinConf.maskOpacity})`; 
+               bgCtx.fillRect(0,0,w,h); 
+            }            
+        }
+
+        const m = getLayoutMetrics(w, h, p, skinConf);
+        const { harBaseW, harLeft, harRight, harStatic, holes, hitY, customImg, isCustom } = m;
+        
+        const baseLeft = harLeft - 18, baseRight = harRight + 18, wBase = harBaseW + 36;
+        const tipLeftTop = harLeft + 8, tipRightTop = harRight - 8, tipLeftBot = harLeft + 2, tipRightBot = harRight - 2;
+
+        if (customImg) {
+            const imgW = harBaseW + 60; 
+            const imgH = (imgW / customImg.width) * customImg.height;
+            fgCtx.drawImage(customImg, (w - imgW)/2, hitY - imgH/2, imgW, imgH);
+        } else {
+            if (skinConf.theme !== 'chroma' && theme.harShadow !== 'transparent') {
+                fgCtx.save(); fgCtx.filter = 'blur(20px)'; fgCtx.fillStyle = theme.harShadow; 
+                drawTrapHalfRound(fgCtx, harStatic.b - 8, harStatic.b + 25, baseLeft + 10, baseRight - 10, baseLeft, baseRight, 10);
+                fgCtx.fill(); fgCtx.fill(); fgCtx.restore();
+            }
+
+            const botSurfaceGrad = fgCtx.createLinearGradient(0, harStatic.pb_curve, 0, harStatic.b);
+            botSurfaceGrad.addColorStop(0, theme.harBotGrad[0]); botSurfaceGrad.addColorStop(1, theme.harBotGrad[3]); fgCtx.fillStyle = botSurfaceGrad;
+            drawTrapHalfRound(fgCtx, harStatic.pb_curve, harStatic.b, baseLeft, baseRight, tipLeftBot, tipRightBot, harStatic.r); fgCtx.fill();
+
+            const botCurveGrad = fgCtx.createLinearGradient(0, harStatic.pb_lip, 0, harStatic.pb_curve);
+            botCurveGrad.addColorStop(0, theme.harBotGrad[3]); botCurveGrad.addColorStop(0.6, `rgba(${theme.whiteRGB}, 1)`); botCurveGrad.addColorStop(1, theme.harBotGrad[2]); fgCtx.fillStyle = botCurveGrad;
+            roundRectCustom(fgCtx, baseLeft, harStatic.pb_lip, wBase, harStatic.pb_curve - harStatic.pb_lip, 0, 0, harStatic.r, harStatic.r); fgCtx.fill();
+
+            fgCtx.fillStyle = theme.harComb; roundRectCustom(fgCtx, baseLeft + 2, harStatic.pt_lip, wBase - 4, harStatic.pb_lip - harStatic.pt_lip, 1, 1, 1, 1); fgCtx.fill();
+
+            const topCurveGrad = fgCtx.createLinearGradient(0, harStatic.pt_curve, 0, harStatic.pt_lip);
+            topCurveGrad.addColorStop(0, theme.harTopGrad[0]); topCurveGrad.addColorStop(0.4, `rgba(${theme.whiteRGB}, 1)`); topCurveGrad.addColorStop(1, theme.harTopGrad[3]); fgCtx.fillStyle = topCurveGrad;
+            roundRectCustom(fgCtx, baseLeft, harStatic.pt_curve, wBase, harStatic.pt_lip - harStatic.pt_curve, harStatic.r, harStatic.r, 0, 0); fgCtx.fill();
+
+            const topSurfaceGrad = fgCtx.createLinearGradient(0, harStatic.t, 0, harStatic.pt_curve);
+            topSurfaceGrad.addColorStop(0, theme.harTopGrad[3]); topSurfaceGrad.addColorStop(0.5, theme.harTopGrad[1]); topSurfaceGrad.addColorStop(0.8, theme.harTopGrad[2]); topSurfaceGrad.addColorStop(1, theme.harTopGrad[0]); fgCtx.fillStyle = topSurfaceGrad;
+            drawTrapHalfRound(fgCtx, harStatic.pt_curve, harStatic.t, baseLeft, baseRight, tipLeftTop, tipRightTop, harStatic.r); fgCtx.fill();
+
+            fgCtx.textAlign = 'center'; fgCtx.fillStyle = theme.harEngraving; fgCtx.globalAlpha = 0.7; fgCtx.font = "800 12px Inter, sans-serif";
+            let engravingText = `KEY ${p.harmonica.key}`; if (p.display.noteMode === 'relative' && p.display.relativePosition) engravingText += `   |   ${p.display.relativePosition.toUpperCase()}`;
+            if (skinConf.theme !== 'chroma') { fgCtx.save(); fgCtx.shadowColor = `rgba(${theme.whiteRGB}, 0.4)`; fgCtx.shadowOffsetY = 1; fgCtx.shadowBlur = 0; fgCtx.fillText(engravingText, w/2, harStatic.t + 20); fgCtx.restore(); } 
+            else { fgCtx.fillText(engravingText, w/2, harStatic.t + 20); }
+            fgCtx.globalAlpha = 1.0;
+            
+            if (!isCustom) {
+                for(let i=0; i<holes; i++) {
+                    const harLaneTotalW = harBaseW / holes;
+                    const harLw = harLaneTotalW * 0.88; 
+                    const harPad = holes > 1 ? (harBaseW - holes * harLw) / (holes - 1) : 0;
+                    const cx = harLeft + i*(harLw+harPad) + harLw/2;
+                    const hw = harLw * 0.75; 
+                    
+                    roundRect(fgCtx, cx - hw/2, harStatic.mt, hw, harStatic.mb-harStatic.mt, 4); fgCtx.fillStyle = theme.harHole; fgCtx.fill();
+                    if (skinConf.theme !== 'chroma') {
+                        fgCtx.save(); fgCtx.beginPath(); roundRect(fgCtx, cx - hw/2, harStatic.mt, hw, harStatic.mb-harStatic.mt, 4); fgCtx.clip();
+                        const holeShadow = fgCtx.createLinearGradient(0, harStatic.mt, 0, harStatic.mt + 6); 
+                        holeShadow.addColorStop(0, `rgba(${theme.whiteRGB}, 0.18)`); holeShadow.addColorStop(1, 'transparent'); 
+                        fgCtx.fillStyle = holeShadow; fgCtx.fillRect(cx - hw/2, harStatic.mt, hw, 5); fgCtx.restore();
+                    }
+                    roundRect(fgCtx, cx - hw/2, harStatic.mt, hw, harStatic.mb-harStatic.mt, 4); fgCtx.strokeStyle = `rgba(${theme.blackRGB}, 0.8)`; fgCtx.lineWidth = 1; fgCtx.stroke();
+                    
+                    const holeNumColor = skinConf.theme === 'chroma' ? `rgba(${theme.whiteRGB}, 0.8)` : `rgba(${theme.whiteRGB}, 0.85)`;
+                    fgCtx.fillStyle = holeNumColor; fgCtx.font = `900 ${Math.max(12, harLw*0.35)}px Inter, sans-serif`; fgCtx.textAlign = 'center'; fgCtx.textBaseline = 'middle';
+                    fgCtx.fillText(i+1, cx, hitY + 1); 
+                    fgCtx.textBaseline = 'alphabetic'; 
+                }
+            }
+        }
+        state.staticCached = true;
+    }
+
+    function drawFrame(ctx, actualW, actualH, timeSec, p, skinConf, activeEvId) {
+      const isHoriz = p.display.aspectRatio === '4/3'; const LOGIC_W = 720; const LOGIC_H = isHoriz ? 540 : 1280; 
+      
+      if (!state.staticCached || bgCanvas.width !== LOGIC_W || bgCanvas.height !== LOGIC_H) {
+          updateStaticCaches(LOGIC_W, LOGIC_H, p, skinConf);
+      }
+
+      ctx.save(); ctx.scale(actualW / LOGIC_W, actualH / LOGIC_H);
+      const w = LOGIC_W, h = LOGIC_H; ctx.clearRect(0,0,w,h); 
+      const theme = THEMES[skinConf.theme] || THEMES['candy'];
+      
+      const m = getLayoutMetrics(w, h, p, skinConf);
+      const { left, right, lw, pad, holes, blowLip, drawLip, harStatic, isCustom } = m;
+      const b = secToBeat(timeSec, p); const pps = 180 * (p.display.barScale||1);
+
+      const applyFadeMaskToTrack = () => {
+          trackCtx.save();
+          trackCtx.globalCompositeOperation = 'destination-in';
+          const fadeGrad = trackCtx.createLinearGradient(0, 0, 0, h);
+          fadeGrad.addColorStop(0, 'rgba(0,0,0,0)');
+          fadeGrad.addColorStop(0.2, 'rgba(0,0,0,1)');
+          fadeGrad.addColorStop(0.8, 'rgba(0,0,0,1)');
+          fadeGrad.addColorStop(1, 'rgba(0,0,0,0)');
+          trackCtx.fillStyle = fadeGrad;
+          trackCtx.fillRect(0, 0, w, h);
+          trackCtx.restore();
+      };
+
+      // Layer 1. 底图层
+      ctx.drawImage(bgCanvas, 0, 0);
+
+      // Layer 2. 离屏绘制竖向钢丝线 (被压在口琴下方)
+      const trackCtx = trackCanvas.getContext('2d');
+      trackCtx.clearRect(0,0,w,h);
+
+      if (skinConf.theme !== 'chroma') {
+          const drawWire = (x) => {
+              trackCtx.beginPath(); 
+              trackCtx.moveTo(x, 0); 
+              trackCtx.lineTo(x, h);
+              trackCtx.strokeStyle = 'rgba(255,255,255,0.15)'; 
+              trackCtx.lineWidth = 1; 
+              trackCtx.stroke();
+          };
+          
+          drawWire(left - pad/2); 
+          for(let i=0; i<holes-1; i++) {
+              drawWire(left + i*(lw+pad) + lw + pad/2); 
+          }
+          drawWire(right + pad/2); 
+      }
+
+      applyFadeMaskToTrack();
+      ctx.drawImage(trackCanvas, 0, 0);
+
+      // Layer 3. 实体口琴模型贴图层
+      ctx.drawImage(fgCanvas, 0, 0);
+
+      // Layer 4. 离屏绘制动态音符轨道与击中特效
+      trackCtx.clearRect(0,0,w,h);
+
+      const activeBlowHoles = new Set(); const activeDrawHoles = new Set();
+      
+      let blockTheme = theme;
+      let styleOpt = skinConf.theme;
+      if (isCustom) {
+          styleOpt = skinConf.customOpts.blockStyle || 'ios26';
+          if (styleOpt !== 'ios26' && styleOpt !== 'hamu') {
+              blockTheme = THEMES[styleOpt] || theme;
+          }
+      }
+
+      p.score.forEach(e => {
+        const s = beatToSec(e.startBeat, p), eT = beatToSec(e.startBeat+e.durationBeats, p), evH = Math.max(12, (eT-s)*pps);
+        let top, bot;
+        
+        if(e.dir==='blow') { bot = blowLip - (s-timeSec)*pps; top = bot-evH; } else { top = drawLip + (s-timeSec)*pps; bot = top+evH; }
+        if (timeSec >= s && timeSec <= eT) { e.holes.forEach(h => e.dir === 'blow' ? activeBlowHoles.add(h) : activeDrawHoles.add(h)); }
+        if(bot<0 || top>h) return;
+        
+        trackCtx.save(); trackCtx.beginPath(); if(e.dir==='blow') trackCtx.rect(0,0,w,blowLip); else trackCtx.rect(0,drawLip,w,h-drawLip); trackCtx.clip(); 
+        
+        e.holes.forEach(hole => { 
+            const nx = left + (hole-1)*(lw+pad) + lw*0.06, width = lw*0.88; 
+            if (styleOpt === 'ios26') {
+                drawGlassNote(trackCtx, nx, top, width, evH, e.dir === 'blow', e, activeEvId);
+            } else if (styleOpt === 'hamu') {
+                drawHamuGlassNote(trackCtx, nx, top, width, evH, THEMES.hamu, e.dir === 'blow', e, activeEvId);
+            } else {
+                drawModernNote(trackCtx, nx, top, width, evH, blockTheme, e.dir === 'blow', e, activeEvId);
+            }
+        });
+        
+        if(e.techniques.includes('chord') && e.holes.length > 1) {
+             const minH = Math.min(...e.holes), maxH = Math.max(...e.holes); const startX = left + (minH-1)*(lw+pad) + lw/2, endX = left + (maxH-1)*(lw+pad) + lw/2;
+             trackCtx.strokeStyle = e.dir==='blow'? blockTheme.chordBlow : blockTheme.chordDraw; trackCtx.lineWidth = 6;
+             trackCtx.beginPath(); const cy = e.dir==='blow' ? bot - 12 : top + 12; trackCtx.moveTo(startX, cy); trackCtx.lineTo(endX, cy); trackCtx.stroke(); trackCtx.lineWidth = 1;
+        }
+        trackCtx.restore();
+      });
+
+      trackCtx.save();
+      for(let i=0; i<holes; i++) {
+        const cx = left + i*(lw+pad) + lw/2;
+        const activeBlow = activeBlowHoles.has(i + 1);
+        const activeDraw = activeDrawHoles.has(i + 1);
+
+        let effTheme = blockTheme;
+        if (styleOpt === 'ios26') effTheme = THEMES.custom;
+        if (styleOpt === 'hamu') effTheme = THEMES.hamu;
+
+        if (activeBlow) drawHitEffect(trackCtx, cx, blowLip, lw, effTheme, true);
+        if (activeDraw) drawHitEffect(trackCtx, cx, drawLip, lw, effTheme, false);
+      }
+      trackCtx.restore();
+
+      applyFadeMaskToTrack();
+      ctx.drawImage(trackCanvas, 0, 0);
+
+      const rootMidiC = 60; const harpRootMidi = KEY_TO_ROOT_MIDI[p.harmonica.key] || 60; const harpOffset = harpRootMidi - rootMidiC;
+      let tonicMidi = harpRootMidi; const isRelative = p.display.noteMode === 'relative';
+      if (isRelative) tonicMidi += (POS_OFFSETS[p.display.relativePosition || '2nd'] || 0);
+      const baseHarp = getHarpBase(p.harmonica.tuning);
+
+      if (!isCustom) {
+          ctx.globalAlpha = 0.65; ctx.textAlign='center';
+          for(let i=0; i<holes; i++) {
+            const blowMidi = baseHarp.blow[Math.min(i,9)] + Math.max(0,i-9)*4 + harpOffset;
+            const drawMidi = baseHarp.draw[Math.min(i,9)] + Math.max(0,i-9)*4 + harpOffset;
+            const nb = isRelative ? JIANPU_MAP[((blowMidi - tonicMidi) % 12 + 12) % 12] : NOTE_NAMES[(blowMidi % 12 + 12) % 12];
+            const nd = isRelative ? JIANPU_MAP[((drawMidi - tonicMidi) % 12 + 12) % 12] : NOTE_NAMES[(drawMidi % 12 + 12) % 12];
+            
+            const harLaneTotalW = m.harBaseW / holes;
+            const harLw = harLaneTotalW * 0.88; 
+            const harPad = holes > 1 ? (m.harBaseW - holes * harLw) / (holes - 1) : 0;
+            const cx = m.harLeft + i*(harLw+harPad) + harLw/2;
+            
+            ctx.fillStyle = theme.harNoteBlow; ctx.font=`900 17px Inter, sans-serif`; ctx.fillText(nb, cx, harStatic.t - 12);
+            ctx.fillStyle = theme.harNoteDraw; ctx.font=`900 17px Inter, sans-serif`; ctx.fillText(nd, cx, harStatic.b + 28);
+          }
+          ctx.globalAlpha = 1.0; ctx.textAlign='left'; 
+      }
+      
+      ctx.restore();
+    }
+
+    function draw() { 
+      if(!els.previewCanvas) return;
+      const canvas = els.previewCanvas; const rect = canvas.getBoundingClientRect(); if (rect.width === 0 || rect.height === 0) return;
+      const dpr = window.devicePixelRatio || 1; canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+      
+      if (window._exportState && window._exportState.active && window._exportState.isRealtime && window._exportState.realtimeCanvas) {
+          const rtCanvas = window._exportState.realtimeCanvas;
+          drawFrame(window._exportState.realtimeCtx, rtCanvas.width, rtCanvas.height, curT(), state.project, state.skin, state.selectedEventId);
+          
+          const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = '#38bdf8'; ctx.font = '900 16px sans-serif'; ctx.textAlign = 'center';
+          ctx.fillText('🔴 全尺寸无损导出运行中', canvas.width/2, canvas.height/2 - 10);
+          ctx.fillStyle = '#64748b'; ctx.font = '700 12px sans-serif';
+          ctx.fillText('为保障物理编码速度与稳定，已自动切断本地视觉预览', canvas.width/2, canvas.height/2 + 15);
+      } else {
+          drawFrame(canvas.getContext('2d'), canvas.width, canvas.height, curT(), state.project, state.skin, state.selectedEventId); 
+      }
+    }
+
+    function computeWaveform(buf, samples) {
+      const ch = buf.getChannelData(0), blk = Math.max(1, Math.floor(ch.length/samples)), res = [];
+      for(let i=0; i<samples; i++) { let min=1, max=-1; for(let j=i*blk; j<Math.min(ch.length, i*blk+blk); j++) { if(ch[j]<min) min=ch[j]; if(ch[j]>max) max=ch[j]; } res.push({min, max}); }
+      return res;
+    }
+    function renderWaveform() {
+      if(!els.waveCanvas) return; const canvas = els.waveCanvas; const ctx = canvas.getContext('2d'); const rect = canvas.getBoundingClientRect(); if(rect.width === 0 || rect.height === 0) return;
+      const dpr = window.devicePixelRatio || 1; canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+      ctx.save(); ctx.scale(dpr, dpr); const w = rect.width, h = rect.height; 
+      
+      ctx.clearRect(0,0,w,h); ctx.strokeStyle = 'rgba(0,0,0,0.05)'; ctx.beginPath(); ctx.moveTo(0, h/2); ctx.lineTo(w, h/2); ctx.stroke();
+      if(state.waveform) {
+        ctx.strokeStyle='rgba(14,165,233,0.8)'; ctx.lineWidth=1.5; ctx.beginPath();
+        state.waveform.forEach((d,i) => { const x = (i/(state.waveform.length-1))*w; ctx.moveTo(x, h/2+d.min*h*0.45); ctx.lineTo(x, h/2+d.max*h*0.45); });
+        ctx.stroke(); ctx.lineWidth=1;
+      }
+      getAnchors(state.project).forEach(a => { const x = (a.timeSec/endT(state.project))*w; ctx.fillStyle='rgba(236,72,153,0.6)'; ctx.fillRect(x-1, 0, 2, h); });
+      const cx = (curT()/endT(state.project))*w; ctx.fillStyle='#10b981'; ctx.fillRect(cx-1, 0, 2, h); ctx.restore();
+    }
+
+    function tick(ts) {
+      if(!state.lastDrawTs) state.lastDrawTs=ts; const dt = (ts-state.lastDrawTs)/1000; state.lastDrawTs=ts;
+      if(state.playingWithoutAudio) {
+        state.previewClock += dt;
+        if(state.previewClock>=endT(state.project)) { state.previewClock=endT(state.project); pause(); } syncUI();
+      }
+      draw(); renderWaveform(); state.raf = requestAnimationFrame(tick);
+    }
+
+    function toggleRenderUI(isRendering) {
+        els.exportFormStage.style.display = isRendering ? 'none' : 'block';
+        els.exportProgressStage.style.display = isRendering ? 'block' : 'none';
+        els.exportAlertBox.style.display = 'none';
+    }
+
+    function showExportAlert(msg, type = 'error') {
+        els.exportAlertBox.style.display = 'block';
+        els.exportAlertBox.style.backgroundColor = type === 'error' ? 'rgba(239,68,68,0.1)' : (type === 'warn' ? 'rgba(245,158,11,0.1)' : 'rgba(16,185,129,0.1)');
+        els.exportAlertBox.style.color = type === 'error' ? 'var(--danger)' : (type === 'warn' ? 'var(--warn)' : 'var(--good)');
+        els.exportAlertBox.innerText = msg;
+    }
+
+    els.btnOpenExportModal.onclick = () => {
+        els.exportModal.classList.remove('hidden');
+        toggleRenderUI(false);
+        els.expStart.value = 0; els.expEnd.value = endT(state.project).toFixed(1);
+    };
+
+    els.exportCloseBtn.onclick = () => {
+        if (window._exportState.active) { window._exportState.canceled = true; }
+        els.exportModal.classList.add('hidden');
+        els.miniExportWidget.classList.add('hidden');
+    };
+    
+    els.exportMinimizeBtn.onclick = () => {
+        els.exportModal.classList.add('hidden');
+        if (window._exportState.active) els.miniExportWidget.classList.remove('hidden');
+    };
+    
+    els.miniExportWidget.onclick = () => {
+        els.miniExportWidget.classList.add('hidden');
+        els.exportModal.classList.remove('hidden');
+    };
+
+    els.expSetFullRangeBtn.onclick = () => { els.expStart.value = 0; els.expEnd.value = endT(state.project).toFixed(1); };
+
+    els.expStartBtn.onclick = async () => {
+        if(window._exportState.active) return;
+        
+        const renderMode = els.expRenderMode.value;
+        const isRealtime = renderMode.startsWith('realtime_');
+
+        try {
+            window._exportState = { active: true, paused: false, canceled: false, renderTimer: null, mediaRecorder: null, isRealtime: false, realtimeCanvas: null, realtimeCtx: null };
+            toggleRenderUI(true);
+            
+            els.expTitleIng.innerText = isRealtime ? '🔴 正在执行实时录制与混流' : '🚀 正在执行离线超音速极速渲染';
+            
+            const startSec = Math.max(0, parseFloat(els.expStart.value) || 0);
+            const endSec = Math.max(startSec + 0.1, parseFloat(els.expEnd.value) || 30);
+            const snapP = JSON.parse(JSON.stringify(state.project));
+            
+            let exportW = clampNum(els.expWidth.value, 640, 3840, 1080);
+            let exportH = clampNum(els.expHeight.value, 360, 3840, 1920);
+            exportW = exportW % 2 === 0 ? exportW : exportW - 1;
+            exportH = exportH % 2 === 0 ? exportH : exportH - 1;
+
+            if (isRealtime) {
+                els.expPauseResumeBtn.style.display = 'none'; 
+                els.expCancelBtn.innerText = '⏹ 中止录制';
+                els.expProgressBar.style.width = '0%';
+                
+                pause(); 
+                setT(startSec); 
+                
+                window._exportState.isRealtime = true;
+                const exportCanvas = document.createElement('canvas');
+                exportCanvas.width = exportW;
+                exportCanvas.height = exportH;
+                window._exportState.realtimeCanvas = exportCanvas;
+                window._exportState.realtimeCtx = exportCanvas.getContext('2d');
+                
+                const videoStream = exportCanvas.captureStream(60);
+                const stream = new MediaStream([videoStream.getVideoTracks()[0]]);
+                
+                let hasAudio = false;
+                try {
+                    const el = els.audioEl;
+                    if (el.src) {
+                        el.currentTime = startSec;
+                        let audioStream = null;
+                        if (el.captureStream) audioStream = el.captureStream();
+                        else if (el.mozCaptureStream) audioStream = el.mozCaptureStream();
+                        
+                        if (audioStream && audioStream.getAudioTracks().length > 0) {
+                            stream.addTrack(audioStream.getAudioTracks()[0]);
+                            hasAudio = true;
+                        }
+                    }
+                } catch(e) { console.warn("Audio Capture Warning:", e); }
+                
+                if (!hasAudio) showExportAlert("⚠️ 提示: 未检测到伴奏或已加载的合成轨，本次将导出无声视频。", "warn");
+
+                let mimeType = 'video/mp4';
+                let fileExt = 'mp4';
+                
+                if (!MediaRecorder.isTypeSupported(mimeType)) {
+                    mimeType = 'video/webm; codecs=h264';
+                    fileExt = 'webm';
+                    if (!MediaRecorder.isTypeSupported(mimeType)) {
+                        mimeType = 'video/webm';
+                    }
+                    console.warn(`浏览器不支持原生录制 ${renderMode}，已降级为: ${mimeType}`);
+                }
+
+                const recorder = new MediaRecorder(stream, { 
+                    mimeType: mimeType,
+                    videoBitsPerSecond: 8000000 
+                });
+                
+                const chunks = [];
+                recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+                
+                recorder.onstop = () => {
+                    window._exportState.isRealtime = false;
+                    window._exportState.realtimeCanvas = null;
+                    window._exportState.realtimeCtx = null;
+                    
+                    if (window._exportState.canceled) {
+                        showExportAlert("❌ 录制任务已被您中止。", "error");
+                        return;
+                    }
+                    const blob = new Blob(chunks, { type: mimeType });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a'); a.href = url;
+                    a.download = `${String(snapP.title || 'export').replace(/[^a-z0-9_\-]+/gi, '_')}_高质量实时混流.${fileExt}`; 
+                    a.click(); setTimeout(() => URL.revokeObjectURL(url), 2000);
+                    
+                    showExportAlert(`✅ 录像合流完成！已使用 ${mimeType} 高保真编码，并触发下载。`, 'success');
+                    els.expCancelBtn.innerText = '完成并关闭';
+                    window._exportState.active = false;
+                    els.miniExportWidget.classList.add('hidden');
+                    pause();
+                };
+
+                window._exportState.mediaRecorder = recorder;
+                recorder.start();
+                play(); 
+                
+                window._exportState.renderTimer = setInterval(() => {
+                    if (window._exportState.canceled) {
+                        clearInterval(window._exportState.renderTimer);
+                        if(recorder.state !== 'inactive') recorder.stop();
+                        pause(); return;
+                    }
+                    const current = curT();
+                    const p = (current - startSec) / (endSec - startSec);
+                    
+                    if (current >= endSec || p >= 1.0 || !state.isPlaying) {
+                        clearInterval(window._exportState.renderTimer);
+                        els.expProgressBar.style.width = '100%';
+                        els.expProgressText.innerText = "录制完成，正在打包文件，请稍候...";
+                        els.miniProgressText.innerText = "打包中...";
+                        if(recorder.state !== 'inactive') recorder.stop();
+                        pause();
+                    } else {
+                        els.expProgressBar.style.width = `${p * 100}%`;
+                        const txt = `录制中: ${(current-startSec).toFixed(1)}s / ${(endSec-startSec).toFixed(1)}s`;
+                        els.expProgressText.innerText = txt;
+                        els.miniProgressText.innerText = txt;
+                    }
+                }, 100);
+
+            } else {
+                const isMp4 = renderMode === 'webcodecs_mp4';
+                if (isMp4 && typeof window.Mp4Muxer === 'undefined') throw new Error("MP4 核心库未加载，请刷新页面重试。");
+                if (!isMp4 && typeof window.WebMMuxer === 'undefined') throw new Error("WebM 核心库未加载，请刷新页面重试。");
+
+                const snapS = { ...state.skin }; 
+                
+                els.expProgressBar.style.width = '0%';
+                const initText = `0% ( 0.0s / ${(endSec - startSec).toFixed(1)}s )`;
+                els.expProgressText.innerText = initText;
+                els.miniProgressText.innerText = initText;
+                
+                els.expPauseResumeBtn.style.display = 'inline-flex';
+                els.expPauseResumeBtn.innerText = '⏸ 暂停渲染';
+                els.expCancelBtn.innerText = '⏹ 彻底放弃任务';
+                
+                const canvas = new OffscreenCanvas(exportW, exportH);
+                const ctx = canvas.getContext('2d', { willReadFrequently: true }); 
+                
+                const fps = 60; 
+                const totalFrames = Math.ceil((endSec - startSec) * fps);
+
+                let muxer;
+                if (isMp4) {
+                    muxer = new window.Mp4Muxer.Muxer({
+                        target: new window.Mp4Muxer.ArrayBufferTarget(),
+                        video: { codec: 'avc', width: exportW, height: exportH },
+                        fastStart: 'in-memory'
+                    });
+                } else {
+                    muxer = new window.WebMMuxer.Muxer({
+                        target: new window.WebMMuxer.ArrayBufferTarget(),
+                        video: { codec: 'V_VP9', width: exportW, height: exportH }
+                    });
+                }
+
+                const config = {
+                    codec: isMp4 ? 'avc1.640032' : 'vp09.00.41.08',
+                    width: exportW, height: exportH,
+                    bitrate: 8_000_000,
+                    framerate: fps
+                };
+
+                const support = await VideoEncoder.isConfigSupported(config);
+                if (!support.supported) throw new Error(`当前环境硬件不支持该编码档位: ${config.codec} (${exportW}x${exportH})`);
+
+                const encoder = new VideoEncoder({
+                    output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
+                    error: (e) => { throw e; } 
+                });
+                encoder.configure(config);
+
+                for (let i = 0; i <= totalFrames; i++) {
+                    if (window._exportState.canceled) throw new Error("任务已被您主动终止。");
+                    while (window._exportState.paused && !window._exportState.canceled) { await new Promise(r => setTimeout(r, 100)); }
+
+                    const targetT = startSec + (i / fps);
+                    drawFrame(ctx, exportW, exportH, targetT, snapP, snapS, null);
+
+                    const frame = new VideoFrame(canvas, { timestamp: (i * 1000000) / fps });
+                    encoder.encode(frame);
+                    frame.close();
+
+                    if (i % 5 === 0) {
+                        const p = i / totalFrames;
+                        els.expProgressBar.style.width = `${p * 100}%`;
+                        const progressText = `${Math.round(p * 100)}% ( ${(i/fps).toFixed(1)}s / ${(totalFrames/fps).toFixed(1)}s )`;
+                        els.expProgressText.innerText = progressText;
+                        els.miniProgressText.innerText = progressText;
+                    }
+                    if (i % 10 === 0) await new Promise(r => setTimeout(r, 0));
+                }
+                
+                await encoder.flush();
+                muxer.finalize();
+
+                const blob = new Blob([muxer.target.buffer], { type: isMp4 ? 'video/mp4' : 'video/webm' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a'); a.href = url;
+                const ext = isMp4 ? 'mp4' : 'webm';
+                a.download = `${String(snapP.title || 'export').replace(/[^a-z0-9_\-]+/gi, '_')}_纯视觉无声渲染.${ext}`; 
+                a.click(); setTimeout(() => URL.revokeObjectURL(url), 2000);
+                
+                showExportAlert("✅ WebCodecs 无声视觉序列极速渲染完成，已自动触发下载！", 'success');
+                els.expPauseResumeBtn.style.display = 'none';
+                els.expCancelBtn.innerText = '完成并关闭';
+                window._exportState.active = false;
+                els.miniExportWidget.classList.add('hidden');
+            }
+        
+        } catch(err) {
+            console.error("渲染异常中断: ", err);
+            showExportAlert("渲染中止: " + err.message, 'error');
+            els.expPauseResumeBtn.style.display = 'none';
+            els.expCancelBtn.innerText = '关闭面板';
+            window._exportState.active = false;
+            els.miniExportWidget.classList.add('hidden');
+            if (window._exportState.renderTimer) clearInterval(window._exportState.renderTimer);
+            pause();
+        } 
+    };
+
+    els.expPauseResumeBtn.onclick = () => {
+        window._exportState.paused = !window._exportState.paused;
+        els.expPauseResumeBtn.innerText = window._exportState.paused ? '▶ 继续渲染' : '⏸ 暂停渲染';
+    };
+    
+    els.expCancelBtn.onclick = () => {
+        if (!window._exportState.active) {
+            els.exportModal.classList.add('hidden');
+            return;
+        }
+        if (els.expCancelBtn.innerText.includes('彻底放弃') || els.expCancelBtn.innerText.includes('中止录制')) {
+            els.expCancelBtn.innerText = '⚠️ 再次点击确认终止';
+            setTimeout(() => {
+                if (window._exportState.active && els.expCancelBtn.innerText === '⚠️ 再次点击确认终止') {
+                    els.expCancelBtn.innerText = '⏹ 彻底放弃任务';
+                }
+            }, 3000);
+        } else {
+            window._exportState.canceled = true;
+            window._exportState.isRealtime = false;
+            window._exportState.realtimeCanvas = null;
+            window._exportState.realtimeCtx = null;
+        }
+    };
+
+    if(els.playPauseBtn) els.playPauseBtn.onclick = togglePlay;
+    if(els.stopBtn) els.stopBtn.onclick = () => { pause(); setT(0); };
+    
+    if(els.audioFileInput) els.audioFileInput.onchange = async(e) => {
+      const file = e.target.files?.[0]; if(!file) return; els.audioEl.src = URL.createObjectURL(file);
+      setStatus(els.xmlStatus, `✅ 已加载外部伴奏音频。`, 'good');
+      const ctx = new (window.AudioContext || window.webkitAudioContext)(); 
+      const decodedBuffer = await ctx.decodeAudioData(await file.arrayBuffer());
+      state.audioBuffer = decodedBuffer; 
+      state.waveform = computeWaveform(decodedBuffer, 800); 
+      renderWaveform();
+    };
+    
+    if(els.seekRange) {
+      els.seekRange.onmousedown = () => state.isDraggingSlider = true; els.seekRange.onmouseup = () => state.isDraggingSlider = false;
+      els.seekRange.addEventListener('touchstart', () => state.isDraggingSlider = true, {passive:true}); els.seekRange.addEventListener('touchend', () => state.isDraggingSlider = false, {passive:true});
+      els.seekRange.oninput = () => setT((Number(els.seekRange.value)/1000)*endT(state.project));
+    }
+    
+    if(els.audioEl) { els.audioEl.ontimeupdate = () => { draw(); renderWaveform(); syncUI(); }; els.audioEl.onended = () => { pause(); }; }
+    
+    if(els.waveCanvas) els.waveCanvas.onclick = (e) => { const r=els.waveCanvas.getBoundingClientRect(); setT((e.clientX-r.left)/r.width*endT(state.project)); };
+    if(els.addAnchorFromCurrentBtn) els.addAnchorFromCurrentBtn.onclick = () => { els.anchorTimeInput.value = curT().toFixed(2); els.addAnchorManualBtn.onclick(); };
+    if(els.addAnchorManualBtn) els.addAnchorManualBtn.onclick = () => {
+      const b=Number(els.anchorBeatInput.value), t=Number(els.anchorTimeInput.value); if(!Number.isFinite(b)||!Number.isFinite(t)) return;
+      const idx=state.project.anchors.findIndex(a=>Math.abs(a.beat-b)<0.001); if(idx>=0) state.project.anchors[idx].timeSec=t; else state.project.anchors.push({beat:b,timeSec:t});
+      applyForm();
+    };
+    if(els.clearAnchorsBtn) els.clearAnchorsBtn.onclick = () => { state.project.anchors=[{beat:0,timeSec:state.project.timing.leadInSec}]; applyForm(); };
+
+    if(els.previewCanvas) {
+      els.previewCanvas.addEventListener('click', (e) => {
+        const rect = els.previewCanvas.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const clickY = e.clientY - rect.top;
+        
+        const isHoriz = state.project.display.aspectRatio === '4/3';
+        const LOGIC_W = 720; const LOGIC_H = isHoriz ? 540 : 1280;
+        
+        const scaleX = LOGIC_W / rect.width;
+        const scaleY = LOGIC_H / rect.height;
+        const logX = clickX * scaleX;
+        const logY = clickY * scaleY;
+        
+        const p = state.project;
+        const timeSec = curT();
+        const pps = 180 * (p.display.barScale||1);
+        
+        const m = getLayoutMetrics(LOGIC_W, LOGIC_H, p, state.skin);
+        const { left, lw, pad, blowLip, drawLip } = m;
+        
+        let hitEventId = null;
+        
+        for (let i = p.score.length - 1; i >= 0; i--) {
+            const ev = p.score[i];
+            const s = beatToSec(ev.startBeat, p);
+            const eT = beatToSec(ev.startBeat + ev.durationBeats, p);
+            const evH = Math.max(12, (eT - s) * pps);
+            
+            let top, bot;
+            if (ev.dir === 'blow') {
+                bot = blowLip - (s - timeSec) * pps; 
+                top = bot - evH;
+            } else {
+                top = drawLip + (s - timeSec) * pps; 
+                bot = top + evH;
+            }
+            
+            if (logY >= top && logY <= bot) {
+                for (const hole of ev.holes) {
+                    const nx = left + (hole - 1) * (lw + pad) + lw * 0.06;
+                    const nw = lw * 0.88;
+                    if (logX >= nx && logX <= nx + nw) {
+                        hitEventId = ev.id;
+                        break;
+                    }
+                }
+            }
+            if (hitEventId) break;
+        }
+
+        if (hitEventId) {
+            if (state.selectedEventId !== hitEventId) {
+                state.selectedEventId = hitEventId;
+                const ev = p.score.find(e => e.id === hitEventId);
+                if (els.anchorBeatInput) els.anchorBeatInput.value = ev.startBeat.toFixed(2);
+                setT(beatToSec(ev.startBeat, state.project));
+                renderEventList();
+                draw();
+                setTimeout(() => {
+                    const row = document.getElementById('event-row-' + hitEventId);
+                    if (row) row.scrollIntoView({behavior: 'smooth', block: 'center'});
+                }, 50);
+            } else {
+                state.selectedEventId = null;
+                renderEventList();
+                draw();
+            }
+        }
+      });
+    }
+
+    window.addEventListener('resize', () => { state.staticCached = false; draw(); renderWaveform(); });
+
+    function init() { 
+      const cached = loadFromLocal();
+      if (cached && cached.project) { 
+          state.project = normalizeProject(cached.project); 
+          state.rawXmlNotes = cached.rawXmlNotes || null;
+          state.correctedNotes = cached.correctedNotes || null;
+          
+          if(cached.skin) {
+              state.skin.theme = cached.skin.theme || 'candy';
+              state.skin.bgBlur = cached.skin.bgBlur || 0;
+              state.skin.maskColor = cached.skin.maskColor || 'black';
+              state.skin.maskOpacity = cached.skin.maskOpacity || 0;
+              if(cached.skin.customOpts) state.skin.customOpts = {...state.skin.customOpts, ...cached.skin.customOpts};
+              
+              if(cached.skin.bgImageData) {
+                  state.skin.bgImageData = cached.skin.bgImageData;
+                  const img = new Image();
+                  img.onload = () => { state.skin.bgImageObj = img; state.staticCached = false; draw(); };
+                  img.src = state.skin.bgImageData;
+              }
+              if(cached.skin.customOpts && cached.skin.customOpts.harpImageData) {
+                  const img = new Image();
+                  img.onload = () => { state.skin.customOpts.harpImageObj = img; state.staticCached = false; draw(); };
+                  img.src = cached.skin.customOpts.harpImageData;
+              }
+          }
+          setStatus(document.getElementById('xmlStatus'), '✅ 已自动恢复上次的本地缓存工程（包含乐谱和设置）。'); 
+      } else { 
+          state.project = normalizeProject(makeEmptyProject()); 
+      }
+      
+      syncThemeToLegend(); populateForm(); if(!state.raf) state.raf = requestAnimationFrame(tick); 
+
+      function setupSpinner(inputId, decId, incId, step) {
+          const input = document.getElementById(inputId);
+          const dec = document.getElementById(decId);
+          const inc = document.getElementById(incId);
+          if(!input || !dec || !inc) return;
+          const trigger = () => { input.dispatchEvent(new Event('input')); };
+          dec.onclick = () => { input.value = Number(input.value) - step; trigger(); };
+          inc.onclick = () => { input.value = Number(input.value) + step; trigger(); };
+      }
+      setupSpinner('laneWidthScaleInput', 'cwDec', 'cwInc', 0.001); 
+      setupSpinner('blockDutyCycleInput', 'cdDec', 'cdInc', 0.01);
+      setupSpinner('hitPosBlowInput', 'cbDec', 'cbInc', 1);
+      setupSpinner('hitPosDrawInput', 'cdrawDec', 'cdrawInc', 1);
+      setupSpinner('lanePanOffsetInput', 'cpanDec', 'cpanInc', 1);
+    }
+    init();
+  </script>
+</body>
+</html>
