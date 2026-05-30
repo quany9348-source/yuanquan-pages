@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>万能查表工具</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        .hidden-admin-trigger { cursor: default; user-select: none; }
+        .search-highlight { background-color: rgba(59, 130, 246, 0.2); font-weight: bold; border-radius: 2px; padding: 0 2px;}
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f8fafc; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.2s ease-out forwards; }
+        @keyframes modalShow { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+        .animate-modal { animation: modalShow 0.2s ease-out forwards; }
+        
+        /* 列宽拖拽指示器的高亮状态 */
+        .resizer.resizing {
+            opacity: 1 !important;
+            background-color: #3b82f6 !important; /* Tailwind blue-500 */
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans text-slate-900">
+
+    <div id="app" class="max-w-7xl mx-auto px-4 py-8">
+        <!-- 头部区域 -->
+        <header class="flex justify-between items-center mb-8 border-b border-slate-200 pb-6">
+            <div>
+                <h1 id="main-title" class="text-3xl font-bold text-slate-800 tracking-tight">万能查表工具</h1>
+                <p class="text-slate-500 mt-1">本地化数据存储 · 支持列宽拖拽调节</p>
+            </div>
+            <!-- 隐蔽的管理员入口：双击版本号 -->
+            <div id="admin-trigger" class="hidden-admin-trigger opacity-10 hover:opacity-100 transition-opacity text-xs text-slate-400">
+                Ver 4.6.0
+            </div>
+        </header>
+
+        <!-- 管理员口令校验弹窗 -->
+        <section id="auth-panel" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+            <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-sm animate-fade-in">
+                <h3 class="text-lg font-bold text-slate-800 mb-4 text-center">管理权限校验</h3>
+                <div class="space-y-4">
+                    <input type="password" id="admin-password-input" placeholder="请输入管理口令" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-center tracking-widest text-xl">
+                    <div class="flex gap-2">
+                        <button id="cancel-auth" class="flex-1 px-4 py-2 text-slate-500 hover:bg-slate-100 rounded-lg transition">返回</button>
+                        <button id="confirm-auth" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-bold shadow-lg shadow-blue-100">解锁</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 管理员面板 -->
+        <section id="admin-panel" class="hidden mb-8 bg-white p-6 rounded-2xl shadow-xl border border-blue-100 animate-fade-in">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-blue-800 flex items-center">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    数据管理控制台
+                </h2>
+                <button id="close-admin" class="px-4 py-1.5 text-sm font-medium bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 transition">收起后台</button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+                <!-- 导入区 -->
+                <div class="flex flex-col gap-3">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest shrink-0">导入新数据</h3>
+                    <div class="p-4 bg-blue-50/50 rounded-xl border border-blue-100 flex flex-col gap-4 flex-1">
+                        <label class="block shrink-0">
+                            <span class="text-sm font-medium text-slate-600 mb-1 block">选择 Excel/CSV</span>
+                            <input type="file" id="file-input" accept=".xlsx, .xls, .csv" class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer">
+                        </label>
+                        <div class="flex flex-col gap-2 mt-auto">
+                            <input type="text" id="table-name" placeholder="数据集命名" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                            <button id="import-btn" class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold hover:bg-blue-700 transition shrink-0">加载并存至本地</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 已存版本管理 -->
+                <div class="flex flex-col gap-3">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest shrink-0">已存版本</h3>
+                    <div class="bg-white border border-slate-200 rounded-xl overflow-hidden flex flex-col flex-1">
+                        <ul id="table-list" class="divide-y divide-slate-100 overflow-y-auto flex-1 max-h-[160px]">
+                            <!-- 动态加载列表 -->
+                        </ul>
+                        <button id="clear-all-btn" class="w-full py-2 text-xs text-red-500 hover:bg-red-50 border-t border-slate-100 transition shrink-0 mt-auto">清空全部本地数据</button>
+                    </div>
+                </div>
+
+                <!-- 安全设置 -->
+                <div class="flex flex-col gap-3">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest shrink-0">安全设置</h3>
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col gap-4 flex-1">
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-slate-600">自定义管理口令</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="new-password-input" placeholder="输入新口令" class="flex-1 px-3 py-2 text-sm border border-slate-200 rounded-lg outline-none">
+                                <button id="change-pwd-btn" class="bg-slate-800 text-white px-3 py-2 rounded-lg text-sm hover:bg-slate-900 shrink-0">修改</button>
+                            </div>
+                            <p class="text-[10px] text-slate-400">修改后的口令将立即保存于本地浏览器。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 查询交互区域 -->
+        <main class="space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 grid grid-cols-1 md:grid-cols-12 gap-4">
+                <div class="md:col-span-3">
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">选择数据集</label>
+                    <select id="db-selector" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer appearance-none"></select>
+                </div>
+
+                <div class="md:col-span-3">
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">查询维度</label>
+                    <select id="column-selector" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer appearance-none">
+                        <option value="all">全部属性 (全局模糊)</option>
+                    </select>
+                </div>
+
+                <div class="md:col-span-6">
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">搜索关键词</label>
+                    <div class="relative">
+                        <input type="text" id="search-input" placeholder="请输入内容进行全局匹配..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium">
+                        <button id="search-btn" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-blue-600 hover:bg-blue-50 rounded-lg">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 结果展示 (主视图) -->
+            <div id="results-container" class="hidden animate-fade-in space-y-4">
+                <div class="flex justify-between items-center bg-white px-4 py-3 rounded-xl border border-slate-200">
+                    <h3 class="font-bold text-slate-700 flex items-center">
+                        查询结果 
+                        <span id="result-count" class="ml-2 bg-blue-100 text-blue-600 text-xs px-2 py-1 rounded-full">0</span>
+                    </h3>
+                    <div class="text-xs text-slate-400">列表中仅显示前 5 个属性，点击第一列内容可查看详情，点击表头边缘可调整列宽</div>
+                </div>
+                
+                <div class="overflow-x-auto bg-white rounded-2xl shadow-sm border border-slate-200">
+                    <table id="data-table" class="text-left border-collapse min-w-full table-fixed">
+                        <thead id="table-head" class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 font-bold uppercase tracking-wider"></thead>
+                        <tbody id="table-body" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+
+                <!-- 分页控制面板 -->
+                <div id="pagination-controls" class="hidden flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="text-sm text-slate-600">
+                        共 <span id="page-total-items" class="font-bold text-blue-600">0</span> 条结果，
+                        当前 <span id="page-current" class="font-bold text-slate-800">1</span> / <span id="page-total-pages" class="font-bold text-slate-800">1</span> 页
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="prev-page-btn" class="px-4 py-2 bg-white border border-slate-200 text-slate-600 font-medium rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:bg-slate-50 disabled:cursor-not-allowed transition shadow-sm text-sm">
+                            上一页
+                        </button>
+                        <button id="next-page-btn" class="px-4 py-2 bg-white border border-slate-200 text-slate-600 font-medium rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:bg-slate-50 disabled:cursor-not-allowed transition shadow-sm text-sm">
+                            下一页
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 空状态 -->
+            <div id="empty-state" class="py-32 text-center flex flex-col items-center">
+                <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center text-slate-200 mb-6">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                </div>
+                <h4 class="text-slate-400 font-medium">准备就绪</h4>
+                <p class="text-slate-300 text-sm mt-1">请上方输入关键词进行检索</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- 对象详情弹窗 -->
+    <div id="detail-modal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[70] flex items-center justify-center p-4 md:p-8">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col animate-modal">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 rounded-t-2xl shrink-0">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+                    完整属性档案
+                </h3>
+                <button onclick="closeDetailModal()" class="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1">
+                <div id="detail-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+                    <!-- 动态注入完整属性对 -->
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 rounded-b-2xl shrink-0 flex justify-end">
+                <button onclick="closeDetailModal()" class="px-6 py-2 bg-white border border-slate-200 text-slate-600 font-medium rounded-lg hover:bg-slate-50 transition shadow-sm">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 弹窗通知 -->
+    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 transform scale-0 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl transition-all duration-300 z-[100]">
+        <span id="toast-msg"></span>
+    </div>
+
+    <script>
+        const STORAGE_KEYS = { TABLES: 'LOCAL_DATA_STORE', CONFIG: 'LOCAL_CONFIG_STORE' };
+        
+        let state = { 
+            tables: {}, 
+            config: { adminPassword: "9348" }, 
+            isAdminAuthenticated: false,
+            currentFilteredData: [], 
+            currentSearchQuery: "",  
+            currentPage: 1,          
+            pageSize: 20             
+        };
+
+        const dom = {
+            adminTrigger: document.getElementById('admin-trigger'),
+            authPanel: document.getElementById('auth-panel'),
+            adminPasswordInput: document.getElementById('admin-password-input'),
+            confirmAuth: document.getElementById('confirm-auth'),
+            cancelAuth: document.getElementById('cancel-auth'),
+            adminPanel: document.getElementById('admin-panel'),
+            closeAdmin: document.getElementById('close-admin'),
+            fileInput: document.getElementById('file-input'),
+            tableName: document.getElementById('table-name'),
+            importBtn: document.getElementById('import-btn'),
+            tableList: document.getElementById('table-list'),
+            dbSelector: document.getElementById('db-selector'),
+            columnSelector: document.getElementById('column-selector'),
+            searchInput: document.getElementById('search-input'),
+            searchBtn: document.getElementById('search-btn'),
+            resultsContainer: document.getElementById('results-container'),
+            emptyState: document.getElementById('empty-state'),
+            tableHead: document.getElementById('table-head'),
+            tableBody: document.getElementById('table-body'),
+            resultCount: document.getElementById('result-count'),
+            detailModal: document.getElementById('detail-modal'),
+            detailGrid: document.getElementById('detail-grid'),
+            toast: document.getElementById('toast'),
+            toastMsg: document.getElementById('toast-msg'),
+            newPasswordInput: document.getElementById('new-password-input'),
+            changePwdBtn: document.getElementById('change-pwd-btn'),
+            clearAllBtn: document.getElementById('clear-all-btn'),
+            paginationControls: document.getElementById('pagination-controls'),
+            pageTotalItems: document.getElementById('page-total-items'),
+            pageCurrent: document.getElementById('page-current'),
+            pageTotalPages: document.getElementById('page-total-pages'),
+            prevPageBtn: document.getElementById('prev-page-btn'),
+            nextPageBtn: document.getElementById('next-page-btn')
+        };
+
+        function showToast(msg) {
+            dom.toastMsg.innerText = msg;
+            dom.toast.classList.replace('scale-0', 'scale-100');
+            setTimeout(() => dom.toast.classList.replace('scale-100', 'scale-0'), 3000);
+        }
+
+        function saveToLocal() {
+            localStorage.setItem(STORAGE_KEYS.TABLES, JSON.stringify(state.tables));
+            localStorage.setItem(STORAGE_KEYS.CONFIG, JSON.stringify(state.config));
+        }
+
+        function loadFromLocal() {
+            const t = localStorage.getItem(STORAGE_KEYS.TABLES);
+            const c = localStorage.getItem(STORAGE_KEYS.CONFIG);
+            if (c) state.config = JSON.parse(c);
+            if (t) state.tables = JSON.parse(t);
+            else loadExampleData(); 
+            
+            updateAdminTableList();
+            updateUserSelectors();
+        }
+
+        function loadExampleData() {
+            const exampleHeaders = ["工号", "姓名", "性别", "部门", "岗位", "职级", "直接主管", "入职日期", "办公地点", "分机号", "系统账号", "在职状态"];
+            const exampleRows = [
+                {"工号": "RD001", "姓名": "张三", "性别": "男", "部门": "核心研发部", "岗位": "后端架构师", "职级": "P7", "直接主管": "李雷", "入职日期": "2020-05-20", "办公地点": "上海总部-A栋3层", "分机号": "8001", "系统账号": "zhangsan_dev", "在职状态": "正式在职"},
+                {"工号": "MK002", "姓名": "李四", "性别": "女", "部门": "大中华区市场部", "岗位": "市场总监", "职级": "M3", "直接主管": "韩梅梅", "入职日期": "2021-03-15", "办公地点": "北京分部-国贸大厦", "分机号": "8002", "系统账号": "lisi_mkt", "在职状态": "正式在职"},
+                {"工号": "HR003", "姓名": "王五", "性别": "男", "部门": "集团人力资源中心", "岗位": "招聘专家", "职级": "P6", "直接主管": "Lucy", "入职日期": "2019-11-01", "办公地点": "广州分部-天河智谷", "分机号": "8005", "系统账号": "wangwu_hr", "在职状态": "正式在职"},
+                {"工号": "AD004", "姓名": "赵六", "性别": "女", "部门": "行政支持部", "岗位": "行政专员", "职级": "P4", "直接主管": "Tom", "入职日期": "2022-01-10", "办公地点": "深圳分部-南山科技园", "分机号": "8008", "系统账号": "zhaoliu_ad", "在职状态": "试用期"}
+            ];
+            let expandedRows = [];
+            for(let i=0; i<8; i++) {
+                expandedRows = expandedRows.concat(exampleRows.map(r => ({...r, "工号": r["工号"] + "-" + i})));
+            }
+            state.tables["示例：员工全息档案(宽表)"] = { headers: exampleHeaders, rows: expandedRows };
+            saveToLocal();
+        }
+
+        dom.adminTrigger.ondblclick = () => {
+            if (state.isAdminAuthenticated) dom.adminPanel.classList.toggle('hidden');
+            else dom.authPanel.classList.remove('hidden'), dom.adminPasswordInput.focus();
+        };
+        dom.cancelAuth.onclick = () => { dom.authPanel.classList.add('hidden'); dom.adminPasswordInput.value = ""; };
+        function verifyAuth() {
+            if (dom.adminPasswordInput.value === state.config.adminPassword) {
+                state.isAdminAuthenticated = true;
+                dom.authPanel.classList.add('hidden');
+                dom.adminPanel.classList.remove('hidden');
+                showToast("验证成功");
+            } else showToast("口令错误");
+            dom.adminPasswordInput.value = "";
+        }
+        dom.confirmAuth.onclick = verifyAuth;
+        dom.adminPasswordInput.onkeyup = (e) => e.key === 'Enter' && verifyAuth();
+        dom.changePwdBtn.onclick = () => {
+            const p = dom.newPasswordInput.value.trim();
+            if (p) { state.config.adminPassword = p; saveToLocal(); showToast("口令更新完毕"); dom.newPasswordInput.value = ""; }
+        };
+        dom.closeAdmin.onclick = () => dom.adminPanel.classList.add('hidden');
+
+        dom.importBtn.onclick = async () => {
+            const file = dom.fileInput.files[0];
+            let name = dom.tableName.value.trim() || (file ? file.name.split('.')[0] : null);
+            if (!file || !name) return showToast("请完整填写表单");
+            const reader = new FileReader();
+            const ext = file.name.split('.').pop().toLowerCase();
+            reader.onload = (e) => {
+                try {
+                    const wb = ext === 'csv' 
+                        ? XLSX.read(new TextDecoder('utf-8').decode(e.target.result), {type:'string'}) 
+                        : XLSX.read(e.target.result, {type: ext==='csv'?'string':'binary'});
+                    const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header: 1});
+                    const headers = json[0].filter(h => h!=null).map(String);
+                    const rows = json.slice(1).map(r => {
+                        const o = {}; headers.forEach((h,i) => o[h] = r[i]==null ? "" : String(r[i])); return o;
+                    });
+                    state.tables[name] = { headers, rows };
+                    saveToLocal(); updateAdminTableList(); updateUserSelectors();
+                    showToast(`加载完成: ${name}`);
+                    dom.fileInput.value = ""; dom.tableName.value = "";
+                } catch(err) { showToast("解析异常"); }
+            };
+            if(ext==='csv') reader.readAsArrayBuffer(file); else reader.readAsBinaryString(file);
+        };
+
+        function updateAdminTableList() {
+            dom.tableList.innerHTML = Object.keys(state.tables).map(k => `
+                <li class="flex justify-between items-center p-3 hover:bg-slate-50 group transition shrink-0">
+                    <div class="text-xs">
+                        <p class="font-bold text-slate-700">${k}</p>
+                        <p class="text-slate-400">包含 ${state.tables[k].headers.length} 个字段 · ${state.tables[k].rows.length} 条记录</p>
+                    </div>
+                    <button onclick="deleteTable('${k}')" class="text-xs font-bold text-red-400 opacity-0 group-hover:opacity-100">删除</button>
+                </li>
+            `).join('') || '<li class="p-4 text-center text-slate-400 text-xs italic">空</li>';
+        }
+
+        window.deleteTable = (n) => {
+            if(confirm(`删除 "${n}" 吗?`)){ delete state.tables[n]; saveToLocal(); updateAdminTableList(); updateUserSelectors(); }
+        };
+
+        dom.clearAllBtn.onclick = () => {
+            if(confirm("将永久抹除数据，确定吗？")){ state.tables = {}; saveToLocal(); updateAdminTableList(); updateUserSelectors(); }
+        };
+
+        function updateUserSelectors() {
+            const cur = dom.dbSelector.value;
+            const keys = Object.keys(state.tables);
+            dom.dbSelector.innerHTML = '<option value="">-- 请选择数据源 --</option>' + keys.map(k => `<option value="${k}" ${k===cur?'selected':''}>${k}</option>`).join('');
+            if (keys.length === 1 && !cur) dom.dbSelector.value = keys[0];
+            handleDbChange();
+        }
+
+        function handleDbChange() {
+            const n = dom.dbSelector.value;
+            dom.columnSelector.innerHTML = '<option value="all">任意属性 (全局模糊)</option>' + 
+                (state.tables[n] ? state.tables[n].headers.map(h => `<option value="${h}">${h}</option>`).join('') : '');
+        }
+        dom.dbSelector.onchange = handleDbChange;
+
+        dom.searchBtn.onclick = () => {
+            const db = dom.dbSelector.value;
+            const col = dom.columnSelector.value;
+            const q = dom.searchInput.value.trim().toLowerCase();
+            
+            if(!db) return showToast("请选择数据源");
+            if(!q) return dom.resultsContainer.classList.add('hidden'), dom.emptyState.classList.remove('hidden');
+
+            const data = state.tables[db];
+            
+            const filtered = data.rows.filter(r => 
+                col === 'all' 
+                ? Object.values(r).some(v => v.toLowerCase().includes(q)) 
+                : r[col].toLowerCase().includes(q)
+            );
+            
+            state.currentFilteredData = filtered;
+            state.currentSearchQuery = q;
+            state.currentPage = 1; 
+            
+            dom.emptyState.classList.add('hidden');
+            dom.resultsContainer.classList.remove('hidden');
+            dom.resultCount.innerText = filtered.length;
+            
+            renderTablePage();
+        };
+
+        dom.searchInput.onkeyup = (e) => e.key === 'Enter' && dom.searchBtn.onclick();
+
+        /**
+         * 表头拖拽调节列宽逻辑
+         */
+        function initResizers() {
+            const table = document.getElementById('data-table');
+            const ths = dom.tableHead.querySelectorAll('th');
+            
+            ths.forEach(th => {
+                const resizer = th.querySelector('.resizer');
+                if (!resizer) return;
+
+                let startX, startWidth, tableStartWidth;
+
+                const mouseDownHandler = function(e) {
+                    startX = e.pageX;
+                    startWidth = th.offsetWidth;
+                    tableStartWidth = table.offsetWidth;
+                    
+                    ths.forEach(t => {
+                        if(!t.style.width) {
+                            t.style.width = t.offsetWidth + 'px';
+                        }
+                    });
+                    
+                    table.classList.remove('min-w-full', 'w-full');
+                    table.style.width = tableStartWidth + 'px';
+
+                    resizer.classList.add('resizing');
+                    document.body.style.cursor = 'col-resize';
+                    document.body.style.userSelect = 'none';
+
+                    document.addEventListener('mousemove', mouseMoveHandler);
+                    document.addEventListener('mouseup', mouseUpHandler);
+                };
+
+                const mouseMoveHandler = function(e) {
+                    const diff = e.pageX - startX;
+                    const newWidth = Math.max(60, startWidth + diff); 
+                    const actualDiff = newWidth - startWidth;
+                    
+                    th.style.width = `${newWidth}px`;
+                    table.style.width = `${tableStartWidth + actualDiff}px`;
+                };
+
+                const mouseUpHandler = function() {
+                    resizer.classList.remove('resizing');
+                    document.body.style.cursor = 'default';
+                    document.body.style.userSelect = 'auto';
+                    document.removeEventListener('mousemove', mouseMoveHandler);
+                    document.removeEventListener('mouseup', mouseUpHandler);
+                };
+
+                resizer.addEventListener('mousedown', mouseDownHandler);
+            });
+        }
+
+        function renderTablePage() {
+            const db = dom.dbSelector.value;
+            const data = state.currentFilteredData;
+            const q = state.currentSearchQuery;
+            
+            const totalItems = data.length;
+            const totalPages = Math.ceil(totalItems / state.pageSize) || 1;
+            
+            dom.paginationControls.classList.toggle('hidden', totalItems === 0);
+            dom.pageTotalItems.innerText = totalItems;
+            dom.pageCurrent.innerText = state.currentPage;
+            dom.pageTotalPages.innerText = totalPages;
+            
+            dom.prevPageBtn.disabled = state.currentPage === 1;
+            dom.nextPageBtn.disabled = state.currentPage === totalPages;
+
+            if (totalItems === 0) {
+                dom.tableHead.innerHTML = '';
+                dom.tableBody.innerHTML = `<tr><td class="px-6 py-12 text-center text-slate-400 italic">未能检索到相关数据</td></tr>`;
+                return;
+            }
+
+            const startIndex = (state.currentPage - 1) * state.pageSize;
+            const endIndex = startIndex + state.pageSize;
+            const pageData = data.slice(startIndex, endIndex);
+
+            const summaryHeaders = state.tables[db].headers.slice(0, 5);
+            
+            const table = document.getElementById('data-table');
+            table.classList.add('min-w-full');
+            table.style.width = '';
+
+            // 渲染表头 (移除了独立的操作列)
+            dom.tableHead.innerHTML = `<tr>
+                ${summaryHeaders.map(h => `
+                <th class="px-4 py-4 text-left relative group select-none align-middle" style="width: 150px;" title="${h}">
+                    <div class="truncate pr-3">${h}</div>
+                    <div class="resizer absolute right-0 top-0 bottom-0 w-[6px] cursor-col-resize hover:bg-blue-400 opacity-0 group-hover:opacity-100 transition-opacity z-10" title="拖动调整列宽"></div>
+                </th>`).join('')}
+            </tr>`;
+            
+            // 渲染表体
+            dom.tableBody.innerHTML = pageData.map((r, rowIndex) => {
+                const absoluteIndex = startIndex + rowIndex; 
+                return `
+                <tr class="hover:bg-blue-50/30 transition-colors border-l-4 border-transparent hover:border-blue-500">
+                    ${summaryHeaders.map((h, colIndex) => {
+                        const text = r[h] || "-";
+                        let display = text;
+                        if (q && text.toLowerCase().includes(q)) {
+                            display = text.replace(new RegExp(`(${q})`, 'gi'), '<span class="search-highlight">$1</span>');
+                        }
+                        
+                        // 将第一列渲染为可点击的链接样式，触发详情弹窗
+                        if (colIndex === 0) {
+                            return `<td class="px-4 py-3 text-sm truncate" title="${text} (点击查看详情)">
+                                        <span onclick="openDetailModal(${absoluteIndex}, '${db}')" class="text-blue-600 font-bold hover:text-blue-800 hover:underline cursor-pointer transition-colors block w-full truncate">${display}</span>
+                                    </td>`;
+                        } else {
+                            return `<td class="px-4 py-3 text-sm text-slate-700 truncate" title="${text}">${display}</td>`;
+                        }
+                    }).join('')}
+                </tr>
+            `}).join('');
+
+            initResizers();
+        }
+
+        dom.prevPageBtn.onclick = () => {
+            if (state.currentPage > 1) {
+                state.currentPage--;
+                renderTablePage();
+            }
+        };
+
+        dom.nextPageBtn.onclick = () => {
+            const totalPages = Math.ceil(state.currentFilteredData.length / state.pageSize);
+            if (state.currentPage < totalPages) {
+                state.currentPage++;
+                renderTablePage();
+            }
+        };
+
+        window.openDetailModal = (rowIndex, dbName) => {
+            const rowData = state.currentFilteredData[rowIndex];
+            const allHeaders = state.tables[dbName].headers;
+            const q = state.currentSearchQuery;
+
+            dom.detailGrid.innerHTML = allHeaders.map(h => {
+                const val = rowData[h] || '<span class="text-slate-300 italic">空</span>';
+                let displayVal = val;
+                if (val !== '<span class="text-slate-300 italic">空</span>' && q && val.toLowerCase().includes(q)) {
+                    displayVal = val.replace(new RegExp(`(${q})`, 'gi'), '<span class="search-highlight">$1</span>');
+                }
+                return `
+                    <div class="bg-white border border-slate-100 p-4 rounded-xl hover:shadow-md hover:border-blue-200 transition-all">
+                        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">${h}</div>
+                        <div class="text-sm font-medium text-slate-800 break-words">${displayVal}</div>
+                    </div>
+                `;
+            }).join('');
+
+            dom.detailModal.classList.remove('hidden');
+        };
+
+        window.closeDetailModal = () => { dom.detailModal.classList.add('hidden'); };
+        dom.detailModal.addEventListener('click', (e) => { if(e.target === dom.detailModal) closeDetailModal(); });
+        window.onload = loadFromLocal;
+    </script>
+</body>
+</html>
