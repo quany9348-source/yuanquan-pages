@@ -440,9 +440,9 @@
             clearTimeout(longPressTimer);
         });
 
-        // 键盘快捷键: Alt+P
+        // 键盘快捷键: Ctrl+Shift+P (Mac 友好)
         document.addEventListener('keydown', (e) => {
-            if (e.altKey && e.key === 'p') {
+            if (e.ctrlKey && e.shiftKey && e.key === 'P') {
                 e.preventDefault();
                 flashDot();
                 togglePersonal();
