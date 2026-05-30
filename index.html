@@ -13,6 +13,7 @@
             --text-dim: #5c6068;
             --accent-work: #e8b86d;
             --accent-personal: #6db3a5;
+            --accent-tools: #8ba3d6;
             --radius: 6px;
             --transition: 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
         }
@@ -159,6 +160,7 @@
 
         .category-dot.work { background: var(--accent-work); }
         .category-dot.personal { background: var(--accent-personal); }
+        .category-dot.tools { background: var(--accent-tools); }
 
         .category-name {
             font-size: 0.95rem;
@@ -317,6 +319,25 @@
             </div>
         </section>
 
+        <!-- 工具 -->
+        <section class="category" data-category="tools">
+            <div class="category-header" tabindex="0" role="button" aria-expanded="false"
+                 onclick="toggleCategory(this.parentElement)">
+                <span class="category-dot tools"></span>
+                <span class="category-name">工具</span>
+                <span class="category-count" id="count-tools">1</span>
+                <svg class="category-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </div>
+            <div class="category-body">
+                <ul class="project-list" id="list-tools">
+                    <li><a href="excel-compare/"><span class="icon">📊</span><span class="name">Excel 结构化差异比对工具</span><span class="desc">Excel/CSV 文件的结构化差异比对与可视化</span><span class="arrow">→</span></a></li>
+                </ul>
+                <div class="empty-hint" id="empty-tools" style="display:none">暂无项目</div>
+            </div>
+        </section>
+
         <!-- 个人（隐藏入口） -->
         <section class="category secret-category" data-category="personal" id="personalSection">
             <div class="category-header" tabindex="0" role="button" aria-expanded="false"
@@ -350,7 +371,7 @@
 
         // 更新项目计数和空状态
         function refreshCounts() {
-            ['work', 'personal'].forEach(cat => {
+            ['work', 'tools', 'personal'].forEach(cat => {
                 const list = document.getElementById('list-' + cat);
                 const count = document.getElementById('count-' + cat);
                 const empty = document.getElementById('empty-' + cat);
