@@ -2477,7 +2477,8 @@
                 }, 100);
 
             } else {
-                const isMp4 = renderMode === 'webcodecs_mp4';
+                // 修改点 1：包容匹配 mp4，因为下拉框的 value 是 webcodecs_mp4_audio
+                const isMp4 = renderMode.includes('mp4');
                 if (isMp4 && typeof window.Mp4Muxer === 'undefined') throw new Error("MP4 核心库未加载，请刷新页面重试。");
                 if (!isMp4 && typeof window.WebMMuxer === 'undefined') throw new Error("WebM 核心库未加载，请刷新页面重试。");
 
@@ -2498,19 +2499,41 @@
                 const fps = 60; 
                 const totalFrames = Math.ceil((endSec - startSec) * fps);
 
+                // --- 修改点 2：建立音频轨上下文及编码器 ---
+                const hasAudio = !!state.audioBuffer;
+                const audioSampleRate = hasAudio ? state.audioBuffer.sampleRate : 44100;
+                const audioChannels = hasAudio ? state.audioBuffer.numberOfChannels : 2;
+
                 let muxer;
                 if (isMp4) {
                     muxer = new window.Mp4Muxer.Muxer({
                         target: new window.Mp4Muxer.ArrayBufferTarget(),
                         video: { codec: 'avc', width: exportW, height: exportH },
+                        audio: hasAudio ? { codec: 'aac', sampleRate: audioSampleRate, numberOfChannels: audioChannels } : undefined,
                         fastStart: 'in-memory'
                     });
                 } else {
                     muxer = new window.WebMMuxer.Muxer({
                         target: new window.WebMMuxer.ArrayBufferTarget(),
-                        video: { codec: 'V_VP9', width: exportW, height: exportH }
+                        video: { codec: 'V_VP9', width: exportW, height: exportH },
+                        audio: hasAudio ? { codec: 'A_OPUS', sampleRate: audioSampleRate, numberOfChannels: audioChannels } : undefined
                     });
                 }
+
+                let audioEncoder = null;
+                if (hasAudio) {
+                    audioEncoder = new AudioEncoder({
+                        output: (chunk, meta) => muxer.addAudioChunk(chunk, meta),
+                        error: (e) => { console.error("Audio encoder error:", e); throw e; }
+                    });
+                    audioEncoder.configure({
+                        codec: isMp4 ? 'mp4a.40.2' : 'opus', // MP4 走 AAC 格式
+                        sampleRate: audioSampleRate,
+                        numberOfChannels: audioChannels,
+                        bitrate: 128000 // 128 kbps
+                    });
+                }
+                // ------------------------------------
 
                 const config = {
                     codec: isMp4 ? 'avc1.640032' : 'vp09.00.41.08',
@@ -2534,10 +2557,39 @@
 
                     const targetT = startSec + (i / fps);
                     drawFrame(ctx, exportW, exportH, targetT, snapP, snapS, null);
+                    
+                    const timestampUs = (i * 1000000) / fps;
 
-                    const frame = new VideoFrame(canvas, { timestamp: (i * 1000000) / fps });
+                    const frame = new VideoFrame(canvas, { timestamp: timestampUs });
                     encoder.encode(frame);
                     frame.close();
+
+                    // --- 修改点 3：逐帧抽取离线波形压入音频编码器（纯离线，不播放）---
+                    if (hasAudio) {
+                        const frameDurationSec = 1 / fps;
+                        const startAudioFrame = Math.floor(targetT * audioSampleRate);
+                        const endAudioFrame = Math.min(Math.floor((targetT + frameDurationSec) * audioSampleRate), state.audioBuffer.length);
+                        const framesToEncode = endAudioFrame - startAudioFrame;
+                        
+                        if (framesToEncode > 0) {
+                            const planarData = new Float32Array(framesToEncode * audioChannels);
+                            for (let c = 0; c < audioChannels; c++) {
+                                // 提取 planar 格式 (先排满第一声道，再排第二声道)
+                                planarData.set(state.audioBuffer.getChannelData(c).subarray(startAudioFrame, endAudioFrame), c * framesToEncode);
+                            }
+                            const audioData = new AudioData({
+                                format: 'f32-planar',
+                                sampleRate: audioSampleRate,
+                                numberOfFrames: framesToEncode,
+                                numberOfChannels: audioChannels,
+                                timestamp: timestampUs,
+                                data: planarData
+                            });
+                            audioEncoder.encode(audioData);
+                            audioData.close();
+                        }
+                    }
+                    // ----------------------------------------------------
 
                     if (i % 5 === 0) {
                         const p = i / totalFrames;
@@ -2546,20 +2598,24 @@
                         els.expProgressText.innerText = progressText;
                         els.miniProgressText.innerText = progressText;
                     }
-                    if (i % 10 === 0) await new Promise(r => setTimeout(r, 0));
+                    if (i % 10 === 0) await new Promise(r => setTimeout(r, 0)); // 释放主线程防止完全阻塞
                 }
                 
                 await encoder.flush();
+                // 修改点 4：清空音频编码管线
+                if (audioEncoder) await audioEncoder.flush();
                 muxer.finalize();
 
                 const blob = new Blob([muxer.target.buffer], { type: isMp4 ? 'video/mp4' : 'video/webm' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a'); a.href = url;
                 const ext = isMp4 ? 'mp4' : 'webm';
-                a.download = `${String(snapP.title || 'export').replace(/[^a-z0-9_\-]+/gi, '_')}_纯视觉无声渲染.${ext}`; 
+                // 修改点 5：根据是否混入了音频给予正确的文件名
+                const suffix = hasAudio ? '离线视听合轨' : '纯视觉无声渲染';
+                a.download = `${String(snapP.title || 'export').replace(/[^a-z0-9_\-]+/gi, '_')}_${suffix}.${ext}`; 
                 a.click(); setTimeout(() => URL.revokeObjectURL(url), 2000);
                 
-                showExportAlert("✅ WebCodecs 无声视觉序列极速渲染完成，已自动触发下载！", 'success');
+                showExportAlert(hasAudio ? "✅ WebCodecs 离线视听合轨渲染完成，已自动触发下载！" : "✅ WebCodecs 无声视觉序列渲染完成，已自动触发下载！", 'success');
                 els.expPauseResumeBtn.style.display = 'none';
                 els.expCancelBtn.innerText = '完成并关闭';
                 window._exportState.active = false;
