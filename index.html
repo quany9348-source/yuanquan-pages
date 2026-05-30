@@ -79,6 +79,46 @@
             letter-spacing: 0.03em;
         }
 
+        .header .subtitle .secret-dot {
+            cursor: default;
+            display: inline-block;
+            transition: all 0.4s ease;
+        }
+
+        .header .subtitle .secret-dot:hover {
+            color: var(--accent-personal);
+            text-shadow: 0 0 8px rgba(109,179,165,0.35);
+        }
+
+        /* 彩蛋激活反馈 */
+        .header .subtitle .secret-dot.flash {
+            color: var(--accent-personal);
+            text-shadow: 0 0 16px rgba(109,179,165,0.6);
+            transform: scale(1.3);
+            transition: all 0.15s ease;
+        }
+
+        /* ========== Hidden Personal Section ========== */
+        .category.secret-category {
+            display: none;
+        }
+
+        .category.secret-category.revealed {
+            display: block;
+            animation: revealDown 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+        }
+
+        @keyframes revealDown {
+            from {
+                opacity: 0;
+                transform: translateY(-16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         /* ========== Category Section ========== */
         .category {
             margin-bottom: 24px;
@@ -253,7 +293,7 @@
         <header class="header">
             <span class="header-tag">Portal</span>
             <h1>Yuan Quan</h1>
-            <p class="subtitle">项目合集 · 工作与创造</p>
+            <p class="subtitle">项目合集 <span class="secret-dot" id="secretDot" title="·">·</span> 工作与创造</p>
         </header>
 
         <!-- 工作 -->
@@ -277,8 +317,8 @@
             </div>
         </section>
 
-        <!-- 个人 -->
-        <section class="category" data-category="personal">
+        <!-- 个人（隐藏入口） -->
+        <section class="category secret-category" data-category="personal" id="personalSection">
             <div class="category-header" tabindex="0" role="button" aria-expanded="false"
                  onclick="toggleCategory(this.parentElement)">
                 <span class="category-dot personal"></span>
@@ -328,6 +368,85 @@
                     toggleCategory(header.parentElement);
                 }
             });
+        });
+
+        // ═══════════════ 彩蛋：间隔号触发个人入口 ═══════════════
+        const secretDot = document.getElementById('secretDot');
+        const personalSection = document.getElementById('personalSection');
+        let personalRevealed = false;
+        let longPressTimer = null;
+        let clickCount = 0;
+        let clickTimer = null;
+
+        function revealPersonal() {
+            if (personalRevealed) return;
+            personalRevealed = true;
+            personalSection.classList.add('revealed');
+            secretDot.style.color = 'var(--accent-personal)';
+            secretDot.style.textShadow = '0 0 10px rgba(109,179,165,0.4)';
+            personalSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function hidePersonal() {
+            if (!personalRevealed) return;
+            personalRevealed = false;
+            personalSection.classList.remove('revealed');
+            personalSection.classList.remove('open');
+            personalSection.querySelector('.category-header').setAttribute('aria-expanded', 'false');
+            secretDot.style.color = '';
+            secretDot.style.textShadow = '';
+        }
+
+        function togglePersonal() {
+            if (personalRevealed) {
+                hidePersonal();
+            } else {
+                revealPersonal();
+            }
+        }
+
+        function flashDot() {
+            secretDot.classList.add('flash');
+            setTimeout(() => secretDot.classList.remove('flash'), 200);
+        }
+
+        // 双击
+        secretDot.addEventListener('click', (e) => {
+            e.preventDefault();
+            clickCount++;
+            if (clickCount === 1) {
+                clickTimer = setTimeout(() => { clickCount = 0; }, 400);
+            } else if (clickCount === 2) {
+                clearTimeout(clickTimer);
+                clickCount = 0;
+                flashDot();
+                togglePersonal();
+            }
+        });
+
+        // 长按 (移动端)
+        secretDot.addEventListener('touchstart', (e) => {
+            longPressTimer = setTimeout(() => {
+                flashDot();
+                togglePersonal();
+            }, 600);
+        });
+
+        secretDot.addEventListener('touchend', () => {
+            clearTimeout(longPressTimer);
+        });
+
+        secretDot.addEventListener('touchmove', () => {
+            clearTimeout(longPressTimer);
+        });
+
+        // 键盘快捷键: Alt+P
+        document.addEventListener('keydown', (e) => {
+            if (e.altKey && e.key === 'p') {
+                e.preventDefault();
+                flashDot();
+                togglePersonal();
+            }
         });
 
         // 初始化计数
