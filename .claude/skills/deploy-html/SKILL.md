@@ -33,9 +33,10 @@ yuanquan-pages/
 
 1. **HTML 文件路径** — 要部署的源文件（必填）
 2. **项目标识 (slug)** — URL 友好的文件夹名，如 `my-dashboard`（必填；仅限小写字母、连字符，不含空格）
-3. **显示名称** — 导航链接中显示的可读名称（默认从 slug 推导）
-4. **描述** — 导航链接的一行描述（默认为空）
-5. **图标** — 导航链接的表情符号（默认：📁）
+3. **分类** — `work`（工作）或 `personal`（个人）（必填，默认 `personal`）
+4. **显示名称** — 导航链接中显示的可读名称（默认从 slug 推导）
+5. **描述** — 导航链接的一行描述（默认为空）
+6. **图标** — 导航链接的表情符号（默认：📁）
 
 如果用户只提供了 HTML 文件路径，则逐项询问其余信息。
 
@@ -64,16 +65,37 @@ done
 
 ### 第三步：更新导航首页
 
-读取 `/Users/yuanquan/Documents/my pages/index.html`，在 `<ul id="projectList">` 内部添加新的 `<li>` 条目。格式：
+读取 `/Users/yuanquan/Documents/my pages/index.html`，在对应分类的 `<ul id="list-<category>">` 内部添加新的 `<li>` 条目。
 
+导航首页结构：
 ```html
-<li><a href="<slug>/"><span class="icon"><emoji></span><display-name><span class="desc"><description></span></a></li>
+<!-- 工作 -->
+<section class="category" data-category="work">
+  <div class="category-body">
+    <ul class="project-list" id="list-work"><!-- 在此插入 --></ul>
+    <div class="empty-hint" id="empty-work">暂无项目</div>
+  </div>
+</section>
+
+<!-- 个人 -->
+<section class="category" data-category="personal">
+  <div class="category-body">
+    <ul class="project-list" id="list-personal"><!-- 在此插入 --></ul>
+    <div class="empty-hint" id="empty-personal">暂无项目</div>
+  </div>
+</section>
+```
+
+条目格式：
+```html
+<li><a href="<slug>/"><span class="icon"><emoji></span><span class="name"><display-name></span><span class="desc"><description></span><span class="arrow">→</span></a></li>
 ```
 
 **规则：**
-- 插入到 `id="projectList"` 的 `</ul>` 闭合标签之前
+- 根据分类插入到 `id="list-work"` 或 `id="list-personal"` 的 `</ul>` 之前
 - 如果该项目已存在于列表中，则更新而非重复
-- 如果是第一个项目，移除 `empty-hint` 提示区域
+- 添加项目后，隐藏对应分类的 `empty-hint` 元素（`empty-work` 或 `empty-personal`）
+- 更新对应分类的 `count-work` 或 `count-personal` 计数
 - 保持已有条目不变
 
 ### 第四步：Git 提交与推送
@@ -81,7 +103,7 @@ done
 ```bash
 cd "/Users/yuanquan/Documents/my pages"
 git add "<slug>/" index.html
-git commit -m "deploy: 添加 <display-name> (<slug>)"
+git commit -m "deploy: 添加 <display-name> (<slug>) [<category>]"
 git push origin main
 ```
 
@@ -113,9 +135,10 @@ git push origin main
 
 如果用户要求删除项目：
 1. 删除项目文件夹：`rm -rf "/Users/yuanquan/Documents/my pages/<slug>/"`
-2. 从导航首页中移除对应的 `<li>`
-3. 提交：`remove: 移除 <display-name> (<slug>)`
-4. 推送
+2. 从导航首页对应分类的列表中移除对应的 `<li>`
+3. 更新对应分类的计数，若该分类无项目则显示 `empty-hint`
+4. 提交：`remove: 移除 <display-name> (<slug>)`
+5. 推送
 
 ## 常见错误
 
