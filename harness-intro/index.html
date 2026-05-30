@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harness CI/CD 平台深度解析</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1a1a24;
+    --border: #252530;
+    --text: #c8c8d4;
+    --text2: #8888a0;
+    --accent: #00b4d8;
+    --accent2: #48cae4;
+    --blue: #6a9fd8;
+    --green: #7eb77f;
+    --red: #d87070;
+    --purple: #b392f0;
+    --orange: #e8b456;
+    --cyan: #56b6c2;
+    --radius: 10px;
+    --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --mono: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── Navigation ── */
+  nav {
+    position: fixed; top:0; left:0; right:0; z-index:100;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(16px) saturate(180%);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+  }
+  nav .inner {
+    max-width: 1100px; margin:0 auto;
+    display:flex; align-items:center; gap:28px; height:52px;
+  }
+  nav .logo {
+    font-weight:700; font-size:15px; color:var(--accent);
+    letter-spacing: -0.3px; white-space:nowrap;
+  }
+  nav a {
+    color: var(--text2); text-decoration:none; font-size:13px;
+    transition: color 0.2s; white-space:nowrap;
+  }
+  nav a:hover { color: var(--text); }
+
+  /* ── Hero ── */
+  .hero {
+    padding: 120px 24px 80px;
+    text-align: center; max-width: 800px; margin:0 auto;
+  }
+  .hero .badge {
+    display:inline-block; padding:4px 14px; border-radius:99px;
+    background: rgba(0,180,216,0.1); color:var(--accent);
+    font-size:12px; font-weight:600; letter-spacing:0.6px;
+    text-transform: uppercase; margin-bottom:24px;
+  }
+  .hero h1 {
+    font-size: clamp(36px, 6vw, 56px);
+    font-weight: 800; letter-spacing: -1.5px; line-height:1.15;
+    background: linear-gradient(135deg, #48cae4 0%, #90e0ef 30%, #00b4d8 70%);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    margin-bottom:20px;
+  }
+  .hero p {
+    font-size:18px; color:var(--text2); max-width:560px; margin:0 auto 36px;
+  }
+  .hero .stats {
+    display:flex; justify-content:center; gap:48px;
+  }
+  .hero .stat .num {
+    font-size:28px; font-weight:700; color:var(--text);
+  }
+  .hero .stat .label {
+    font-size:12px; color:var(--text2); text-transform: uppercase; letter-spacing:0.4px;
+  }
+
+  /* ── Sections ── */
+  .section {
+    max-width: 1100px; margin:0 auto; padding: 80px 24px;
+  }
+  .section h2 {
+    font-size: 28px; font-weight: 700; letter-spacing: -0.5px;
+    margin-bottom: 12px; color: var(--text);
+  }
+  .section .subtitle {
+    color: var(--text2); font-size:15px; margin-bottom: 40px;
+  }
+  .divider {
+    border: none; border-top: 1px solid var(--border);
+    margin: 0 24px; max-width: 1100px; margin:0 auto;
+  }
+
+  /* ── Cards ── */
+  .card-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 28px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .card:hover { border-color: #3a3a48; transform: translateY(-2px); }
+  .card .icon { font-size:28px; margin-bottom:14px; }
+  .card h3 { font-size:16px; font-weight:600; margin-bottom:8px; color:var(--text); }
+  .card p { font-size:14px; color:var(--text2); }
+
+  /* ── Architecture Diagram ── */
+  .arch-diagram {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 48px 24px;
+    overflow-x: auto;
+  }
+  .arch-diagram svg { display:block; margin:0 auto; }
+
+  /* ── Tables ── */
+  .table-wrap {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow:hidden; overflow-x:auto;
+  }
+  table {
+    width:100%; border-collapse: collapse; font-size:14px;
+  }
+  thead { background: var(--surface2); }
+  th {
+    text-align:left; padding:14px 20px; font-weight:600;
+    color: var(--text2); font-size:12px; text-transform: uppercase; letter-spacing:0.4px;
+  }
+  td { padding:12px 20px; border-top:1px solid var(--border); }
+  tr:hover td { background: rgba(255,255,255,0.015); }
+
+  /* ── Code blocks ── */
+  .code-block {
+    background: var(--surface); border:1px solid var(--border);
+    border-radius: var(--radius); padding:24px; overflow-x:auto;
+    margin: 16px 0;
+  }
+  .code-block pre {
+    font-family: var(--mono); font-size:13px; line-height:1.8;
+    color: var(--text); white-space:pre;
+  }
+  .code-block .kw  { color: var(--purple); }
+  .code-block .str { color: var(--green); }
+  .code-block .cmt { color: var(--text2); font-style:italic; }
+  .code-block .fn  { color: var(--blue); }
+  .code-block .num { color: var(--orange); }
+
+  /* ── Flow ── */
+  .flow-list {
+    display:flex; flex-direction:column; gap:0;
+  }
+  .flow-item {
+    display:flex; align-items:flex-start; gap:16px;
+    padding: 16px 20px;
+    border-left: 2px solid var(--border);
+    margin-left: 12px;
+    position:relative;
+  }
+  .flow-item::before {
+    content:''; position:absolute; left:-6px; top:22px;
+    width:10px; height:10px; border-radius:50%;
+    background: var(--accent);
+  }
+  .flow-item .step {
+    font-weight:700; font-size:13px; color:var(--accent);
+    min-width:28px;
+  }
+  .flow-item .body h4 { font-size:15px; font-weight:600; margin-bottom:2px; }
+  .flow-item .body p { font-size:13px; color:var(--text2); }
+
+  /* ── Best Practices ── */
+  .two-col {
+    display:grid; grid-template-columns: 1fr 1fr; gap:24px;
+  }
+  @media (max-width: 700px) { .two-col { grid-template-columns:1fr; } }
+
+  .do-dont {
+    background: var(--surface); border:1px solid var(--border);
+    border-radius: var(--radius); padding:28px;
+  }
+  .do-dont.good { border-left:3px solid var(--green); }
+  .do-dont.bad  { border-left:3px solid var(--red); }
+  .do-dont h4 {
+    font-size:14px; font-weight:700; margin-bottom:16px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .do-dont li {
+    font-size:13px; color:var(--text2); margin-bottom:8px;
+    padding-left:4px; list-style:inside;
+  }
+  .do-dont li::marker { color:var(--text2); }
+
+  /* ── File Tree ── */
+  .file-tree {
+    background: var(--surface); border:1px solid var(--border);
+    border-radius: var(--radius); padding:24px 28px;
+    font-family: var(--mono); font-size:13px; line-height:2;
+  }
+  .file-tree .dir  { color: var(--blue); }
+  .file-tree .file { color: var(--text2); }
+  .file-tree .hl   { color: var(--accent); }
+  .file-tree .cmt  { color: #555; }
+
+  /* ── Footer ── */
+  footer {
+    text-align:center; padding:48px 24px; color:var(--text2);
+    font-size:12px; border-top:1px solid var(--border);
+  }
+
+  /* ── Animations ── */
+  @keyframes fadeUp {
+    from { opacity:0; transform: translateY(24px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+  .section { animation: fadeUp 0.6s ease both; }
+  .section:nth-child(2) { animation-delay:0.1s; }
+  .section:nth-child(3) { animation-delay:0.2s; }
+  .section:nth-child(4) { animation-delay:0.3s; }
+  .section:nth-child(5) { animation-delay:0.4s; }
+  .section:nth-child(6) { animation-delay:0.5s; }
+  .section:nth-child(7) { animation-delay:0.6s; }
+</style>
+</head>
+<body>
+
+<!-- ═══ Navigation ═══ -->
+<nav>
+  <div class="inner">
+    <span class="logo">Harness</span>
+    <a href="#overview">总览</a>
+    <a href="#architecture">平台架构</a>
+    <a href="#ci">CI/CD</a>
+    <a href="#modules">功能模块</a>
+    <a href="#pipeline">流水线模型</a>
+    <a href="#governance">治理与安全</a>
+    <a href="#best-practices">最佳实践</a>
+  </div>
+</nav>
+
+<!-- ═══ Hero ═══ -->
+<header class="hero">
+  <div class="badge">CI/CD Platform</div>
+  <h1>Harness 平台<br>深度解析</h1>
+  <p>
+    从传统 Jenkins 到云原生智能交付 — 理解 Harness 如何通过 AI 驱动的 CI/CD 流水线、策略即代码和统一治理，实现软件交付的端到端自动化
+  </p>
+  <div class="stats">
+    <div class="stat"><div class="num">8+</div><div class="label">功能模块</div></div>
+    <div class="stat"><div class="num">3</div><div class="label">部署策略</div></div>
+    <div class="stat"><div class="num">100+</div><div class="label">原生集成</div></div>
+    <div class="stat"><div class="num">70%</div><div class="label">部署效率提升</div></div>
+  </div>
+</header>
+
+<!-- ═══ Overview ═══ -->
+<section class="section" id="overview">
+  <h2>核心理念：从脚本到策略</h2>
+  <p class="subtitle">Harness 的底层哲学是用"策略声明"替代"过程脚本" — 你声明目标状态和约束条件，平台自动执行并收敛。</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="icon">&#x1F3AF;</div>
+      <h3>声明式交付</h3>
+      <p>YAML 定义部署目标、回滚策略、健康检查阈值。平台负责执行细节，而非你编写复杂的 Shell 步骤。</p>
+    </div>
+    <div class="card">
+      <div class="icon">&#x1F9E0;</div>
+      <h3>AI 驱动决策</h3>
+      <p>内置机器学习引擎分析部署指标（错误率、延迟、吞吐），自动判断金丝雀/蓝绿推进还是自动回滚。</p>
+    </div>
+    <div class="card">
+      <div class="icon">&#x1F510;</div>
+      <h3>Secret 与 RBAC 原生集成</h3>
+      <p>凭证管理内置在平台层，不随 Pipeline YAML 传递。细粒度 RBAC 控制谁能在什么环境执行什么操作。</p>
+    </div>
+  </div>
+
+  <div class="code-block" style="margin-top:24px;">
+    <pre><span class="cmt"># Harness 声明式 Pipeline YAML 示例</span>
+<span class="kw">pipeline</span>:
+  <span class="kw">name</span>: <span class="str">microservice-deploy</span>
+  <span class="kw">identifier</span>: <span class="str">ms_deploy</span>
+  <span class="kw">stages</span>:
+    - <span class="kw">stage</span>:
+        <span class="kw">name</span>: <span class="str">Deploy to K8s</span>
+        <span class="kw">type</span>: <span class="str">Deploy</span>
+        <span class="kw">spec</span>:
+          <span class="kw">deploymentType</span>: <span class="str">Rolling</span>         <span class="cmt"># 策略声明，非脚本</span>
+          <span class="kw">failureStrategy</span>:
+            <span class="kw">onFailure</span>:
+              <span class="kw">action</span>: <span class="str">Rollback</span>               <span class="cmt"># 自动回滚</span>
+          <span class="kw">healthCheck</span>:
+            <span class="kw">type</span>: <span class="str">Datadog</span>
+            <span class="kw">metric</span>: <span class="str">error_rate</span>
+            <span class="kw">threshold</span>: <span class="num">&lt; 1%</span></pre>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══ Architecture ═══ -->
+<section class="section" id="architecture">
+  <h2>平台架构</h2>
+  <p class="subtitle">从开发者体验到策略引擎再到资源调度 — 五层分层架构，每层独立可插拔。</p>
+
+  <div class="arch-diagram">
+    <svg viewBox="0 0 900 580" width="100%" max-width="900" font-family="system-ui,sans-serif">
+      <defs>
+        <linearGradient id="g5" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#e8b456" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="#e8b456" stop-opacity="0.05"/>
+        </linearGradient>
+        <linearGradient id="g4" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#b392f0" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="#b392f0" stop-opacity="0.05"/>
+        </linearGradient>
+        <linearGradient id="g3" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#d87070" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="#d87070" stop-opacity="0.05"/>
+        </linearGradient>
+        <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#6a9fd8" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="#6a9fd8" stop-opacity="0.05"/>
+        </linearGradient>
+        <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#00b4d8" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="#00b4d8" stop-opacity="0.05"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Layer 5: Insights / Dashboard -->
+      <rect x="60" y="20" width="780" height="85" rx="10" fill="url(#g5)" stroke="#e8b456" stroke-opacity="0.4"/>
+      <text x="90" y="48" fill="#e8b456" font-size="12" font-weight="700">第五层 · 可观测性</text>
+      <text x="90" y="70" fill="#f0c878" font-size="18" font-weight="700">SRM · CCM · CET · SEI</text>
+      <text x="90" y="90" fill="#888" font-size="11">服务可靠性管理 · 云成本管理 · 混沌工程 · 工程效能洞察 — 统一 Dashboard</text>
+
+      <!-- Layer 4: Governance -->
+      <rect x="60" y="125" width="780" height="85" rx="10" fill="url(#g4)" stroke="#b392f0" stroke-opacity="0.4"/>
+      <text x="90" y="153" fill="#b392f0" font-size="12" font-weight="700">第四层 · 安全与治理</text>
+      <text x="90" y="175" fill="#c4a8ff" font-size="18" font-weight="700">STO · SCS · Policy as Code (OPA)</text>
+      <text x="90" y="195" fill="#888" font-size="11">安全测试编排 · 供应链安全 · OPA 策略引擎 — 门控、合规检查、SBOM 生成</text>
+
+      <!-- Layer 3: CD / Feature Flags -->
+      <rect x="60" y="230" width="780" height="85" rx="10" fill="url(#g3)" stroke="#d87070" stroke-opacity="0.4"/>
+      <text x="90" y="258" fill="#d87070" font-size="12" font-weight="700">第三层 · 交付与发布</text>
+      <text x="90" y="280" fill="#e89090" font-size="18" font-weight="700">CD · Feature Flags · GitOps (GitOps Agent)</text>
+      <text x="90" y="300" fill="#888" font-size="11">金丝雀/蓝绿/Rolling 部署 · 渐进式发布 · 特性开关 A/B · ArgoCD 集成</text>
+
+      <!-- Layer 2: CI -->
+      <rect x="60" y="335" width="780" height="85" rx="10" fill="url(#g2)" stroke="#6a9fd8" stroke-opacity="0.4"/>
+      <text x="90" y="363" fill="#6a9fd8" font-size="12" font-weight="700">第二层 · 持续集成</text>
+      <text x="90" y="385" fill="#89b8f0" font-size="18" font-weight="700">CI · Drone · Cloud / Hybrid / Self-hosted Runner</text>
+      <text x="90" y="405" fill="#888" font-size="11">容器化构建 · 缓存加速 · 测试智能拆分 · 并行执行 · 多架构（amd64/arm64）</text>
+
+      <!-- Layer 1: Delegate / Infra -->
+      <rect x="60" y="440" width="780" height="85" rx="10" fill="url(#g1)" stroke="#00b4d8" stroke-opacity="0.4"/>
+      <text x="90" y="468" fill="#00b4d8" font-size="12" font-weight="700">第一层 · 基础设施 &amp; 执行</text>
+      <text x="90" y="490" fill="#48cae4" font-size="18" font-weight="700">Harness Delegate · Kubernetes · Terraform · Cloud Providers</text>
+      <text x="90" y="510" fill="#888" font-size="11">轻量级 Agent（Delegate）部署在 VPC/Cluster 内 · 出站轮询 · 无防火墙入站规则 · 多云抽象</text>
+
+      <!-- Connectors -->
+      <line x1="450" y1="105" x2="450" y2="125" stroke="#555" stroke-width="1" stroke-dasharray="4"/>
+      <line x1="450" y1="210" x2="450" y2="230" stroke="#555" stroke-width="1" stroke-dasharray="4"/>
+      <line x1="450" y1="315" x2="450" y2="335" stroke="#555" stroke-width="1" stroke-dasharray="4"/>
+      <line x1="450" y1="420" x2="450" y2="440" stroke="#555" stroke-width="1" stroke-dasharray="4"/>
+    </svg>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══ CI/CD ═══ -->
+<section class="section" id="ci">
+  <h2>CI/CD 核心流水线</h2>
+  <p class="subtitle">Harness 的 CI 和 CD 是独立但深度集成的模块，共用 Delegate、Secret Store 和 RBAC。</p>
+
+  <h3 style="font-size:18px; margin-bottom:16px;">Pipeline Stage 类型</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Stage 类型</th><th>作用</th><th>典型触发</th><th>关键能力</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span style="color:var(--blue);font-weight:600;">CI (Build)</span></td>
+          <td>代码检查、编译、单元测试、镜像构建与推送</td>
+          <td>Git Push / PR / Webhook</td>
+          <td>测试智能拆分、缓存层、多架构构建</td>
+        </tr>
+        <tr>
+          <td><span style="color:var(--accent);font-weight:600;">CD (Deploy)</span></td>
+          <td>将构建产物部署到目标环境</td>
+          <td>CI 完成 / 手动审批 / 定时</td>
+          <td>金丝雀/蓝绿/Rolling、自动回滚</td>
+        </tr>
+        <tr>
+          <td><span style="color:var(--purple);font-weight:600;">Approval</span></td>
+          <td>人工审批门控</td>
+          <td>部署前 / 金丝雀推进前</td>
+          <td>多级审批、Jira/SNOW 集成、邮件通知</td>
+        </tr>
+        <tr>
+          <td><span style="color:var(--orange);font-weight:600;">Custom</span></td>
+          <td>自定义步骤（脚本、通知、Webhook 回调）</td>
+          <td>任意位置插入</td>
+          <td>Shell / Python / HTTP / Plugin 扩展</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="margin-top:36px;font-size:18px;">三种部署策略对比</h3>
+  <div class="card-grid" style="margin-top:16px;">
+    <div class="card">
+      <div class="icon">&#x1F500;</div>
+      <h3>Rolling（滚动）</h3>
+      <p>逐个替换 Pod/实例，适合有状态服务。可设置最大不可用数和最大激增数。</p>
+    </div>
+    <div class="card">
+      <div class="icon">&#x1F41B;</div>
+      <h3>Canary（金丝雀）</h3>
+      <p>先部署 5% 流量到新版本，AI 自动分析指标，通过后逐步扩到 100%。</p>
+    </div>
+    <div class="card">
+      <div class="icon">&#x1F535;</div>
+      <h3>Blue-Green（蓝绿）</h3>
+      <p>两套完整环境并行运行，流量一键切换。秒级回滚，但需要双倍资源。</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══ Modules ═══ -->
+<section class="section" id="modules">
+  <h2>功能模块全景</h2>
+  <p class="subtitle">除了核心 CI/CD，Harness 平台提供一整套覆盖软件交付生命周期的功能模块。</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>模块</th><th>缩写</th><th>核心功能</th><th>适用场景</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span style="color:var(--accent);font-weight:600;">Continuous Integration</span></td>
+          <td>CI</td>
+          <td>容器化构建、测试拆分、缓存加速、多架构</td>
+          <td>单仓/多仓构建、PR 门控检查</td>
+        </tr>
+        <tr>
+          <td><span style="color:var(--red);font-weight:600;">Continuous Delivery</span></td>
+          <td>CD</td>
+          <td>声明式部署、金丝雀/蓝绿、自动回滚</td>
+          <td>K8s/VM/Serverless 多环境部署</td>
+        </tr>
+        <tr>
+          <td><span style="color:var(--green);font-weight:600;">Feature Flags</span></td>
+          <td>FF</td>
+          <td>特性开关、A/B 测试、渐进式发布</td>
+          <td>功能灰度、租户级特性控制</td>
+        </tr>
+        <tr>
+          <td><span style="color:var(--purple);font-weight:600;">Security Testing Orchestration</span></td>
+          <td>STO</td>
+          <td>SAST/DAST/SCA 扫描编排、漏洞优先级</td>
+          <td>安全左移、合规审计、SBOM 管理</td>
+        </tr>
+        <tr>
+          <td><span style="color:var(--orange);font-weight:600;">Supply Chain Security</span></td>
+          <td>SCS</td>
+          <td>依赖扫描、SBOM 生成、策略门控</td>
+          <td>开源合规、供应链攻击防护</td>
+        </tr>
+        <tr>
+          <td><span style="color:var(--cyan);font-weight:600;">Cloud Cost Management</span></td>
+          <td>CCM</td>
+          <td>云成本可视化、异常检测、自动优化</td>
+          <td>FinOps、多云成本归因</td>
+        </tr>
+        <tr>
+          <td><span style="color:var(--blue);font-weight:600;">Chaos Engineering</span></td>
+          <td>CET</td>
+          <td>混沌实验编排、爆炸半径控制、稳态验证</td>
+          <td>韧性测试、故障演练</td>
+        </tr>
+        <tr>
+          <td><span style="color:var(--accent2);font-weight:600;">Service Reliability Management</span></td>
+          <td>SRM</td>
+          <td>SLO 定义与监控、错误预算、告警策略</td>
+          <td>SRE 实践落地</td>
+        </tr>
+        <tr>
+          <td><span style="color:var(--text);font-weight:600;">Software Engineering Insights</span></td>
+          <td>SEI</td>
+          <td>DORA 指标、交付效率看板、瓶颈分析</td>
+          <td>工程效能度量与改进</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══ Pipeline Model ═══ -->
+<section class="section" id="pipeline">
+  <h2>流水线执行模型</h2>
+  <p class="subtitle">Harness Pipeline 是 DAG（有向无环图）而非线性序列 — 支持并行 Stage、条件分支、矩阵执行。</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="icon">&#x1F504;</div>
+      <h3>Trigger → Pipeline → Stages → Steps</h3>
+      <p>四层嵌套模型。Trigger 定义触发条件（Cron / Webhook / Artifact 变更），Pipeline 编排 Stage DAG，Stage 内 Steps 顺序执行。</p>
+    </div>
+    <div class="card">
+      <div class="icon">&#x1F4E6;</div>
+      <h3>Artifact / Manifest 抽象</h3>
+      <p>不直接写镜像名或 Helm Chart 路径。通过 Artifact Source 和 Manifest Source 抽象绑定，切换版本只需改 Trigger 条件。</p>
+    </div>
+    <div class="card">
+      <div class="icon">&#x267B;</div>
+      <h3>Looping / Matrix 策略</h3>
+      <p>Matrix 语法在一个 Stage 内对不同环境/集群并行执行相同步骤。Looping 支持对列表元素迭代执行。</p>
+    </div>
+  </div>
+
+  <div class="code-block" style="margin-top:20px;">
+    <pre><span class="cmt"># Matrix 执行策略 — 同一 Stage 在 3 个环境并行部署</span>
+<span class="kw">stage</span>:
+  <span class="kw">name</span>: <span class="str">Deploy Matrix</span>
+  <span class="kw">strategy</span>:
+    <span class="kw">matrix</span>:
+      <span class="kw">env</span>: [<span class="str">dev</span>, <span class="str">staging</span>, <span class="str">prod-us</span>]
+      <span class="kw">region</span>: [<span class="str">us-east-1</span>, <span class="str">eu-west-1</span>]
+      <span class="kw">exclude</span>:
+        - <span class="kw">env</span>: <span class="str">dev</span>
+          <span class="kw">region</span>: <span class="str">eu-west-1</span>        <span class="cmt"># dev 仅部署 us-east-1</span></pre>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══ Governance ═══ -->
+<section class="section" id="governance">
+  <h2>安全治理与策略即代码</h2>
+  <p class="subtitle">OPA (Open Policy Agent) 作为策略引擎，Pipeline 执行前强制执行合规规则。</p>
+
+  <div class="flow-list">
+    <div class="flow-item">
+      <div class="step">01</div>
+      <div class="body">
+        <h4>Pipeline 触发器激活</h4>
+        <p>Git Push / PR Merge / Manual Run / Cron Schedule 触发 Pipeline 执行请求。</p>
+      </div>
+    </div>
+    <div class="flow-item">
+      <div class="step">02</div>
+      <div class="body">
+        <h4>OPA 策略评估（Pre-Flight）</h4>
+        <p>Harness Manager 调用 OPA 引擎，评估所有绑定的 Policy Set。例如："prod 环境禁止周末部署"、"必须关联 Jira Ticket"。</p>
+      </div>
+    </div>
+    <div class="flow-item">
+      <div class="step">03</div>
+      <div class="body">
+        <h4>Delegate 领取任务</h4>
+        <p>策略通过后，目标环境的 Delegate 通过出站 HTTPS 轮询从 Manager 领取 Stage 任务，无需开放入站端口。</p>
+      </div>
+    </div>
+    <div class="flow-item">
+      <div class="step">04</div>
+      <div class="body">
+        <h4>执行 + 实时回传</h4>
+        <p>Delegate 在集群/VPC 内执行 kubectl/terraform/helm 命令，日志和指标实时回传 Manager。</p>
+      </div>
+    </div>
+    <div class="flow-item">
+      <div class="step">05</div>
+      <div class="body">
+        <h4>Governance 审计日志</h4>
+        <p>每次执行完整记录：谁触发、策略评估结果、Delegate 行为、部署前后差异。满足 SOC2 / FedRAMP 审计要求。</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex; gap:20px; margin-top:24px;">
+    <div style="flex:1; background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;">
+      <h4 style="color:var(--green);font-size:14px;margin-bottom:8px;">Delegate 安全优势</h4>
+      <p style="font-size:13px;color:var(--text2);">出站轮询模式意味着无需在防火墙上开放入站端口。Delegate 运行在 VPC 内，拥有最小所需权限的 IAM Role。</p>
+    </div>
+    <div style="flex:1; background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;">
+      <h4 style="color:var(--accent);font-size:14px;margin-bottom:8px;">Secret 管理</h4>
+      <p style="font-size:13px;color:var(--text2);">所有凭证存储在 Harness Secret Manager 或外部 Vault/AWS KMS/GCP Secret Manager。Pipeline YAML 中仅引用 Secret ID。</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══ Best Practices ═══ -->
+<section class="section" id="best-practices">
+  <h2>最佳实践</h2>
+  <p class="subtitle">用好 Harness 的关键不是掌握 YAML 语法，而是理解其策略驱动模型。</p>
+
+  <div class="two-col">
+    <div class="do-dont good">
+      <h4><span style="color:var(--green);font-size:20px;">&#x2714;</span> 推荐做法</h4>
+      <ul>
+        <li>Template 化 — Pipeline/Stage/Step 模板，通过 Git 同步复用</li>
+        <li>Environment + Infrastructure Definition 分离 — 环境定义与基础设施实现解耦</li>
+        <li>AI 验证金丝雀 — 生产部署必须绑定 Harness 自动验证或 Datadog/Prometheus 健康检查</li>
+        <li>多 Delegate — 按环境/集群部署独立 Delegate，避免单点</li>
+        <li>OPA 门控 — 对所有生产环境 Pipeline 绑定合规策略</li>
+        <li>Feature Flags 解耦部署与发布 — 部署代码，用 Flag 控制上线</li>
+        <li>Pipeline as Code — YAML 存 Git，PR 审核变更</li>
+      </ul>
+    </div>
+    <div class="do-dont bad">
+      <h4><span style="color:var(--red);font-size:20px;">&#x2718;</span> 反模式</h4>
+      <ul>
+        <li>Pipeline 中硬编码凭证/密钥 — 始终用 Secret Manager 引用</li>
+        <li>一个 Delegate 跑所有环境 — 生产隔离失效</li>
+        <li>跳过 Canary 分析直接全量 — 失去 AI 自动回滚保护</li>
+        <li>Pipeline 变成万行 Monolith — 模块化拆分</li>
+        <li>忽略 Delegate 版本升级 — 安全补丁和功能更新延迟</li>
+        <li>用 Custom Stage 替代 CD Stage — 丧失声明式回滚和策略能力</li>
+        <li>所有团队共用同一 Connector — 权限粒度不足</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 style="margin-top:40px;font-size:18px;">核心对比：Harness vs 传统工具</h3>
+  <div class="table-wrap" style="margin-top:16px;">
+    <table>
+      <thead>
+        <tr><th>维度</th><th>传统 CI/CD（Jenkins / Spinnaker）</th><th>Harness</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-weight:600;">部署逻辑</td>
+          <td>过程式 Shell 脚本</td>
+          <td style="color:var(--green);">声明式策略 + 平台执行</td>
+        </tr>
+        <tr>
+          <td style="font-weight:600;">回滚</td>
+          <td>手动编写回滚脚本，易遗漏</td>
+          <td style="color:var(--green);">一键自动回滚（含依赖服务）</td>
+        </tr>
+        <tr>
+          <td style="font-weight:600;">健康检查</td>
+          <td>sleep N 秒后人工判断</td>
+          <td style="color:var(--green);">AI 驱动持续验证（APM/日志/指标）</td>
+        </tr>
+        <tr>
+          <td style="font-weight:600;">密钥管理</td>
+          <td>Jenkins Credential Plugin / 环境变量</td>
+          <td style="color:var(--green);">内置 Secret Manager + 外部 Vault 集成</td>
+        </tr>
+        <tr>
+          <td style="font-weight:600;">安全模型</td>
+          <td>Master-Agent（需入站端口）</td>
+          <td style="color:var(--green);">Delegate 出站轮询（无需入站）</td>
+        </tr>
+        <tr>
+          <td style="font-weight:600;">治理</td>
+          <td>靠流程规范，无技术约束</td>
+          <td style="color:var(--green);">OPA 策略引擎强制执行</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══ Footer ═══ -->
+<footer>
+  <p>Harness CI/CD 平台 &copy; 2026 — 基于 Harness 官方文档与社区实践</p>
+  <p style="margin-top:4px;">
+    Sources:
+    <a href="https://developer.harness.io" style="color:var(--text2);">Harness Developer Hub</a> ·
+    <a href="https://docs.harness.io" style="color:var(--text2);">Official Docs</a> ·
+    <a href="https://github.com/harness" style="color:var(--text2);">GitHub</a>
+  </p>
+</footer>
+
+</body>
+</html>
