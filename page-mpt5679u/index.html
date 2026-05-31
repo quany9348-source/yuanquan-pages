@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的周报 v25.0</title>
+    <style>
+        :root {
+            --bg-color: #f3f4f6;
+            --sidebar-bg: #ffffff;
+            --card-bg: #ffffff;
+            --primary-color: #1e293b;
+            --accent-color: #0f172a;
+            --accent-hover: #334155;
+            --border-color: #e2e8f0;
+            --text-main: #334155;
+            --text-sub: #64748b;
+            --brand-blue: #2563eb;
+            --alert-color: #ef4444; 
+            
+            /* 状态指示色 */
+            --status-plan: #94a3b8;
+            --status-run: #0ea5e9;
+            --status-block: #ef4444;
+            --status-done: #10b981;
+            --status-overdue: #f97316; 
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; 
+        }
+
+        header {
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--card-bg); padding: 12px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); z-index: 10;
+        }
+
+        h1 { font-size: 1.3rem; color: var(--primary-color); margin: 0; display: flex; align-items: center; gap: 8px; font-weight: 700; }
+        .version-tag { font-size: 0.75rem; background: var(--brand-blue); color: white; padding: 2px 6px; border-radius: 4px; font-weight: normal; }
+
+        .toolbar { display: flex; gap: 10px; align-items: center; }
+
+        button {
+            padding: 6px 14px; border: none; border-radius: 6px; cursor: pointer;
+            font-weight: 500; font-size: 0.85rem; transition: all 0.2s ease;
+            display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+        }
+
+        .btn-primary { background-color: var(--brand-blue); color: white; }
+        .btn-primary:hover { background-color: #1d4ed8; }
+        .btn-danger { background-color: #fee2e2; color: var(--alert-color); }
+        .btn-danger:hover { background-color: #fecaca; }
+        .btn-outline { background-color: transparent; border: 1px solid var(--border-color); color: var(--text-sub); }
+        .btn-outline:hover { background-color: #f8fafc; color: var(--text-main); }
+        .btn-outline:disabled { opacity: 0.5; cursor: not-allowed; background-color: transparent; color: var(--text-sub); border-color: var(--border-color); }
+        .btn-poster { background-color: #4f46e5; color: white; }
+        .btn-poster:hover { background-color: #4338ca; }
+
+        .week-controller {
+            display: flex; align-items: center; background: var(--bg-color);
+            border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden;
+        }
+        .week-btn { background: transparent; border: none; padding: 4px 12px; cursor: pointer; color: var(--text-sub); font-size: 1rem; }
+        .week-btn:hover:not(:disabled) { background: #e2e8f0; color: var(--primary-color); }
+        .week-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .week-display { padding: 4px 16px; font-weight: 600; color: var(--primary-color); border-left: 1px solid var(--border-color); border-right: 1px solid var(--border-color); font-family: monospace; font-size: 0.95rem; background: var(--card-bg); }
+        
+        .historical-badge { font-size: 0.7rem; background-color: #fef3c7; color: #d97706; padding: 2px 8px; border-radius: 12px; margin-left: 8px; display: none; }
+
+        .app-layout { display: flex; flex: 1; overflow: hidden; }
+
+        .sidebar { width: 280px; background: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; overflow-y: auto; }
+
+        .user-profile { padding: 16px; border-bottom: 1px solid var(--border-color); background-color: #fafbfc; }
+        .user-profile-title { font-size: 0.75rem; color: var(--text-sub); font-weight: 600; margin-bottom: 8px; text-transform: uppercase; }
+        .user-input-group { display: flex; flex-direction: column; gap: 6px; }
+        .user-input { width: 100%; padding: 6px 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.85rem; outline: none; transition: all 0.2s; background: #ffffff; }
+        .user-input:focus { border-color: var(--brand-blue); box-shadow: 0 0 0 2px rgba(37,99,235,0.1); }
+
+        .sector-nav { padding: 12px; flex: 1; }
+        .sector-nav-title { font-size: 0.75rem; color: var(--text-sub); font-weight: 600; margin-bottom: 8px; padding-left: 8px; text-transform: uppercase; }
+        
+        .nav-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 12px; border-radius: 6px; cursor: pointer;
+            color: var(--text-main); font-size: 0.85rem; font-weight: 500;
+            margin-bottom: 2px; transition: all 0.15s; position: relative;
+        }
+        .nav-item:hover { background-color: #f1f5f9; }
+        .nav-item.active { background-color: #eff6ff; color: var(--brand-blue); font-weight: 600; }
+        
+        .nav-item-left { display: flex; align-items: center; gap: 8px; }
+        
+        .nav-alert-dot {
+            width: 6px; height: 6px; background-color: var(--alert-color); border-radius: 50%; display: inline-block;
+            box-shadow: 0 0 4px rgba(239, 68, 68, 0.6); animation: pulse-dot 2s infinite;
+        }
+        @keyframes pulse-dot { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 4px rgba(239, 68, 68, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+
+        .nav-item-badge { background: #e2e8f0; color: #475569; font-size: 0.7rem; padding: 2px 6px; border-radius: 10px; font-family: monospace; }
+        .nav-item.active .nav-item-badge { background: #dbeafe; color: var(--brand-blue); }
+        
+        .btn-add-sector-side { width: calc(100% - 16px); margin: 8px; padding: 8px; background: transparent; border: 1px dashed #cbd5e1; color: var(--text-sub); border-radius: 6px; cursor: pointer; transition: all 0.2s; font-size: 0.8rem;}
+        .btn-add-sector-side:hover { border-color: var(--brand-blue); color: var(--brand-blue); background: #f8fafc; }
+
+        .sidebar-footer { margin-top: auto; padding: 16px; border-top: 1px solid var(--border-color); background: #fafbfc; }
+
+        .main-content { flex: 1; padding: 24px 32px; overflow-y: auto; background: var(--bg-color); }
+
+        .sector-header-main { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #e2e8f0; }
+        .sector-title-wrapper { display: flex; align-items: center; gap: 12px; }
+        .sector-title-main { font-size: 1.3rem; font-weight: 700; color: var(--primary-color); }
+        
+        .edit-icon { cursor: pointer; color: #cbd5e1; font-size: 0.9rem; opacity: 0; transition: opacity 0.2s, color 0.2s; }
+        .sector-title-wrapper:hover .edit-icon, .item-title-col:hover .edit-icon { opacity: 1; }
+        .edit-icon:hover { color: var(--brand-blue); }
+
+        .item-list { display: flex; flex-direction: column; gap: 12px; max-width: 900px; }
+
+        .item-card { border: 1px solid var(--border-color); border-radius: 8px; background-color: #ffffff; box-shadow: 0 1px 2px rgba(0,0,0,0.03); transition: box-shadow 0.2s, border-color 0.2s; }
+        .item-card:hover { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.06); border-color: #cbd5e1; }
+        
+        .item-card.is-alert { border-color: #fca5a5; box-shadow: 0 0 0 1px #fca5a5, 0 1px 3px rgba(239, 68, 68, 0.1); }
+        .item-card.is-alert .item-header { background-color: #fef2f2; border-bottom-color: #fca5a5; }
+
+        .item-header { padding: 12px 16px; display: flex; align-items: flex-start; gap: 12px; background-color: #fafbfc; border-bottom: 1px solid var(--border-color); border-radius: 8px 8px 0 0; transition: background-color 0.2s; }
+
+        .status-pill { text-align: center; font-size: 0.7rem; padding: 2px 8px; border-radius: 12px; cursor: pointer; user-select: none; font-weight: 600; white-space: nowrap; margin-top: 2px; }
+        .status-plan { background: #f1f5f9; color: var(--status-plan); border: 1px solid #cbd5e1; }
+        .status-run { background: #e0f2fe; color: var(--status-run); border: 1px solid #bae6fd; }
+        .status-block { background: #fee2e2; color: var(--status-block); border: 1px solid #fecaca; }
+        .status-done { background: #d1fae5; color: var(--status-done); border: 1px solid #a7f3d0; }
+        .status-overdue { background: #fff7ed; color: var(--status-overdue); border: 1px solid #fed7aa; } 
+
+        .item-title-col { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+        .item-title { font-weight: 600; color: var(--primary-color); font-size: 0.9rem; line-height: 1.3; display: flex; align-items: center; gap: 6px; }
+        .item-time { font-size: 0.65rem; color: var(--text-sub); font-family: monospace; }
+
+        .item-ddl-col { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+        .ddl-label { font-size: 0.6rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; }
+        .ddl-input { border: 1px solid transparent; background: transparent; color: var(--text-main); font-family: monospace; font-size: 0.75rem; padding: 2px; border-radius: 4px; cursor: text; transition: all 0.2s; outline: none; }
+        .ddl-input:hover, .ddl-input:focus { border-color: var(--border-color); background: #fff; }
+        
+        .btn-alert-toggle { background: transparent; border: 1px solid transparent; border-radius: 4px; padding: 2px 6px; font-size: 0.7rem; cursor: pointer; color: #94a3b8; transition: all 0.2s; display: flex; align-items: center; gap: 4px; }
+        .btn-alert-toggle:hover { background: #f1f5f9; color: var(--text-main); }
+        .btn-alert-toggle.active { color: var(--alert-color); background: #fef2f2; border-color: #fca5a5; font-weight: 600; }
+        
+        .btn-icon-small { background: none; border: none; color: #cbd5e1; cursor: pointer; font-size: 1rem; padding: 2px; border-radius: 4px; }
+        .btn-icon-small:hover { color: var(--alert-color); background: #fee2e2; }
+
+        .item-timeline { padding: 8px 16px; }
+        .timeline-entry { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+        .timeline-date { font-family: monospace; font-size: 0.65rem; color: var(--brand-blue); background: #eff6ff; padding: 2px 4px; border-radius: 4px; margin-top: 2px; }
+        
+        .timeline-text { 
+            flex: 1; font-size: 0.85rem; color: var(--text-main); white-space: pre-wrap; line-height: 1.5; 
+            padding: 2px 4px; border-radius: 4px; border: 1px solid transparent; transition: all 0.2s;
+        }
+        .timeline-text.editable:hover { background-color: #f8fafc; border-color: #cbd5e1; cursor: text; }
+        
+        .link-wrap { position: relative; display: inline-block; vertical-align: baseline; }
+        .link-wrap a { color: var(--brand-blue); text-decoration: none; font-weight: 500; }
+        .link-wrap a:hover { text-decoration: underline; }
+        
+        .link-edit-btn {
+            opacity: 0; visibility: hidden; pointer-events: none;
+            position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+            background: #1e293b; color: #ffffff; font-size: 0.7rem; padding: 4px 8px;
+            border-radius: 4px; cursor: pointer; white-space: nowrap; z-index: 20;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2); font-family: sans-serif; font-weight: normal;
+            transition: opacity 0.15s ease, visibility 0.15s ease;
+            transition-delay: 0.1s; 
+        }
+        .link-edit-btn::after {
+            content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+            border-width: 4px; border-style: solid; border-color: #1e293b transparent transparent transparent;
+        }
+        .link-edit-btn::before {
+            content: ''; position: absolute; top: 100%; left: -20px; right: -20px; height: 16px; background: transparent;
+        }
+        .link-wrap:hover .link-edit-btn {
+            opacity: 1; visibility: visible; pointer-events: auto;
+            transition-delay: 0s; 
+        }
+        
+        .timeline-input-wrapper { display: flex; gap: 6px; align-items: flex-start; margin-top: 8px; }
+        .timeline-input-box { flex: 1; width: 100%; border: 1px dashed #cbd5e1; padding: 6px 10px; font-size: 0.8rem; border-radius: 4px; background-color: transparent; transition: all 0.2s; resize: vertical; min-height: 32px; font-family: inherit; }
+        .timeline-input-box:focus { border-style: solid; border-color: var(--brand-blue); background-color: #fff; outline: none; }
+
+        .add-item-wrapper { margin-top: 12px; max-width: 900px; }
+        .add-item-input { width: 100%; padding: 10px 14px; border: 1px dashed #94a3b8; border-radius: 6px; background-color: #fff; font-size: 0.85rem; outline: none; transition: all 0.2s; }
+        .add-item-input:focus { border-style: solid; border-color: var(--brand-blue); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.8); backdrop-filter: blur(8px); z-index: 100; overflow-y: auto; }
+        .modal-scroll-wrapper { width: 100%; min-height: 100%; padding: 30px 16px; display: flex; justify-content: center; align-items: flex-start; box-sizing: border-box; }
+        .modal-container { background: white; width: 100%; max-width: 800px; padding: 24px; border-radius: 12px; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
+        
+        #md-output { flex: 1; margin-top: 16px; padding: 12px; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 6px; font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 0.85rem; white-space: pre-wrap; overflow-y: auto; max-height: 50vh; line-height: 1.6;}
+
+        .empty-state { text-align: center; padding: 40px 20px; color: #94a3b8; font-size: 0.85rem;}
+
+        /* 可视化战报专属样式 */
+        .p-wrapper-box { 
+            width: 100%; max-width: 760px; margin: 0 auto;
+            background: #ffffff; padding: 24px 32px; 
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; 
+            color: #1e293b; box-sizing: border-box; 
+            border-radius: 8px; border: 1px solid #e2e8f0; 
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.5);
+        }
+        .p-header-bar { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 20px; }
+        .p-header-title { font-size: 1.25rem; font-weight: 800; color: #0f172a; margin: 0; line-height: 1.1; letter-spacing: -0.5px;}
+        .p-header-meta { font-size: 0.7rem; color: #64748b; font-family: monospace; line-height: 1;}
+        
+        .p-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
+        .p-kpi-card { 
+            background: #f8fafc; border-radius: 6px; padding: 12px 14px; 
+            display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 4px;
+        }
+        .p-kpi-val { font-size: 1.4rem; font-weight: 700; font-family: -apple-system, sans-serif; line-height: 1; }
+        .p-kpi-label { font-size: 0.65rem; color: #64748b; font-weight: 600; text-transform: uppercase;}
+        
+        .p-risk-banner { background: #fef2f2; border-left: 3px solid #ef4444; padding: 8px 12px; border-radius: 2px; margin-bottom: 16px; }
+        .p-risk-banner-title { font-size: 0.8rem; font-weight: 700; color: #991b1b; margin-bottom: 4px; }
+        .p-risk-item { font-size: 0.75rem; color: #7f1d1d; display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px dashed #fecaca; }
+        .p-risk-item:last-child { border-bottom: none; padding-bottom: 0; }
+        
+        .p-health-banner { background: #ecfdf5; border-left: 3px solid #10b981; padding: 8px 12px; border-radius: 2px; margin-bottom: 16px; font-size: 0.8rem; font-weight: 600; color: #065f46; display: flex; align-items: center; gap: 6px; }
+        
+        .p-detail-title { 
+            font-size: 0.8rem; font-weight: 700; color: #64748b; 
+            margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;
+            border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;
+        }
+        
+        .p-sector-block { margin-bottom: 16px; }
+        .p-sector-header { 
+            padding: 4px 0 6px 0; font-weight: 700; font-size: 0.9rem; color: #1e293b; 
+            border-bottom: 1px solid #f1f5f9; margin-bottom: 4px;
+        }
+        .p-sector-body { display: flex; flex-direction: column; gap: 8px;}
+        
+        .p-item-row { padding: 4px 0; }
+        
+        .p-item-main { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 2px; }
+        .p-status-badge { font-size: 0.6rem; padding: 2px 4px; border-radius: 3px; font-weight: 600; flex-shrink: 0; margin-top: 1px; line-height: 1;}
+        .p-item-title { flex: 1; font-size: 0.8rem; font-weight: 500; color: #334155; line-height: 1.4; }
+        .p-item-meta { font-size: 0.65rem; color: #94a3b8; font-family: monospace; white-space: nowrap; line-height: 1.4;}
+        
+        .p-item-update { 
+            margin-top: 4px; padding: 6px 8px; background: #f8fafc; 
+            border-left: 2px solid #e2e8f0; border-radius: 0 4px 4px 0; 
+            font-size: 0.7rem; color: #475569; white-space: pre-wrap; line-height: 1.5;
+        }
+        .p-item-update a { color: var(--brand-blue); text-decoration: none; font-weight: 500;}
+        .p-update-date { color: #64748b; font-family: monospace; font-weight: 600; margin-right: 4px; }
+        
+        .p-footer { margin-top: 24px; text-align: center; color: #cbd5e1; font-size: 0.65rem; border-top: 1px dashed #e2e8f0; padding-top: 12px; font-family: monospace;}
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>我的周报 <span class="version-tag">v25.0</span> <span id="historical-badge" class="historical-badge">⚠️ 历史快照</span></h1>
+    <div class="toolbar">
+        <div class="week-controller">
+            <button class="week-btn" id="btn-prev-week" onclick="changeWeek(-1)" title="历史周报">◀</button>
+            <div class="week-display" id="week-display">2026-W--</div>
+            <button class="week-btn" id="btn-next-week" onclick="changeWeek(1)" title="回到未来">▶</button>
+        </div>
+        <button class="btn-outline" onclick="document.getElementById('file-import').click()">⬇️ 导入</button>
+        <input type="file" id="file-import" accept=".json" style="display: none;" onchange="importData(event)">
+        <button class="btn-outline" onclick="exportData()">⬆️ 备份</button>
+        
+        <button class="btn-outline" id="btn-undo" onclick="undoAction()" disabled title="撤销">↩️ 撤销</button>
+        
+        <button class="btn-danger" id="btn-clean" onclick="archiveDoneItems()" style="background-color: var(--alert-color); color: white;">清理已完成</button>
+        <button class="btn-primary" onclick="exportMD()">📄 导出 Markdown</button>
+        <button class="btn-poster" onclick="openPoster()">📊 导出看板</button>
+    </div>
+</header>
+
+<div class="app-layout">
+    <aside class="sidebar">
+        <div class="user-profile">
+            <div class="user-profile-title">汇报人基本信息</div>
+            <div class="user-input-group">
+                <input type="text" class="user-input" id="user-name" placeholder="填写姓名..." onblur="updateUserInfo('name', this.value)">
+                <input type="text" class="user-input" id="user-group" placeholder="填写组别/部门..." onblur="updateUserInfo('group', this.value)">
+            </div>
+        </div>
+        
+        <div class="sector-nav" id="sector-nav"></div>
+        <button class="btn-add-sector-side" onclick="addSector()">+ 新增板块</button>
+        
+        <div class="sidebar-footer">
+            <button class="btn-outline" style="width: 100%; border-color: #fca5a5; color: var(--alert-color);" onclick="clearLocalCache()">🗑️ 初始化工具</button>
+        </div>
+    </aside>
+
+    <main class="main-content" id="main-content"></main>
+</div>
+
+<div id="modal-md" class="modal-overlay">
+    <div class="modal-scroll-wrapper">
+        <div class="modal-container">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 style="margin:0; color: var(--primary-color); font-size:1.2rem;">Markdown 报表就绪 <span id="md-week-title" style="font-size:0.9rem;color:var(--text-sub);"></span></h2>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-outline" onclick="closeModal('modal-md')">关闭</button>
+                    <button class="btn-primary" onclick="copyAndCloseMD()">复制 Markdown</button>
+                </div>
+            </div>
+            <div id="md-output"></div>
+        </div>
+    </div>
+</div>
+
+<div id="modal-poster" class="modal-overlay">
+    <div class="modal-scroll-wrapper">
+        <div class="modal-container" style="max-width: 820px; padding: 24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                <div>
+                    <h2 style="margin:0; font-size:1.1rem; color: var(--primary-color);">看板渲染就绪</h2>
+                    <div style="color:var(--text-sub); font-size:0.8rem; margin-top:4px;">
+                        ℹ️ 您可以“复制图片”粘贴至聊天，或“导出图片”保存到本地。
+                    </div>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-outline" onclick="closeModal('modal-poster')">关闭</button>
+                    <button class="btn-outline" onclick="copyPosterImage()" id="btn-copy-img">📋 复制图片</button>
+                    <button class="btn-primary" onclick="downloadPosterImage()" id="btn-download-img">⬇️ 导出图片 (PNG)</button>
+                </div>
+            </div>
+            
+            <div style="background: #f1f5f9; padding: 24px 0; border-radius: 8px; border: 1px solid #cbd5e1; display: flex; justify-content: center;">
+                <div id="poster-render-target"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const STORAGE_KEY_V25 = 'auto_arch_weekly_data_v25'; 
+    const STORAGE_KEY_OLD = 'auto_arch_weekly_data_v24'; 
+    const DEFAULT_SECTORS = ["架构集成", "功能安全", "工具链"];
+    
+    const STATUS_FLOW = [
+        { id: 0, label: "⏳ 计划", md: "[计划]", hex: "#94a3b8", txtHex: "#475569", bgHex: "#f1f5f9" },
+        { id: 1, label: "🏃 进行中", md: "[进行中]", hex: "#0ea5e9", txtHex: "#0284c7", bgHex: "#e0f2fe" },
+        { id: 2, label: "🛑 阻塞", md: "[阻塞]", hex: "#ef4444", txtHex: "#b91c1c", bgHex: "#fee2e2" },
+        { id: 3, label: "✅ 已完成", md: "[已完成]", hex: "#10b981", txtHex: "#047857", bgHex: "#d1fae5" },
+        { id: 4, label: "⚠️ 超期", md: "[超期]", hex: "#f97316", txtHex: "#c2410c", bgHex: "#ffedd5" }
+    ];
+
+    let globalData = { version: 25, userInfo: { name: "", group: "" }, weeks: {} };
+    let actualCurrentWeek = ""; 
+    let viewingWeek = "";       
+    let activeSector = ""; 
+    let isFreshStart = false;
+    let undoStack = [];
+
+    function escapeHTML(str) { return str.replace(/[&<>'"]/g, tag => ({'&': '&amp;','<': '&lt;','>': '&gt;',"'": '&#39;','"': '&quot;'}[tag])); }
+
+    function renderLinks(text, itemId, updateId, isPoster = false) {
+        let safeText = escapeHTML(text);
+        let mdLinks = [];
+        
+        safeText = safeText.replace(/\[([^\]]+)\]\((https?:\/\/[^\s]+)\)/g, (match, title, url) => {
+            mdLinks.push({ title, url });
+            return `%%MD_LINK_${mdLinks.length - 1}%%`;
+        });
+
+        safeText = safeText.replace(/(https?:\/\/[^\s<]+)/g, (url) => {
+            const encUrl = escapeHTML(url);
+            if (isPoster) return `<a href="${encUrl}" style="color:var(--brand-blue); text-decoration:none;">${encUrl}</a>`;
+            return `<span class="link-wrap"><a href="${encUrl}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">${encUrl}</a><span class="link-edit-btn" onclick="triggerEditLink(event, ${itemId}, ${updateId}, '${encodeURIComponent(url)}', '${encodeURIComponent(url)}')">✏️加名字</span></span>`;
+        });
+
+        safeText = safeText.replace(/%%MD_LINK_(\d+)%%/g, (match, index) => {
+            const { title, url } = mdLinks[index];
+            const encTitle = escapeHTML(title);
+            const encUrl = escapeHTML(url);
+            if (isPoster) return `<a href="${encUrl}" style="color:var(--brand-blue); text-decoration:none; font-weight:500;">${encTitle}</a>`;
+            return `<span class="link-wrap"><a href="${encUrl}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">${encTitle}</a><span class="link-edit-btn" onclick="triggerEditLink(event, ${itemId}, ${updateId}, '${encodeURIComponent(title)}', '${encodeURIComponent(url)}')">✏️编文字</span></span>`;
+        });
+
+        return safeText;
+    }
+
+    function triggerEditLink(e, itemId, updateId, encOldTitle, encUrl) {
+        e.stopPropagation();
+        if (viewingWeek !== actualCurrentWeek) return;
+        
+        const oldTitle = decodeURIComponent(encOldTitle);
+        const url = decodeURIComponent(encUrl);
+        const newTitle = prompt("修改超链接展示的文字:", oldTitle);
+
+        if (newTitle !== null && newTitle.trim() !== "" && newTitle !== oldTitle) {
+            pushToUndoStack();
+            const state = getViewingState();
+            const item = state.items.find(i => i.id === itemId);
+            const update = item.updates.find(u => u.id === updateId);
+
+            const mdFormat = `[${oldTitle}](${url})`;
+            if (update.text.includes(mdFormat)) {
+                update.text = update.text.replace(mdFormat, `[${newTitle.trim()}](${url})`);
+            } else if (update.text.includes(url)) {
+                update.text = update.text.replace(url, `[${newTitle.trim()}](${url})`);
+            }
+            save();
+            refreshUI();
+        }
+    }
+
+    document.addEventListener('paste', function(e) {
+        const target = e.target;
+        if (target.tagName === 'TEXTAREA' || target.classList.contains('add-item-input')) {
+            const html = e.clipboardData.getData('text/html');
+            const plainText = e.clipboardData.getData('text/plain');
+            
+            if (html) {
+                e.preventDefault();
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = html;
+                
+                const links = tempDiv.querySelectorAll('a');
+                links.forEach(a => {
+                    const href = a.getAttribute('href');
+                    const text = a.textContent.trim();
+                    if (href) {
+                        const mdNode = document.createTextNode(`[${text || href}](${href})`);
+                        a.parentNode.replaceChild(mdNode, a);
+                    }
+                });
+
+                document.body.appendChild(tempDiv);
+                tempDiv.style.display = 'none';
+                let mdText = tempDiv.innerText;
+                document.body.removeChild(tempDiv);
+                
+                if (!mdText) mdText = plainText;
+
+                const start = target.selectionStart;
+                const end = target.selectionEnd;
+                target.value = target.value.substring(0, start) + mdText + target.value.substring(end);
+                target.selectionStart = target.selectionEnd = start + mdText.length;
+                
+                target.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        }
+    });
+
+    function init() {
+        const now = new Date();
+        actualCurrentWeek = getISOWeekString(now);
+        
+        const saved = localStorage.getItem(STORAGE_KEY_V25);
+        if (saved) {
+            try { globalData = JSON.parse(saved); } catch (e) { console.error(e); }
+        } else {
+            const savedOld = localStorage.getItem(STORAGE_KEY_OLD);
+            if(savedOld) {
+                try {
+                    let oldData = JSON.parse(savedOld);
+                    globalData.weeks = oldData.weeks;
+                    globalData.userInfo = oldData.userInfo || { name: "", group: "" };
+                } catch(e) {}
+            } else {
+                isFreshStart = true;
+            }
+            save();
+        }
+
+        if(!globalData.userInfo) globalData.userInfo = { name: "", group: "" };
+        document.getElementById('user-name').value = globalData.userInfo.name || "";
+        document.getElementById('user-group').value = globalData.userInfo.group || "";
+
+        if (!globalData.weeks[actualCurrentWeek]) {
+            let lastAvailableWeek = getLatestAvailableWeek();
+            if (lastAvailableWeek) {
+                globalData.weeks[actualCurrentWeek] = JSON.parse(JSON.stringify(globalData.weeks[lastAvailableWeek]));
+            } else {
+                globalData.weeks[actualCurrentWeek] = { 
+                    sectors: [...DEFAULT_SECTORS], 
+                    items: isFreshStart ? [
+                        {
+                            id: Date.now(),
+                            sector: DEFAULT_SECTORS[0],
+                            title: "示例事项：多域控SOA服务接口定义",
+                            statusIndex: 1,
+                            ddl: "",
+                            isAlert: false,
+                            updates: [{
+                                id: Date.now() + 1,
+                                text: "尝试将包含链接的飞书内容粘贴到下方的输入框中，或者将鼠标悬停在刚才粘贴的[链接文字](https://feishu.cn)上方看看效果！",
+                                date: getShortDate()
+                            }],
+                            updateTime: getFormatTime()
+                        }
+                    ] : []
+                };
+            }
+            save();
+        }
+
+        viewingWeek = actualCurrentWeek;
+        const state = getViewingState();
+        if (state.sectors.length > 0) activeSector = state.sectors[0];
+        
+        refreshUI();
+        updateUndoButtonState();
+    }
+
+    function getLatestAvailableWeek() {
+        const weeks = Object.keys(globalData.weeks).sort();
+        return weeks.length === 0 ? null : weeks[weeks.length - 1];
+    }
+    function save() { localStorage.setItem(STORAGE_KEY_V25, JSON.stringify(globalData)); }
+    function pushToUndoStack() { undoStack.push(JSON.stringify(globalData)); if (undoStack.length > 20) undoStack.shift(); updateUndoButtonState(); }
+    function undoAction() {
+        if (undoStack.length === 0) return;
+        const previousStateStr = undoStack.pop();
+        globalData = JSON.parse(previousStateStr); save();
+        const state = getViewingState();
+        if (!state.sectors.includes(activeSector) && state.sectors.length > 0) activeSector = state.sectors[0];
+        refreshUI(); updateUndoButtonState();
+    }
+    function updateUndoButtonState() { const btn = document.getElementById('btn-undo'); if (btn) btn.disabled = undoStack.length === 0; }
+
+    function clearLocalCache() {
+        exportData(true); 
+        setTimeout(() => {
+            if (confirm("已自动为您触发全量备份文件的下载。\n\n⚠️ 危险操作：是否确认彻底清除本机的所有周报数据缓存，并【初始化工具】？\n（此操作不可逆！）")) {
+                Object.keys(localStorage).forEach(key => { if (key.startsWith('auto_arch_weekly_data')) localStorage.removeItem(key); });
+                location.reload(); 
+            }
+        }, 500);
+    }
+
+    function updateUserInfo(field, value) { pushToUndoStack(); globalData.userInfo[field] = value.trim(); save(); }
+
+    function enforceDDLStatus(state) {
+        const today = new Date(); today.setHours(0,0,0,0); 
+        state.items.forEach(item => {
+            if (item.statusIndex === 3) return;
+            if (item.ddl) {
+                const ddlDate = new Date(item.ddl);
+                if (ddlDate < today) { item.statusIndex = 4; } else if (item.statusIndex === 4) { item.statusIndex = 1; }
+            } else if (item.statusIndex === 4) { item.statusIndex = 1; }
+        });
+    }
+
+    function cycleStatus(id) {
+        if (viewingWeek !== actualCurrentWeek) return;
+        pushToUndoStack();
+        const state = getViewingState();
+        const item = state.items.find(i => i.id === id);
+        if (!item) { undoStack.pop(); return; }
+
+        if (item.statusIndex === 4) { item.statusIndex = 3; } 
+        else if (item.statusIndex === 3) {
+            const today = new Date(); today.setHours(0,0,0,0);
+            if (item.ddl && new Date(item.ddl) < today) { item.statusIndex = 4; } else { item.statusIndex = 0; }
+        } else { item.statusIndex = (item.statusIndex + 1) % 4; }
+        item.updateTime = getFormatTime(); save(); refreshUI(); 
+    }
+
+    function updateDDL(id, dateValue) {
+        if (viewingWeek !== actualCurrentWeek) return;
+        pushToUndoStack();
+        const state = getViewingState();
+        const item = state.items.find(i => i.id === id);
+        if (item) { item.ddl = dateValue; item.updateTime = getFormatTime(); save(); refreshUI(); } else { undoStack.pop(); }
+    }
+
+    function toggleAlert(id) {
+        if (viewingWeek !== actualCurrentWeek) return;
+        pushToUndoStack();
+        const state = getViewingState();
+        const item = state.items.find(i => i.id === id);
+        if (item) { item.isAlert = !item.isAlert; item.updateTime = getFormatTime(); save(); refreshUI(); } else { undoStack.pop(); }
+    }
+
+    function changeWeek(direction) {
+        const sortedWeeks = Object.keys(globalData.weeks).sort();
+        const currentIndex = sortedWeeks.indexOf(viewingWeek);
+        let targetIndex = currentIndex + direction;
+        if (targetIndex >= 0 && targetIndex < sortedWeeks.length) { viewingWeek = sortedWeeks[targetIndex]; refreshUI(); }
+    }
+
+    function switchSector(sectorName) { activeSector = sectorName; renderRightPane(); renderSidebar(); }
+
+    function refreshUI() {
+        const sortedWeeks = Object.keys(globalData.weeks).sort();
+        const currentIndex = sortedWeeks.indexOf(viewingWeek);
+        document.getElementById('btn-prev-week').disabled = (currentIndex <= 0);
+        document.getElementById('btn-next-week').disabled = (currentIndex >= sortedWeeks.length - 1);
+        document.getElementById('week-display').innerText = viewingWeek;
+        
+        const isHistorical = (viewingWeek !== actualCurrentWeek);
+        document.getElementById('historical-badge').style.display = isHistorical ? 'inline-block' : 'none';
+        document.getElementById('btn-clean').style.display = isHistorical ? 'none' : 'inline-block';
+        
+        const state = getViewingState();
+        if (!isHistorical) enforceDDLStatus(state); 
+        
+        if (!state.sectors.includes(activeSector) && state.sectors.length > 0) { activeSector = state.sectors[0]; } 
+        else if (state.sectors.length === 0) { activeSector = ""; }
+        renderSidebar(); renderRightPane();
+    }
+
+    function getViewingState() { return globalData.weeks[viewingWeek]; }
+
+    function renderSidebar() {
+        const state = getViewingState();
+        const navContainer = document.getElementById('sector-nav');
+        let html = `<div class="sector-nav-title">工作板块分布</div>`;
+        const counts = {}; const alerts = {};
+        state.sectors.forEach(s => { counts[s] = 0; alerts[s] = false; });
+        state.items.forEach(i => { 
+            if (counts[i.sector] !== undefined) {
+                counts[i.sector]++; 
+                if (i.isAlert && i.statusIndex !== 3) alerts[i.sector] = true; 
+            }
+        });
+
+        state.sectors.forEach(sector => {
+            const isActive = sector === activeSector ? 'active' : '';
+            const hasAlert = alerts[sector] ? `<span class="nav-alert-dot" title="存在报警风险"></span>` : '';
+            html += `
+                <div class="nav-item ${isActive}" onclick="switchSector('${escapeHTML(sector)}')">
+                    <div class="nav-item-left"><span>${escapeHTML(sector)}</span>${hasAlert}</div>
+                    <span class="nav-item-badge">${counts[sector]}</span>
+                </div>
+            `;
+        });
+        navContainer.innerHTML = html;
+    }
+
+    function renderRightPane() {
+        const state = getViewingState();
+        const main = document.getElementById('main-content');
+        const isHistorical = (viewingWeek !== actualCurrentWeek);
+
+        if (!activeSector) {
+            main.innerHTML = `<div class="empty-state"><h3>当前暂无任何板块</h3>请在左侧点击“+ 新增板块”开始工作。</div>`; return;
+        }
+
+        const items = state.items.filter(i => i.sector === activeSector);
+        let html = `
+            <div class="sector-header-main">
+                <div class="sector-title-wrapper">
+                    <div class="sector-title-main">${escapeHTML(activeSector)}</div>
+                    ${!isHistorical ? `<span class="edit-icon" onclick="renameSector('${escapeHTML(activeSector)}')" title="重命名板块">✏️</span>` : ''}
+                </div>
+                ${!isHistorical && items.length === 0 ? `<button class="btn-outline" onclick="deleteSector('${escapeHTML(activeSector)}')">删除空板块</button>` : ''}
+            </div>
+            <div class="item-list">
+        `;
+
+        if (items.length === 0 && isHistorical) html += `<div class="empty-state">该历史周此板块暂无数据。</div>`;
+
+        items.forEach(item => {
+            const isAlertActive = item.isAlert && item.statusIndex !== 3; 
+            const cardClass = isAlertActive ? 'item-card is-alert' : 'item-card';
+            const alertBtnClass = item.isAlert ? 'btn-alert-toggle active' : 'btn-alert-toggle';
+            const statusClassMap = ["status-plan", "status-run", "status-block", "status-done", "status-overdue"];
+
+            html += `
+                <div class="${cardClass}">
+                    <div class="item-header">
+                        <div class="status-pill ${statusClassMap[item.statusIndex]}" ${!isHistorical ? `onclick="cycleStatus(${item.id})"` : ''} title="${isHistorical ? '' : '点击切换状态'}">
+                            ${STATUS_FLOW[item.statusIndex].label}
+                        </div>
+                        <div class="item-title-col">
+                            <div class="item-title">${escapeHTML(item.title)}${!isHistorical ? `<span class="edit-icon" onclick="renameItem(${item.id})" title="重命名事项">✏️</span>` : ''}</div>
+                            <div class="item-time">状态变更于: ${item.updateTime}</div>
+                        </div>
+                        <div class="item-ddl-col">
+                            <button class="${alertBtnClass}" ${isHistorical ? 'disabled' : `onclick="toggleAlert(${item.id})"`}>🚨 风险预警</button>
+                            <div style="display:flex; align-items:center; gap:4px; margin-top:2px;">
+                                <span class="ddl-label">DDL</span>
+                                <input type="date" class="ddl-input" value="${item.ddl || ''}" ${isHistorical ? 'disabled' : ''} onchange="updateDDL(${item.id}, this.value)">
+                            </div>
+                        </div>
+                        ${!isHistorical ? `<button class="btn-icon-small" onclick="deleteItem(${item.id})" title="删除事项" style="margin-left:4px;">×</button>` : '<span></span>'}
+                    </div>
+                    <div class="item-timeline">
+            `;
+            
+            item.updates.forEach(u => {
+                const canEdit = !isHistorical && (u.date === getShortDate()); 
+                const editClass = canEdit ? ' editable' : '';
+                const editTitle = canEdit ? ' title="双击原位编辑当天的记录"' : '';
+                const editHandler = canEdit ? `ondblclick="editTimelineUpdate(${item.id}, ${u.id}, this)"` : '';
+                
+                html += `
+                    <div class="timeline-entry">
+                        <span class="timeline-date">${escapeHTML(u.date)}</span>
+                        <div class="timeline-text${editClass}" ${editTitle} ${editHandler}>${renderLinks(u.text, item.id, u.id, false)}</div>
+                        ${!isHistorical ? `<button class="btn-icon-small" onclick="deleteTimelineUpdate(${item.id}, ${u.id})" title="删除此条进展">×</button>` : ''}
+                    </div>
+                `;
+            });
+
+            if (!isHistorical) {
+                html += `
+                    <div class="timeline-input-wrapper">
+                        <span style="color:var(--text-sub); font-size:1.1rem; margin-top:0px;">↳</span>
+                        <textarea class="timeline-input-box" placeholder="记录新进展... (直接粘贴带标题的飞书/网页链接，Enter 保存，Shift+Enter 换行)" onkeydown="handleTimelineInput(event, ${item.id}, this)" oninput="this.style.height='';this.style.height=this.scrollHeight+'px'"></textarea>
+                    </div>
+                `;
+            }
+            html += `</div></div>`;
+        });
+
+        html += `</div>`; 
+        if (!isHistorical) {
+            html += `
+                <div class="add-item-wrapper">
+                    <input type="text" class="add-item-input" placeholder="+ 新增事项... (输入后按 Enter 键录入)" onkeydown="if(event.key==='Enter') createItem('${escapeHTML(activeSector)}', this)">
+                </div>
+            `;
+        }
+        main.innerHTML = html;
+    }
+
+    function editTimelineUpdate(itemId, updateId, element) {
+        if (viewingWeek !== actualCurrentWeek) return;
+        const state = getViewingState();
+        const item = state.items.find(i => i.id === itemId);
+        if (!item) return;
+        const update = item.updates.find(u => u.id === updateId);
+        if (!update || update.date !== getShortDate()) return;
+
+        const currentText = update.text;
+        const textarea = document.createElement('textarea');
+        textarea.className = 'timeline-input-box';
+        textarea.value = currentText;
+        textarea.style.height = Math.max(32, element.offsetHeight + 10) + 'px';
+        textarea.style.flex = "1";
+        
+        const saveEdit = () => {
+            const newText = textarea.value.trim();
+            if (newText && newText !== currentText) {
+                pushToUndoStack();
+                update.text = newText;
+                save();
+            }
+            refreshUI(); 
+        };
+
+        textarea.onblur = saveEdit;
+        textarea.onkeydown = (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault(); textarea.blur(); 
+            } else if (e.key === 'Escape') {
+                refreshUI(); 
+            }
+        };
+
+        element.parentNode.replaceChild(textarea, element);
+        textarea.focus();
+        textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
+    }
+
+    function renameSector(o){
+        if(viewingWeek!==actualCurrentWeek)return;
+        const n=prompt("为板块输入新的名称:",o);
+        if(n&&n.trim()&&n.trim()!==o){
+            const s=getViewingState();
+            if(s.sectors.includes(n.trim())){alert("板块名称已存在！");return;}
+            pushToUndoStack();
+            const i=s.sectors.indexOf(o);s.sectors[i]=n.trim();s.items.forEach(it=>{if(it.sector===o)it.sector=n.trim();});activeSector=n.trim();save();refreshUI();
+        }
+    }
+    function renameItem(id){
+        if(viewingWeek!==actualCurrentWeek)return;
+        const s=getViewingState();const i=s.items.find(it=>it.id===id);if(!i)return;
+        const n=prompt("重命名该事项:",i.title);
+        if(n&&n.trim()&&n!==i.title){pushToUndoStack();i.title=n.trim();save();refreshUI();}
+    }
+    function addSector(){
+        if(viewingWeek!==actualCurrentWeek){alert("历史快照不可修改结构，请回到当前周。");return;}
+        const n=prompt("请输入新的工作板块名称 (例如：量产保障):");
+        if(n&&n.trim()){
+            const s=getViewingState();
+            if(!s.sectors.includes(n.trim())){ pushToUndoStack(); s.sectors.push(n.trim());activeSector=n.trim();save();refreshUI(); }
+        }
+    }
+    function deleteSector(n){
+        const s=getViewingState();
+        if(confirm(`确定要彻底移除空板块【${n}】吗？`)){ pushToUndoStack(); s.sectors=s.sectors.filter(sec=>sec!==n);if(activeSector===n)activeSector=s.sectors[0]||"";save();refreshUI(); }
+    }
+    function createItem(sec,el){
+        const t=el.value.trim();if(!t)return;
+        pushToUndoStack();
+        const s=getViewingState();s.items.push({id:Date.now(),sector:sec,title:t,statusIndex:1,ddl:"",isAlert:false,updates:[],updateTime:getFormatTime()});save();refreshUI();
+    }
+    function handleTimelineInput(e,id,tx){
+        if(e.key==='Enter'&&!e.shiftKey){
+            e.preventDefault();const t=tx.value.trim();
+            if(t){ pushToUndoStack(); const s=getViewingState();const i=s.items.find(it=>it.id===id);i.updates.push({id:Date.now(),text:t,date:getShortDate()});i.updateTime=getFormatTime();save();refreshUI(); }
+        }
+    }
+    function deleteTimelineUpdate(iid,uid){
+        pushToUndoStack(); const s=getViewingState();const i=s.items.find(it=>it.id===iid);if(i){i.updates=i.updates.filter(u=>u.id!==uid);save();refreshUI();} else { undoStack.pop(); }
+    }
+    function deleteItem(id){
+        if(confirm('确定要彻底删除该事项吗？(仅影响本周及未来)')){ pushToUndoStack(); const s=getViewingState();s.items=s.items.filter(i=>i.id!==id);save();refreshUI(); }
+    }
+    function archiveDoneItems(){
+        const s=getViewingState();const d=s.items.filter(i=>i.statusIndex===3);
+        if(d.length===0){alert('本周没有已完成的事项可以清理。');return;}
+        if(confirm(`确定要从本周面板归档清理 ${d.length} 个已完成(✅)的事项吗？（下周它们将不再出现）`)){ pushToUndoStack(); s.items=s.items.filter(i=>i.statusIndex!==3);save();refreshUI(); }
+    }
+
+    function calcStats(state) {
+        let total = state.items.length;
+        let done = state.items.filter(i => i.statusIndex === 3).length;
+        let run = state.items.filter(i => i.statusIndex === 1).length;
+        let block = state.items.filter(i => i.statusIndex === 2).length;
+        let overdue = state.items.filter(i => i.statusIndex === 4).length;
+        let alertCount = state.items.filter(i => i.isAlert && i.statusIndex !== 3).length;
+        return { total, done, run, block, overdue, alertCount };
+    }
+
+    function exportMD() {
+        const state = getViewingState();
+        const user = globalData.userInfo;
+        const stats = calcStats(state);
+        
+        let md = `# ${viewingWeek} 工作周报\n\n`;
+        const userName = user.name || '未填写';
+        const userGroup = user.group || '未填写';
+        md += `> 👤 汇报人: **${userName}** | 🏢 组织: **${userGroup}** | ⏱️ 时间: **${getFormatTime()}**\n\n`;
+
+        md += `### 📊 态势综述\n`;
+        md += `> 📌 **跟进总数**: \`${stats.total}\` &nbsp; | &nbsp; ✅ **本周完成**: \`${stats.done}\` &nbsp; | &nbsp; 🏃 **稳步推进**: \`${stats.run}\`\n`;
+        md += `> 🚨 **风险预警**: \`${stats.alertCount}\` &nbsp; | &nbsp; ⚠️ **超期告警**: \`${stats.overdue}\` &nbsp; | &nbsp; 🛑 **严重阻塞**: \`${stats.block}\`\n\n`;
+
+        md += `### 📋 工作详情\n\n`;
+
+        const groups = {};
+        state.sectors.forEach(s => groups[s] = []);
+        state.items.forEach(i => { if(groups[i.sector] !== undefined) groups[i.sector].push(i); });
+
+        let index = 1;
+        state.sectors.forEach(sector => {
+            if (groups[sector] && groups[sector].length > 0) {
+                // 去除此处的 Emoji 文件夹图标，仅保留纯文本板块标题
+                md += `#### ${index++}. ${sector}\n\n`;
+                
+                const sortedItems = groups[sector].sort((a, b) => {
+                    const aRiskScore = (a.isAlert && a.statusIndex !== 3) ? 100 : 0;
+                    const bRiskScore = (b.isAlert && b.statusIndex !== 3) ? 100 : 0;
+                    if (aRiskScore !== bRiskScore) return bRiskScore - aRiskScore;
+                    const order = [1, 2, 3, 4, 0]; return order.indexOf(a.statusIndex) - order.indexOf(b.statusIndex);
+                });
+
+                sortedItems.forEach((item, idx) => {
+                    const ddlText = item.ddl ? ` \`DDL: ${item.ddl}\`` : '';
+                    const alertText = (item.isAlert && item.statusIndex !== 3) ? ` 🚨\`高风险\`` : '';
+                    const statusName = STATUS_FLOW[item.statusIndex].label.split(' ')[1] || STATUS_FLOW[item.statusIndex].label;
+
+                    md += `**[${statusName}] ${item.title}**${alertText} \`${item.updateTime}\`${ddlText}\n`;
+                    
+                    if (item.updates && item.updates.length > 0) {
+                        const reversedUpdates = [...item.updates].reverse();
+                        reversedUpdates.forEach(u => {
+                            const formattedText = u.text.replace(/\n/g, '<br>');
+                            md += `> \`${u.date}\` ${formattedText}\n`;
+                        });
+                    }
+                    
+                    if (idx < sortedItems.length - 1) {
+                        md += `---\n`;
+                    } else {
+                        md += `\n`;
+                    }
+                });
+            }
+        });
+
+        document.getElementById('md-week-title').innerText = `(${viewingWeek})`;
+        document.getElementById('md-output').innerText = md;
+        document.getElementById('modal-md').style.display = 'flex';
+    }
+
+    function openPoster() {
+        const state = getViewingState();
+        const user = globalData.userInfo;
+        const stats = calcStats(state);
+        const target = document.getElementById('poster-render-target');
+        
+        let reporterInfo = user.name ? `${user.name} (${user.group || '架构组'})` : '架构工作组';
+        
+        const riskItems = state.items.filter(i => i.isAlert && i.statusIndex !== 3);
+        let riskHtml = '';
+        if (riskItems.length > 0) {
+            riskHtml = `<div class="p-risk-banner"><div class="p-risk-banner-title">🚨 高风险预警 (${riskItems.length})</div>`;
+            riskItems.forEach(item => {
+                riskHtml += `
+                    <div class="p-risk-item">
+                        <span>【${escapeHTML(item.sector)}】 ${escapeHTML(item.title)}</span>
+                        <span style="font-weight:600;">${STATUS_FLOW[item.statusIndex].label.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g,'')}</span>
+                    </div>
+                `;
+            });
+            riskHtml += `</div>`;
+        } else {
+            riskHtml = `<div class="p-health-banner"><span>✅</span> 大盘健康，本周暂无高风险告警项。</div>`;
+        }
+
+        let fullSectorsHtml = `<div class="p-detail-title">工作详情</div>`;
+        const groups = {};
+        state.sectors.forEach(s => groups[s] = []);
+        state.items.forEach(i => { if(groups[i.sector] !== undefined) groups[i.sector].push(i); });
+        
+        state.sectors.forEach(sector => {
+            if (groups[sector].length === 0) return;
+            const items = groups[sector].sort((a,b) => {
+                const aRiskScore = (a.isAlert && a.statusIndex !== 3) ? 100 : 0;
+                const bRiskScore = (b.isAlert && b.statusIndex !== 3) ? 100 : 0;
+                if (aRiskScore !== bRiskScore) return bRiskScore - aRiskScore;
+                const order = [1, 2, 3, 4, 0]; return order.indexOf(a.statusIndex) - order.indexOf(b.statusIndex);
+            });
+            
+            fullSectorsHtml += `
+                <div class="p-sector-block">
+                    <div class="p-sector-header">${escapeHTML(sector)}</div>
+                    <div class="p-sector-body">
+            `;
+            
+            items.forEach(item => {
+                const f = STATUS_FLOW[item.statusIndex];
+                const ddlHtml = item.ddl ? `<span style="margin-left:6px; color:#f97316;">DDL:${item.ddl}</span>` : '';
+                const alertHtml = (item.isAlert && item.statusIndex !== 3) ? `<span style="color:#ef4444; margin-right:4px;">🚨</span>` : '';
+                
+                let latestUpdateHtml = '';
+                if (item.updates && item.updates.length > 0) {
+                    const latest = item.updates[item.updates.length - 1]; 
+                    latestUpdateHtml = `<div class="p-item-update"><span class="p-update-date">[${escapeHTML(latest.date)}]</span>${renderLinks(latest.text, item.id, latest.id, true)}</div>`;
+                }
+
+                fullSectorsHtml += `
+                    <div class="p-item-row">
+                        <div class="p-item-main">
+                            <div class="p-status-badge" style="background:${f.bgHex}; color:${f.txtHex}; border:1px solid ${f.hex}30;">
+                                ${f.label.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g,'')}
+                            </div>
+                            <div class="p-item-title">${alertHtml}${escapeHTML(item.title)}</div>
+                            <div class="p-item-meta">${item.updateTime}${ddlHtml}</div>
+                        </div>
+                        ${latestUpdateHtml}
+                    </div>
+                `;
+            });
+            fullSectorsHtml += `</div></div>`;
+        });
+
+        const reporterMetaStr = reporterInfo ? `👤 ${escapeHTML(reporterInfo)} &#160;|&#160; ⏱️ ${getFormatTime()}` : `⏱️ ${getFormatTime()}`;
+
+        target.innerHTML = `
+            <div id="p-wrapper-source" class="p-wrapper-box">
+                <div class="p-header-bar">
+                    <div class="p-header-title">${viewingWeek}</div>
+                    <div class="p-header-meta">${reporterMetaStr}</div>
+                </div>
+                
+                <div class="p-kpi-grid">
+                    <div class="p-kpi-card" style="border-left: 3px solid #3b82f6;">
+                        <div class="p-kpi-label">跟进事项总数</div>
+                        <div class="p-kpi-val" style="color:#1e3a8a;">${stats.total}</div>
+                    </div>
+                    <div class="p-kpi-card" style="border-left: 3px solid #10b981;">
+                        <div class="p-kpi-label">本周完成</div>
+                        <div class="p-kpi-val" style="color:#064e3b;">${stats.done}</div>
+                    </div>
+                    <div class="p-kpi-card" style="border-left: 3px solid #f59e0b;">
+                        <div class="p-kpi-label">超期告警</div>
+                        <div class="p-kpi-val" style="color:#92400e;">${stats.overdue}</div>
+                    </div>
+                    <div class="p-kpi-card" style="border-left: 3px solid #ef4444;">
+                        <div class="p-kpi-label">严重阻塞</div>
+                        <div class="p-kpi-val" style="color:#991b1b;">${stats.block}</div>
+                    </div>
+                </div>
+                
+                ${riskHtml}
+                ${fullSectorsHtml}
+                
+                <div class="p-footer">Generated by Arch Weekly Editor v25.0</div>
+            </div>
+        `;
+
+        document.getElementById('modal-poster').style.display = 'flex';
+    }
+
+    function generatePosterCanvas(onSuccess, onError) {
+        const wrapperSource = document.getElementById('p-wrapper-source');
+        if(!wrapperSource) return;
+
+        const width = 760; 
+        const height = wrapperSource.offsetHeight;
+        
+        const essentialStyles = `
+            .p-wrapper-box { width: 760px; background: #ffffff; padding: 24px 32px; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; color: #1e293b; box-sizing: border-box; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.5); }
+            .p-header-bar { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 20px; }
+            .p-header-title { font-size: 1.25rem; font-weight: 800; color: #0f172a; margin: 0; line-height: 1.1; letter-spacing: -0.5px;}
+            .p-header-meta { font-size: 0.7rem; color: #64748b; font-family: monospace; line-height: 1;}
+            .p-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
+            .p-kpi-card { background: #f8fafc; border-radius: 6px; padding: 12px 14px; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 4px; }
+            .p-kpi-val { font-size: 1.4rem; font-weight: 700; font-family: -apple-system, sans-serif; line-height: 1; }
+            .p-kpi-label { font-size: 0.65rem; color: #64748b; font-weight: 600; text-transform: uppercase;}
+            .p-risk-banner { background: #fef2f2; border-left: 3px solid #ef4444; padding: 8px 12px; border-radius: 2px; margin-bottom: 16px; }
+            .p-risk-banner-title { font-size: 0.8rem; font-weight: 700; color: #991b1b; margin-bottom: 4px; }
+            .p-risk-item { font-size: 0.75rem; color: #7f1d1d; display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px dashed #fecaca; }
+            .p-risk-item:last-child { border-bottom: none; padding-bottom: 0; }
+            .p-health-banner { background: #ecfdf5; border-left: 3px solid #10b981; padding: 8px 12px; border-radius: 2px; margin-bottom: 16px; font-size: 0.8rem; font-weight: 600; color: #065f46; display: flex; align-items: center; gap: 6px; }
+            .p-detail-title { font-size: 0.8rem; font-weight: 700; color: #64748b; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
+            .p-sector-block { margin-bottom: 16px; }
+            .p-sector-header { padding: 4px 0 6px 0; font-weight: 700; font-size: 0.9rem; color: #1e293b; border-bottom: 1px solid #f1f5f9; margin-bottom: 4px; }
+            .p-sector-body { display: flex; flex-direction: column; gap: 8px;}
+            .p-item-row { padding: 4px 0; }
+            .p-item-main { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 2px; }
+            .p-status-badge { font-size: 0.6rem; padding: 2px 4px; border-radius: 3px; font-weight: 600; flex-shrink: 0; margin-top: 1px; line-height: 1;}
+            .p-item-title { flex: 1; font-size: 0.8rem; font-weight: 500; color: #334155; line-height: 1.4; }
+            .p-item-meta { font-size: 0.65rem; color: #94a3b8; font-family: monospace; white-space: nowrap; line-height: 1.4;}
+            .p-item-update { margin-top: 4px; padding: 6px 8px; background: #f8fafc; border-left: 2px solid #e2e8f0; border-radius: 0 4px 4px 0; font-size: 0.7rem; color: #475569; white-space: pre-wrap; line-height: 1.5; }
+            .p-item-update a { color: var(--brand-blue); text-decoration: none; font-weight: 500;}
+            .p-update-date { color: #64748b; font-family: monospace; font-weight: 600; margin-right: 4px; }
+            .p-footer { margin-top: 24px; text-align: center; color: #cbd5e1; font-size: 0.65rem; border-top: 1px dashed #e2e8f0; padding-top: 12px; font-family: monospace;}
+        `;
+
+        const clone = wrapperSource.cloneNode(true);
+        clone.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
+        
+        const styleNode = document.createElement('style');
+        styleNode.textContent = essentialStyles;
+        clone.insertBefore(styleNode, clone.firstChild);
+
+        const xmlSerializer = new XMLSerializer();
+        const htmlStr = xmlSerializer.serializeToString(clone);
+        
+        const data = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
+                <foreignObject width="100%" height="100%">
+                    ${htmlStr}
+                </foreignObject>
+            </svg>
+        `;
+
+        const svgUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(data)));
+        
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        
+        img.onload = function() {
+            try {
+                const canvas = document.createElement('canvas');
+                const scale = 2; 
+                canvas.width = width * scale;
+                canvas.height = height * scale;
+                const ctx = canvas.getContext('2d');
+                ctx.scale(scale, scale);
+                
+                ctx.fillStyle = "#ffffff";
+                ctx.fillRect(0, 0, width, height);
+                ctx.drawImage(img, 0, 0);
+                
+                onSuccess(canvas);
+            } catch (err) {
+                onError(err);
+            }
+        };
+        img.onerror = function(err) { 
+            onError(err);
+        }
+        img.src = svgUrl;
+    }
+
+    function downloadPosterImage() {
+        const btn = document.getElementById('btn-download-img');
+        const oldText = btn.innerText;
+        btn.innerText = "⏳ 处理中...";
+        btn.disabled = true;
+
+        generatePosterCanvas(
+            (canvas) => {
+                try {
+                    const a = document.createElement('a');
+                    a.download = `我的周报_${viewingWeek}.png`;
+                    a.href = canvas.toDataURL('image/png', 1.0);
+                    a.click();
+                } catch (err) {
+                    console.error(err);
+                    alert("安全限制阻止了自动下载。请直接使用长截图工具截取。");
+                } finally { btn.innerText = oldText; btn.disabled = false; }
+            },
+            (err) => {
+                console.error("SVG 加载崩溃", err);
+                alert("SVG 解析仍遇到严格限制。已显示全景看板，请用系统工具直接截图。"); 
+                btn.innerText = oldText; btn.disabled = false;
+            }
+        );
+    }
+
+    function copyPosterImage() {
+        const btn = document.getElementById('btn-copy-img');
+        const oldText = btn.innerText;
+        btn.innerText = "⏳ 复制中...";
+        btn.disabled = true;
+
+        generatePosterCanvas(
+            (canvas) => {
+                try {
+                    canvas.toBlob(function(blob) {
+                        if (!blob) { alert("生成图片失败。"); btn.innerText = oldText; btn.disabled = false; return; }
+                        try {
+                            const item = new ClipboardItem({ "image/png": blob });
+                            navigator.clipboard.write([item]).then(function() {
+                                alert("✅ 战报图片已成功复制！可直接前往通讯软件粘贴。");
+                            }).catch(function(err) {
+                                console.error(err);
+                                alert("复制失败：浏览器拦截或当前非 HTTPS 安全环境。");
+                            }).finally(() => { btn.innerText = oldText; btn.disabled = false; });
+                        } catch (err) {
+                            console.error(err);
+                            alert("当前环境不支持剪贴板API，请使用导出或系统截图。");
+                            btn.innerText = oldText; btn.disabled = false;
+                        }
+                    }, "image/png", 1.0);
+                } catch(e) {
+                    console.error(e); alert("遇到安全限制无法复制。");
+                    btn.innerText = oldText; btn.disabled = false;
+                }
+            },
+            (err) => {
+                console.error(err); alert("SVG解析受限无法复制，请用系统截图。"); 
+                btn.innerText = oldText; btn.disabled = false;
+            }
+        );
+    }
+
+    function exportData(isSilent = false) {
+        const blob = new Blob([JSON.stringify(globalData, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `ArchReport_FullBackup_${actualCurrentWeek}.json`;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    }
+    
+    function importData(event) {
+        const file = event.target.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try { const imported = JSON.parse(e.target.result);
+                if (imported.version && imported.weeks) { pushToUndoStack(); globalData = imported; save(); init(); alert("数据导入成功！"); } 
+                else { alert("格式不兼容。"); }
+            } catch (err) { alert("文件损坏。"); } event.target.value = '';
+        }; reader.readAsText(file);
+    }
+    
+    function copyAndCloseMD() { navigator.clipboard.writeText(document.getElementById('md-output').innerText).then(() => closeModal('modal-md')).catch(() => alert('复制失败，请手动框选。')); }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function getFormatTime() { const now = new Date(); return `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`; }
+    function getShortDate() { const now = new Date(); return `${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')}`; }
+    function getISOWeekString(d) { const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay()||7)); const yearStart = new Date(Date.UTC(date.getUTCFullYear(),0,1)); const weekNo = Math.ceil(( ( (date - yearStart) / 86400000) + 1)/7); return `${date.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`; }
+
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+            if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+                undoAction();
+            }
+        }
+    });
+
+    init();
+</script>
+</body>
+</html>
