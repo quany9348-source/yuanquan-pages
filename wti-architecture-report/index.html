@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>整车WTI配置表与VAS应用软件架构</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-page: #f6f8fb;
+    --bg-surface: #ffffff;
+    --bg-elevated: #f0f3f8;
+    --border-subtle: #dde3ed;
+    --border-active: #bcc8da;
+    --text-primary: #111827;
+    --text-secondary: #4b5563;
+    --text-muted: #8896a8;
+    --accent-blue: #1a5fdc;
+    --accent-blue-light: #3b82f6;
+    --accent-blue-dim: #dbeafe;
+    --accent-sky: #0ea5e9;
+    --accent-amber: #d97706;
+    --accent-amber-dim: #fef3c7;
+    --accent-green: #059669;
+    --accent-green-dim: #d1fae5;
+    --accent-red: #dc2626;
+    --accent-red-dim: #fee2e2;
+    --accent-purple: #7c3aed;
+    --accent-purple-dim: #ede9fe;
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+    --gap: 24px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg-page);
+    color: var(--text-primary);
+    font-family: 'Inter', -apple-system, sans-serif;
+    font-weight: 400;
+    line-height: 1.72;
+    overflow-x: hidden;
+  }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-page); }
+  ::-webkit-scrollbar-thumb { background: var(--border-active); border-radius: 3px; }
+
+  h1 { font-weight: 800; font-size: 3rem; letter-spacing: -0.025em; line-height: 1.15; color: #0f172a; }
+  h2 { font-weight: 700; font-size: 1.7rem; letter-spacing: -0.01em; color: #1e293b; }
+  h3 { font-weight: 600; font-size: 1.2rem; color: #1e293b; }
+  .mono { font-family: 'DM Mono','Cascadia Code','Consolas',monospace; font-size:0.85em; }
+
+  .container { max-width: 1200px; margin:0 auto; padding:0 32px; }
+  .container-wide { max-width: 1320px; margin:0 auto; padding:0 24px; }
+
+  section {
+    position: relative;
+    padding: 90px 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .section-num {
+    display: inline-flex; align-items:center; gap:10px;
+    font-family: 'DM Mono',monospace; font-size:0.72rem; letter-spacing:0.14em;
+    color: var(--accent-blue); text-transform: uppercase; margin-bottom: 12px; font-weight: 500;
+  }
+  .section-num::before {
+    content:''; display:inline-block; width:20px; height:2px;
+    background: var(--accent-blue); border-radius:1px;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    min-height: 100vh; display:flex; align-items:center; padding:100px 0 120px;
+    border-bottom: none; background: linear-gradient(180deg, #ffffff 0%, #f6f8fb 100%);
+  }
+  .hero h1 { margin-bottom: 20px; }
+  .hero .subtitle { font-size: 1.1rem; color: var(--text-secondary); max-width: 620px; font-weight: 400; line-height: 1.8; }
+  .hero .badge-row { display: flex; gap:10px; margin-top:28px; flex-wrap:wrap; }
+  .hero .badge {
+    font-family: 'DM Mono',monospace; font-size:0.68rem; letter-spacing:0.08em;
+    padding:6px 14px; border:1px solid var(--border-active); border-radius:20px;
+    color: var(--accent-blue); background: var(--accent-blue-dim); font-weight: 500;
+  }
+  .hero-graphic {
+    position: absolute; right: -40px; top: 50%; transform: translateY(-50%);
+    width: 380px; height: 380px; pointer-events:none; z-index:0; opacity:0.6;
+  }
+
+  /* ── Section divider ── */
+  .section-divider {
+    display:flex; align-items:center; gap:8px; margin:0 0 40px; opacity:0.35;
+  }
+  .section-divider .trace { flex:1; height:1px; background: var(--border-active); }
+  .section-divider .dot { width:6px; height:6px; border-radius:50%; background:var(--accent-blue); }
+
+  /* ── Cards ── */
+  .card-grid { display:grid; gap:var(--gap); }
+  .card-grid.cols-2 { grid-template-columns:1fr 1fr; }
+  .card-grid.cols-3 { grid-template-columns:repeat(3,1fr); }
+
+  .card {
+    background: var(--bg-surface); border:1px solid var(--border-subtle);
+    border-radius: var(--radius-md); padding:28px; box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.25s, border-color 0.25s;
+  }
+  .card:hover { border-color: var(--border-active); box-shadow: var(--shadow-md); }
+  .card.accent-blue { border-left:3px solid var(--accent-blue); }
+  .card.accent-sky { border-left:3px solid var(--accent-sky); }
+  .card.accent-green { border-left:3px solid var(--accent-green); }
+  .card.accent-amber { border-left:3px solid var(--accent-amber); }
+  .card .card-label {
+    font-family: 'DM Mono',monospace; font-size:0.62rem; letter-spacing:0.1em;
+    text-transform:uppercase; margin-bottom:10px; font-weight:500;
+  }
+
+  /* ── Flow diagram ── */
+  .flow-diagram {
+    display:flex; align-items:center; justify-content:center; gap:0;
+    padding:32px 0; flex-wrap:wrap;
+  }
+  .flow-node {
+    background: var(--bg-surface); border:1px solid var(--border-subtle);
+    border-radius: var(--radius-md); padding:18px 24px; text-align:center;
+    min-width:140px; box-shadow: var(--shadow-sm);
+  }
+  .flow-node .node-title { font-weight:600; font-size:0.9rem; }
+  .flow-node .node-sub { font-size:0.76rem; color:var(--text-muted); margin-top:4px; }
+  .flow-arrow {
+    display:flex; align-items:center; padding:0 8px; color:var(--accent-blue);
+    font-size:1.3rem;
+  }
+  .flow-arrow::after {
+    content:''; display:block; width:28px; height:2px;
+    background: linear-gradient(90deg, var(--accent-blue), var(--accent-blue-light) 60%, transparent);
+  }
+  .flow-arrow .arrowhead {
+    width:0; height:0;
+    border-top:5px solid transparent;
+    border-bottom:5px solid transparent;
+    border-left:7px solid var(--accent-blue);
+    margin-left:-1px;
+  }
+
+  /* ── Comparison panel ── */
+  .compare-panel {
+    display:grid; grid-template-columns:1fr 1fr; gap:0;
+    border:1px solid var(--border-subtle); border-radius:var(--radius-md);
+    overflow:hidden; box-shadow: var(--shadow-sm);
+  }
+  .compare-col { padding:32px 28px; }
+  .compare-col:first-child { background: var(--accent-blue-dim); border-right:1px solid var(--border-subtle); }
+  .compare-col:last-child { background: var(--accent-amber-dim); }
+  .compare-col .col-tag {
+    font-family: 'DM Mono',monospace; font-size:0.62rem; letter-spacing:0.1em;
+    text-transform:uppercase; margin-bottom:14px; display:inline-block;
+    padding:4px 10px; border-radius:20px; font-weight:500;
+  }
+  .compare-col:first-child .col-tag { color:var(--accent-blue); background:rgba(26,95,220,0.1); }
+  .compare-col:last-child .col-tag { color:var(--accent-amber); background:rgba(217,119,6,0.1); }
+  .compare-col p { color:var(--text-secondary); font-size:0.88rem; margin-bottom:10px; }
+  .compare-divider {
+    text-align:center; padding:12px 0; font-size:0.82rem;
+    color:var(--accent-red); font-weight:600;
+    background: var(--accent-red-dim); border-top:1px dashed rgba(220,38,38,0.2);
+  }
+
+  /* ── Pain grid ── */
+  .pain-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .pain-item {
+    background:var(--bg-surface); border:1px solid var(--border-subtle);
+    border-radius:var(--radius-md); padding:22px; display:flex; gap:14px; align-items:flex-start;
+    box-shadow: var(--shadow-sm); transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .pain-item:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+  .pain-num {
+    font-family:'DM Mono',monospace; font-size:1.3rem; font-weight:600;
+    color:var(--accent-amber); flex-shrink:0; opacity:0.65;
+  }
+  .pain-item h4 { font-size:0.9rem; font-weight:600; margin-bottom:5px; }
+  .pain-item p { font-size:0.82rem; color:var(--text-secondary); line-height:1.6; }
+
+  /* ── Solution architecture ── */
+  .solution-layers { display:flex; flex-direction:column; gap:20px; }
+  .solution-layer {
+    border:1px solid var(--border-subtle); border-radius:var(--radius-md);
+    padding:28px; background:var(--bg-surface); box-shadow: var(--shadow-sm);
+  }
+  .layer-header { display:flex; align-items:center; gap:12px; margin-bottom:18px; }
+  .layer-icon {
+    width:38px; height:38px; border-radius:var(--radius-sm);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'DM Mono',monospace; font-size:0.65rem; font-weight:600; flex-shrink:0;
+  }
+  .layer-icon.soft { background:var(--accent-blue-dim); color:var(--accent-blue); border:1px solid rgba(26,95,220,0.2); }
+  .layer-icon.data { background:var(--accent-amber-dim); color:var(--accent-amber); border:1px solid rgba(217,119,6,0.2); }
+
+  .baseline-split {
+    display:grid; grid-template-columns:1fr 36px 1fr; align-items:center; gap:14px; margin-top:14px;
+  }
+  .baseline-box {
+    background:var(--bg-elevated); border-radius:var(--radius-sm);
+    padding:18px; text-align:center; border:1px solid var(--border-subtle);
+  }
+  .baseline-box.nt30 { border-top:2px solid var(--accent-blue); }
+  .baseline-box.nt35 { border-top:2px solid var(--accent-amber); }
+  .baseline-box .baseline-label {
+    font-family:'DM Mono',monospace; font-size:0.72rem; letter-spacing:0.06em; font-weight:500; margin-bottom:6px;
+  }
+  .fork-icon { text-align:center; font-size:1.5rem; color:var(--text-muted); }
+
+  /* ── Room grid ── */
+  .room-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px; }
+  .room-box {
+    background:var(--bg-elevated); border:1px solid var(--border-subtle);
+    border-radius:var(--radius-sm); padding:14px 16px; font-size:0.82rem;
+    display:flex; align-items:center; gap:10px;
+  }
+  .room-box .room-dot {
+    width:8px; height:8px; border-radius:50%; flex-shrink:0;
+  }
+  .room-box .room-dot.nt30 { background:var(--accent-blue); }
+  .room-box .room-dot.nt35 { background:var(--accent-amber); }
+
+  /* ── Table style ── */
+  .table-wrap { overflow-x:auto; margin-top:16px; }
+  .table-wrap table {
+    width:100%; border-collapse:collapse; font-size:0.84rem;
+  }
+  .table-wrap th {
+    background:var(--bg-elevated); font-weight:600; text-align:left;
+    padding:10px 14px; border-bottom:2px solid var(--border-active); font-size:0.78rem; color:var(--text-secondary);
+  }
+  .table-wrap td {
+    padding:9px 14px; border-bottom:1px solid var(--border-subtle); color:var(--text-secondary);
+  }
+  .table-wrap tr:hover td { background:var(--accent-blue-dim); }
+
+  /* ── Conclusion ── */
+  .conclusion-box {
+    background: linear-gradient(135deg, var(--accent-blue-dim) 0%, #f0f9ff 100%);
+    border:1px solid rgba(26,95,220,0.2); border-radius:var(--radius-md);
+    padding:36px; text-align:center;
+  }
+  .arrow-down-chain {
+    display:flex; flex-direction:column; align-items:center; gap:6px; margin:20px 0;
+  }
+  .arrow-down-chain .chain-item {
+    font-family:'DM Mono',monospace; font-size:0.76rem; letter-spacing:0.05em;
+    padding:7px 18px; border-radius:20px;
+    background:var(--bg-surface); border:1px solid var(--border-subtle);
+    color:var(--text-secondary);
+  }
+  .arrow-down-chain .chain-arrow { color:var(--accent-purple); font-size:0.9rem; }
+
+  /* ── Three Brand Cards ── */
+  .brand-stack { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .brand-card {
+    text-align:center; padding:26px 18px; background:var(--bg-surface);
+    border:1px solid var(--border-subtle); border-radius:var(--radius-md);
+    box-shadow:var(--shadow-sm);
+  }
+  .brand-card::before {
+    content:''; position:absolute; top:0; left:16px; right:16px; height:3px; border-radius:0 0 3px 3px;
+  }
+  .brand-card { position:relative; }
+  .brand-card.brand-nio { border-top:3px solid var(--accent-blue); }
+  .brand-card.brand-onvo { border-top:3px solid var(--accent-green); }
+  .brand-card.brand-mollary { border-top:3px solid var(--accent-amber); }
+  .brand-card .brand-name { font-weight:700; font-size:1.05rem; margin-bottom:4px; }
+  .brand-card .brand-desc { font-size:0.8rem; color:var(--text-muted); }
+
+  /* ── Advantages ── */
+  .advantage-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:20px; }
+  .advantage-card {
+    background:var(--bg-surface); border:1px solid var(--border-subtle);
+    border-radius:var(--radius-md); padding:22px; text-align:center;
+    box-shadow:var(--shadow-sm);
+  }
+  .advantage-card .adv-num {
+    font-family:'DM Mono',monospace; font-size:1.2rem; font-weight:600;
+    color:var(--accent-blue); margin-bottom:8px;
+  }
+  .advantage-card h4 { font-size:0.9rem; font-weight:600; margin-bottom:6px; }
+  .advantage-card p { font-size:0.8rem; color:var(--text-secondary); }
+
+  /* ── Animations ── */
+  .reveal { opacity:0; transform:translateY(24px); transition:opacity 0.6s ease, transform 0.6s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+  .reveal-delay-1 { transition-delay:0.08s; }
+  .reveal-delay-2 { transition-delay:0.16s; }
+  .reveal-delay-3 { transition-delay:0.24s; }
+  .reveal-delay-4 { transition-delay:0.32s; }
+
+  /* ── Footer ── */
+  footer {
+    text-align:center; padding:40px 0; color:var(--text-muted);
+    font-size:0.8rem; background:var(--bg-surface); border-top:1px solid var(--border-subtle);
+  }
+
+  @media (max-width:768px) {
+    .card-grid.cols-2,.card-grid.cols-3,.compare-panel,.pain-grid,
+    .brand-stack,.baseline-split,.room-grid,.advantage-grid { grid-template-columns:1fr; }
+    .hero h1 { font-size:1.9rem; }
+    .flow-diagram { flex-direction:column; }
+    .flow-arrow { transform:rotate(90deg); }
+    section { padding:50px 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════ HERO ════════════ -->
+<section class="hero" id="top">
+  <div class="container">
+    <span class="section-num reveal">Technical Architecture Report</span>
+    <h1 class="reveal reveal-delay-1">
+      整车WTI配置表<br>与VAS应用软件架构
+    </h1>
+    <p class="subtitle reveal reveal-delay-2">
+      从 NT3.0 到 NT3.5 的平台演进中，通过配置表房间拆分与软件基线分离，
+      系统化解耦统一配置与接口断代的架构冲突；探索从 Simulink 模型驱动到手写代码 + AI 赋能的技术转型
+    </p>
+    <div class="badge-row reveal reveal-delay-3">
+      <span class="badge">NT3.0 / 3.5</span>
+      <span class="badge">NIO · ONVO · Mollary</span>
+      <span class="badge">VAS WTI</span>
+      <span class="badge">Simulink → Hand-Code</span>
+      <span class="badge">Room Split</span>
+    </div>
+  </div>
+
+  <svg class="hero-graphic" viewBox="0 0 380 380" xmlns="http://www.w3.org/2000/svg">
+    <rect x="40" y="40" width="300" height="300" rx="8" fill="none" stroke="#1a5fdc" stroke-opacity="0.08" stroke-width="1"/>
+    <rect x="100" y="100" width="180" height="180" rx="4" fill="none" stroke="#1a5fdc" stroke-opacity="0.12" stroke-width="1"/>
+    <circle cx="190" cy="190" r="55" fill="none" stroke="#d97706" stroke-opacity="0.1" stroke-width="1" stroke-dasharray="3 6"/>
+    <line x1="40" y1="190" x2="100" y2="190" stroke="#1a5fdc" stroke-opacity="0.15" stroke-width="1"/>
+    <line x1="280" y1="190" x2="340" y2="190" stroke="#1a5fdc" stroke-opacity="0.15" stroke-width="1"/>
+    <line x1="190" y1="40" x2="190" y2="100" stroke="#1a5fdc" stroke-opacity="0.15" stroke-width="1"/>
+    <line x1="190" y1="280" x2="190" y2="340" stroke="#1a5fdc" stroke-opacity="0.15" stroke-width="1"/>
+    <circle cx="190" cy="190" r="3" fill="#1a5fdc" opacity="0.3"/>
+  </svg>
+</section>
+
+<!-- ════════════ ARCHITECTURE OVERVIEW: STATUS QUO & CONFLICT ════════════ -->
+<section id="arch-overview" style="background:#fff;">
+  <div class="container-wide">
+    <span class="section-num reveal">Architecture Overview</span>
+    <h2 class="reveal">系统现状：统一配置表与分裂接口的矛盾</h2>
+    <p class="reveal" style="color:var(--text-secondary); margin:8px 0 8px;">
+      NT3.0 时代的架构模式在 NT3.5 到来后失效 — 配置层合一，接口层割裂
+    </p>
+    <p class="reveal" style="color:var(--accent-red); font-size:0.9rem; font-weight:500; margin-bottom:36px;">
+      核心矛盾：一份统一配置表，无法同时适配两套互不兼容的服务接口
+    </p>
+
+    <div class="reveal reveal-delay-1" style="background:#ffffff; border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:48px 24px; overflow-x:auto;">
+      <svg viewBox="0 0 1240 820" xmlns="http://www.w3.org/2000/svg" style="width:100%; max-width:1240px; display:block; margin:0 auto;">
+
+        <!-- ====== Layer 0: Brand unified rooms ====== -->
+        <text x="620" y="24" text-anchor="middle" fill="#6b7280" font-family="'DM Mono',monospace" font-size="14" letter-spacing="1.5">LAYER 0 — 品牌配置层：一份统一配置表覆盖 3.0 + 3.5（纵向不区分平台）</text>
+
+        <!-- NIO unified room -->
+        <rect x="80" y="44" width="320" height="76" rx="5" fill="#ffffff" stroke="#1a5fdc" stroke-opacity="0.4" stroke-width="2"/>
+        <text x="240" y="74" text-anchor="middle" fill="#1a5fdc" font-family="Inter,sans-serif" font-size="18" font-weight="700">NIO 品牌房间</text>
+        <text x="240" y="100" text-anchor="middle" fill="#374151" font-family="Inter,sans-serif" font-size="14">WTI 统一配置表（NT3.0 + NT3.5）</text>
+
+        <!-- ONVO unified room -->
+        <rect x="460" y="44" width="320" height="76" rx="5" fill="#ffffff" stroke="#059669" stroke-opacity="0.4" stroke-width="2"/>
+        <text x="620" y="74" text-anchor="middle" fill="#059669" font-family="Inter,sans-serif" font-size="18" font-weight="700">ONVO 品牌房间</text>
+        <text x="620" y="100" text-anchor="middle" fill="#374151" font-family="Inter,sans-serif" font-size="14">WTI 统一配置表（NT3.0 + NT3.5）</text>
+
+        <!-- Mollary unified room -->
+        <rect x="840" y="44" width="320" height="76" rx="5" fill="#ffffff" stroke="#d97706" stroke-opacity="0.4" stroke-width="2"/>
+        <text x="1000" y="74" text-anchor="middle" fill="#d97706" font-family="Inter,sans-serif" font-size="18" font-weight="700">Mollary 品牌房间</text>
+        <text x="1000" y="100" text-anchor="middle" fill="#374151" font-family="Inter,sans-serif" font-size="14">WTI 统一配置表（NT3.0 + NT3.5）</text>
+
+        <!-- WTI ID annotation -->
+        <rect x="1000" y="8" width="210" height="28" rx="14" fill="#ffffff" stroke="#1a5fdc" stroke-opacity="0.3" stroke-width="1.5"/>
+        <text x="1105" y="27" text-anchor="middle" fill="#1a5fdc" font-family="'DM Mono',monospace" font-size="11" font-weight="500">WTI ID 全局唯一</text>
+
+        <!-- ====== Down arrows converge into single baseline ====== -->
+        <line x1="240" y1="120" x2="240" y2="152" stroke="#1a5fdc" stroke-opacity="0.3" stroke-width="1.5"/>
+        <line x1="620" y1="120" x2="620" y2="152" stroke="#059669" stroke-opacity="0.3" stroke-width="1.5"/>
+        <line x1="1000" y1="120" x2="1000" y2="152" stroke="#d97706" stroke-opacity="0.3" stroke-width="1.5"/>
+
+        <line x1="240" y1="151" x2="1000" y2="151" stroke="#9ca3af" stroke-opacity="0.22" stroke-width="1.2"/>
+        <line x1="620" y1="151" x2="620" y2="172" stroke="#9ca3af" stroke-opacity="0.28" stroke-width="2"/>
+        <polygon points="614,166 620,180 626,166" fill="#9ca3af" opacity="0.4"/>
+
+        <!-- ====== Layer 1: SINGLE Software Baseline ====== -->
+        <text x="620" y="160" text-anchor="middle" fill="#6b7280" font-family="'DM Mono',monospace" font-size="14" letter-spacing="1.5">LAYER 1 — 软件执行层（NT3.0 时期仅一版基线，无法覆盖 NT3.5）</text>
+
+        <rect x="180" y="190" width="880" height="80" rx="5" fill="#ffffff" stroke="#1a5fdc" stroke-opacity="0.45" stroke-width="2"/>
+        <text x="620" y="224" text-anchor="middle" fill="#1a5fdc" font-family="Inter,sans-serif" font-size="20" font-weight="700">VAS WTI 统一软件基线（仅对接 NT3.0 服务接口）</text>
+        <text x="620" y="252" text-anchor="middle" fill="#374151" font-family="Inter,sans-serif" font-size="13">基于 Simulink 模型开发 · 配置表增量需手动修改模型 · 一版代码覆盖全品牌</text>
+
+        <!-- ====== SPLIT: The Fork ====== -->
+        <line x1="620" y1="270" x2="620" y2="318" stroke="#1a5fdc" stroke-opacity="0.4" stroke-width="2"/>
+
+        <circle cx="620" cy="340" r="24" fill="#fef2f2" stroke="#dc2626" stroke-opacity="0.55" stroke-width="2.2"/>
+        <text x="620" y="334" text-anchor="middle" fill="#dc2626" font-family="'DM Mono',monospace" font-size="12" font-weight="600">断裂点</text>
+        <text x="620" y="350" text-anchor="middle" fill="#dc2626" font-family="'DM Mono',monospace" font-size="10">CONFLICT</text>
+
+        <line x1="620" y1="364" x2="350" y2="422" stroke="#1a5fdc" stroke-opacity="0.4" stroke-width="2"/>
+        <line x1="620" y1="364" x2="890" y2="422" stroke="#d97706" stroke-opacity="0.4" stroke-width="2"/>
+
+        <!-- ====== Layer 2: Service Interfaces ====== -->
+        <text x="620" y="466" text-anchor="middle" fill="#6b7280" font-family="'DM Mono',monospace" font-size="14" letter-spacing="1.5">LAYER 2 — 整车服务接口层（NT3.5 出现后已分裂为两套独立体系）</text>
+
+        <!-- NT3.0 Interface - COMPATIBLE -->
+        <rect x="70" y="484" width="470" height="88" rx="5" fill="#f0fdf4" stroke="#059669" stroke-opacity="0.35" stroke-width="2"/>
+        <text x="305" y="516" text-anchor="middle" fill="#1a5fdc" font-family="Inter,sans-serif" font-size="17" font-weight="700">NT3.0 整车系统服务接口</text>
+        <text x="305" y="544" text-anchor="middle" fill="#374151" font-family="Inter,sans-serif" font-size="13">多品牌相互兼容 · 现有基线可适配</text>
+        <circle cx="518" cy="528" r="18" fill="#dcfce7" stroke="#059669" stroke-width="2.5"/>
+        <text x="518" y="536" text-anchor="middle" fill="#059669" font-family="sans-serif" font-size="20" font-weight="700">&#10003;</text>
+
+        <!-- NT3.5 Interface - INCOMPATIBLE -->
+        <rect x="700" y="484" width="470" height="88" rx="5" fill="#fff7ed" stroke="#d97706" stroke-opacity="0.35" stroke-width="2"/>
+        <text x="935" y="516" text-anchor="middle" fill="#d97706" font-family="Inter,sans-serif" font-size="17" font-weight="700">NT3.5 整车系统服务接口</text>
+        <text x="935" y="544" text-anchor="middle" fill="#374151" font-family="Inter,sans-serif" font-size="13">接口重大变化 · 与 3.0 互不兼容</text>
+        <circle cx="1148" cy="528" r="18" fill="#fef2f2" stroke="#dc2626" stroke-width="2.5"/>
+        <text x="1148" y="536" text-anchor="middle" fill="#dc2626" font-family="sans-serif" font-size="20" font-weight="700">&#10007;</text>
+
+        <!-- Broken connection -->
+        <line x1="620" y1="364" x2="935" y2="484" stroke="#dc2626" stroke-opacity="0.22" stroke-width="1.8" stroke-dasharray="8 6"/>
+
+        <rect x="560" y="374" width="120" height="50" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-opacity="0.4" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <text x="620" y="396" text-anchor="middle" fill="#dc2626" font-family="'DM Mono',monospace" font-size="12" font-weight="600">无法适配</text>
+        <text x="620" y="414" text-anchor="middle" fill="#dc2626" font-family="'DM Mono',monospace" font-size="9">BROKEN</text>
+
+        <!-- ====== Layer 3: Vehicle Systems ====== -->
+        <line x1="305" y1="572" x2="305" y2="604" stroke="#1a5fdc" stroke-opacity="0.18" stroke-width="1.2"/>
+        <line x1="935" y1="572" x2="935" y2="604" stroke="#d97706" stroke-opacity="0.18" stroke-width="1.2"/>
+
+        <rect x="160" y="610" width="920" height="38" rx="4" fill="#f9fafb" stroke="#d1d5db" stroke-opacity="0.4" stroke-width="1.5"/>
+        <text x="620" y="635" text-anchor="middle" fill="#6b7280" font-family="Inter,sans-serif" font-size="12">整车系统（Motion · Body · Thermal · HMI · ADAS · Energy · ...）</text>
+
+        <!-- ====== Conflict Explanation Box ====== -->
+        <rect x="130" y="672" width="980" height="128" rx="5" fill="#fef2f2" stroke="#dc2626" stroke-opacity="0.22" stroke-width="1.5"/>
+        <text x="620" y="702" text-anchor="middle" fill="#dc2626" font-family="Inter,sans-serif" font-size="16" font-weight="700">架构矛盾全景</text>
+        <text x="620" y="728" text-anchor="middle" fill="#374151" font-family="Inter,sans-serif" font-size="13">统一配置表（3.0 + 3.5 合一）→ 单一软件基线 → 仅能适配 NT3.0 接口</text>
+        <text x="620" y="754" text-anchor="middle" fill="#374151" font-family="Inter,sans-serif" font-size="13">NT3.5 接口独立出现后，<tspan fill="#dc2626" font-weight="700">单一基线无法同时服务两套互不兼容的接口</tspan></text>
+        <text x="620" y="782" text-anchor="middle" fill="#6b7280" font-family="Inter,sans-serif" font-size="12">矛盾本质：<tspan fill="#374151" font-weight="700">配置层"纵向合一" vs. 接口层"代际割裂" — 数据与代码的结构性错配</tspan></text>
+
+        <!-- ====== Side annotations ====== -->
+        <rect x="18" y="190" width="52" height="448" rx="3" fill="none" stroke="#d1d5db" stroke-opacity="0.25" stroke-width="1.2"/>
+        <text x="44" y="420" text-anchor="middle" fill="#6b7280" font-family="'DM Mono',monospace" font-size="10" letter-spacing="2" transform="rotate(-90,44,420)">数 据 流 方 向 ▼</text>
+
+        <rect x="1170" y="190" width="52" height="448" rx="3" fill="none" stroke="#d1d5db" stroke-opacity="0.25" stroke-width="1.2"/>
+        <text x="1196" y="250" text-anchor="middle" fill="#1a5fdc" font-family="'DM Mono',monospace" font-size="10" font-weight="600">统一入口</text>
+        <text x="1196" y="270" text-anchor="middle" fill="#6b7280" font-family="Inter,sans-serif" font-size="10">单一基线</text>
+        <text x="1196" y="330" text-anchor="middle" fill="#dc2626" font-family="'DM Mono',monospace" font-size="10" font-weight="600">接口分裂</text>
+        <text x="1196" y="350" text-anchor="middle" fill="#6b7280" font-family="Inter,sans-serif" font-size="10">不可调和</text>
+        <text x="1196" y="406" text-anchor="middle" fill="#dc2626" font-family="'DM Mono',monospace" font-size="10" font-weight="600">结构性</text>
+        <text x="1196" y="426" text-anchor="middle" fill="#dc2626" font-family="'DM Mono',monospace" font-size="10" font-weight="600">错配</text>
+        <text x="1196" y="484" text-anchor="middle" fill="#059669" font-family="'DM Mono',monospace" font-size="12" font-weight="600">3.0 &#10003;</text>
+        <text x="1196" y="510" text-anchor="middle" fill="#dc2626" font-family="'DM Mono',monospace" font-size="12" font-weight="600">3.5 &#10007;</text>
+        <text x="1196" y="562" text-anchor="middle" fill="#6b7280" font-family="Inter,sans-serif" font-size="10">必须</text>
+        <text x="1196" y="582" text-anchor="middle" fill="#6b7280" font-family="Inter,sans-serif" font-size="10">架构重构</text>
+
+        <!-- ====== Legend ====== -->
+        <rect x="960" y="610" width="16" height="16" rx="3" fill="#ffffff" stroke="#1a5fdc" stroke-opacity="0.4" stroke-width="2"/>
+        <text x="984" y="624" fill="#374151" font-family="Inter,sans-serif" font-size="11">NT3.0 体系</text>
+        <rect x="1070" y="610" width="16" height="16" rx="3" fill="#ffffff" stroke="#d97706" stroke-opacity="0.4" stroke-width="2"/>
+        <text x="1094" y="624" fill="#374151" font-family="Inter,sans-serif" font-size="11">NT3.5 体系</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ SECTION 1 ════════════ -->
+<section id="s1">
+  <div class="container">
+    <span class="section-num reveal">Section 01</span>
+    <h2 class="reveal">核心背景与配置管理机制</h2>
+    <p class="reveal" style="color:var(--text-secondary); margin:12px 0 32px;">
+      WTI 系统遵循 <strong style="color:var(--accent-blue);">"横向品牌隔离，纵向代际分离，全局ID唯一"</strong> 的核心原则
+    </p>
+
+    <div class="brand-stack reveal reveal-delay-1" style="margin-bottom: 32px;">
+      <div class="brand-card brand-nio">
+        <div class="brand-name">NIO</div>
+        <div class="brand-desc">蔚来主品牌<br>NT3.0 + NT3.5 双房间独立维护</div>
+      </div>
+      <div class="brand-card brand-onvo">
+        <div class="brand-name">ONVO</div>
+        <div class="brand-desc">乐道品牌<br>NT3.0 + NT3.5 双房间独立维护</div>
+      </div>
+      <div class="brand-card brand-mollary">
+        <div class="brand-name">Mollary</div>
+        <div class="brand-desc">NT3.0 NIO 衍生分支<br>NT3.0 + NT3.5 双房间独立维护</div>
+      </div>
+    </div>
+
+    <div class="card-grid cols-2">
+      <div class="card accent-blue reveal reveal-delay-2">
+        <div class="card-label" style="color:var(--accent-blue);">全局ID唯一</div>
+        <p style="font-size:0.9rem; color:var(--text-secondary);">
+          虽然分为多个品牌和平台房间，但 <span class="mono" style="color:var(--accent-blue);">WTI ID</span> 在全局范围保持唯一性，从根源上杜绝跨品牌、跨平台的 ID 冲突。
+        </p>
+      </div>
+      <div class="card accent-amber reveal reveal-delay-3">
+        <div class="card-label" style="color:var(--accent-amber);">纵向代际分离</div>
+        <p style="font-size:0.9rem; color:var(--text-secondary);">
+          单一品牌内 NT3.0 和 NT3.5 各自拥有<strong>独立的配置房间</strong>，分开维护，互不交叉。需求方直接提交至对应平台房间，无需额外打标。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ SECTION 2 ════════════ -->
+<section id="s2" style="background:#fff;">
+  <div class="container">
+    <span class="section-num reveal">Section 02</span>
+    <h2 class="reveal">VAS WTI 应用软件运行逻辑</h2>
+
+    <div class="flow-diagram reveal reveal-delay-1" style="margin: 36px 0;">
+      <div class="flow-node">
+        <div class="node-title">数据采集</div>
+        <div class="node-sub">订阅整车系统<br>服务接口状态</div>
+      </div>
+      <div class="flow-arrow"><span class="arrowhead"></span></div>
+      <div class="flow-node">
+        <div class="node-title">逻辑判断</div>
+        <div class="node-sub">解析 summary 字段<br>定义的逻辑规则</div>
+      </div>
+      <div class="flow-arrow"><span class="arrowhead"></span></div>
+      <div class="flow-node">
+        <div class="node-title">触发执行</div>
+        <div class="node-sub">满足条件时触发<br>WTI ID 报警/指示</div>
+      </div>
+    </div>
+
+    <div class="card accent-blue reveal reveal-delay-2" style="margin-top:20px;">
+      <div class="card-label" style="color:var(--accent-blue);">summary 字段示例</div>
+      <code class="mono" style="display:block; padding:12px 0; color:var(--accent-green); word-break:break-all;">
+        srv.motion.susp.LvlCtrlSrv.IfLvlCtrlwarning.LvlCtrlwarning.lvl_adj_mod=2
+      </code>
+      <p style="font-size:0.8rem; color:var(--text-muted); margin-top:6px;">
+        精准定义触发 WTI 所需的底层系统服务接口路径及触发阈值 · 由系统方（需求方）提供具体定义
+      </p>
+    </div>
+
+    <p class="reveal reveal-delay-3" style="margin-top:22px; padding:14px 18px; background:var(--accent-blue-dim); border-left:3px solid var(--accent-blue); border-radius:0 var(--radius-sm) var(--radius-sm) 0; font-size:0.88rem; color:var(--text-secondary);">
+      <strong style="color:var(--text-primary);">核心约束：</strong>
+      VAS WTI 应用软件所调用的系统服务接口，必须与当前运行车型的整车服务接口版本严格兼容。
+    </p>
+  </div>
+</section>
+
+<!-- ════════════ SECTION 3 ════════════ -->
+<section id="s3">
+  <div class="container">
+    <span class="section-num reveal">Section 03</span>
+    <h2 class="reveal">平台演进带来的核心矛盾</h2>
+    <p class="reveal" style="color:var(--text-secondary); margin:12px 0 36px;">
+      NT3.0 → NT3.5 底层电子电气架构演进，服务接口兼容性断裂
+    </p>
+
+    <div class="compare-panel reveal reveal-delay-1" style="margin-bottom:28px;">
+      <div class="compare-col">
+        <span class="col-tag">NT3.0 · 统一时代</span>
+        <p>多品牌所有系统的服务接口<strong style="color:var(--accent-blue);">相互兼容</strong></p>
+        <p style="font-size:0.82rem;">只有<strong style="color:var(--text-primary);">一版软件基线</strong>，最大化覆盖所有 WTI 需求</p>
+        <div style="margin-top:14px; padding:10px; background:rgba(26,95,220,0.06); border-radius:var(--radius-sm); border:1px dashed rgba(26,95,220,0.15);">
+          <span class="mono" style="font-size:0.7rem; color:var(--accent-blue);">统一软件基线 → 全平台兼容</span>
+        </div>
+      </div>
+      <div class="compare-col">
+        <span class="col-tag">NT3.5 · 独立分支</span>
+        <p>服务接口<strong style="color:var(--accent-amber);">发生重大变化</strong>，成为独立分支</p>
+        <p style="font-size:0.82rem;">实现自身多车型兼容，但<strong style="color:var(--accent-red);">与 NT3.0 互不兼容</strong></p>
+        <div style="margin-top:14px; padding:10px; background:rgba(217,119,6,0.06); border-radius:var(--radius-sm); border:1px dashed rgba(217,119,6,0.15);">
+          <span class="mono" style="font-size:0.7rem; color:var(--accent-amber);">独立软件基线 → 仅限 3.5 平台</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="compare-divider reveal reveal-delay-2">
+      核心矛盾：配置表旧模式 "3.0 与 3.5 合一" ↔ 服务接口 "3.0 与 3.5 割裂"
+    </div>
+
+    <div class="card accent-blue reveal reveal-delay-3" style="margin-top:28px;">
+      <div class="card-label" style="color:var(--accent-blue);">NT3.0 开发方式</div>
+      <p style="font-size:0.9rem; color:var(--text-secondary);">
+        VAS WTI 应用软件基于 <strong style="color:var(--accent-blue);">Simulink 模型</strong> 进行开发。
+        每个 WTI 条目的报警逻辑以图形化模块搭建在 Simulink 模型中，通过模型自动生成 C 代码后集成到应用软件。
+        当配置表新增条目时，开发人员需<strong style="color:var(--accent-amber);">手动在 Simulink 模型中逐一增加对应逻辑模块</strong>——每一次增量对应一次人工操作。
+      </p>
+    </div>
+
+    <!-- Section 3.5 -->
+    <div class="section-divider reveal" style="margin-top:44px;">
+      <span class="trace"></span><span class="dot"></span><span class="trace"></span>
+    </div>
+
+    <span class="section-num reveal" style="color:var(--accent-amber);">Section 03.5</span>
+    <h2 class="reveal">Simulink 模型的负荷与瓶颈</h2>
+    <p class="reveal" style="color:var(--text-secondary); margin-bottom:28px;">
+      在"双基线 + 双房间"的新架构下，基于 Simulink 模型的开发模式面临五个核心挑战
+    </p>
+
+    <div class="pain-grid">
+      <div class="pain-item reveal reveal-delay-1">
+        <span class="pain-num">01</span>
+        <div><h4>双线维护成本倍增</h4><p>跨平台共性的 WTI 条目需在两套 Simulink 模型中分别搭建相同逻辑，工作量翻倍</p></div>
+      </div>
+      <div class="pain-item reveal reveal-delay-2">
+        <span class="pain-num">02</span>
+        <div><h4>配置表增量的人工瓶颈</h4><p>每个新增 WTI 需手动拖拽模块、连线、配置参数，效率极低且难以自动化</p></div>
+      </div>
+      <div class="pain-item reveal reveal-delay-3">
+        <span class="pain-num">03</span>
+        <div><h4>协作与版本管理缺陷</h4><p><span class="mono">.slx</span> 二进制/XML 混合格式难以 diff、merge、审查，并行开发冲突频发</p></div>
+      </div>
+      <div class="pain-item reveal reveal-delay-4">
+        <span class="pain-num">04</span>
+        <div><h4>测试与回归周期长</h4><p>每次变更需重新生成代码、编译，执行 MIL/SIL/HIL 全链路测试，验证成本极高</p></div>
+      </div>
+      <div class="pain-item reveal reveal-delay-4" style="grid-column:1/-1;">
+        <span class="pain-num">05</span>
+        <div><h4>跨基线逻辑一致性难以保证</h4><p>同一 <span class="mono">summary</span> 逻辑在两套基线的人工实现可能存在差异，埋下质量隐患</p></div>
+      </div>
+    </div>
+
+    <div class="conclusion-box reveal" style="margin-top:36px;">
+      <p style="font-size:0.92rem; color:var(--text-secondary);">
+        继续沿用 Simulink 人工开发模式，将面临<br>
+        <strong style="color:var(--accent-red); font-size:1rem;">人力投入线性膨胀 · 交付周期持续拉长 · 质量风险累积</strong><br>
+        的不可持续局面
+      </p>
+      <div style="margin-top:20px; padding-top:20px; border-top:1px solid var(--border-subtle);">
+        <p style="font-size:0.9rem;">
+          必然路径：
+          <strong style="color:var(--accent-purple);">手写代码（Hand-Code）替代 Simulink 建模</strong>
+          +
+          <strong style="color:var(--accent-green);">AI 赋能</strong>
+        </p>
+        <div class="arrow-down-chain">
+          <span class="chain-item">WTI 逻辑自动生成</span>
+          <span class="chain-arrow">+</span>
+          <span class="chain-item">双基线代码自动同步</span>
+          <span class="chain-arrow">+</span>
+          <span class="chain-item">配置表到代码自动映射</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ SECTION 4 ════════════ -->
+<section id="s4" style="background:#fff;">
+  <div class="container">
+    <span class="section-num reveal">Section 04</span>
+    <h2 class="reveal">最终解决方案：软件分线与配置表房间拆分</h2>
+    <p class="reveal" style="color:var(--text-secondary); margin:12px 0 40px;">
+      在"软件代码"和"配置数据"两个层面进行系统性重构
+    </p>
+
+    <div class="solution-layers reveal reveal-delay-1">
+      <!-- Layer 1: Software Forking -->
+      <div class="solution-layer">
+        <div class="layer-header">
+          <div class="layer-icon soft">SW</div>
+          <div>
+            <h3>软件层面：基线分离 <span style="font-weight:400; color:var(--text-muted); font-size:0.85rem;">Software Forking</span></h3>
+          </div>
+        </div>
+        <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:18px;">
+          在现有 NT3.0 软件基线基础上，独立拉出一条 NT3.5 迭代分支，各自对接专属配置房间
+        </p>
+        <div class="baseline-split">
+          <div class="baseline-box nt30">
+            <div class="baseline-label" style="color:var(--accent-blue);">基线 A · NT3.0</div>
+            <p style="font-size:0.82rem; color:var(--text-secondary);">对接 3.0 服务接口<br>读取 NT3.0 配置房间</p>
+          </div>
+          <div class="fork-icon">→</div>
+          <div class="baseline-box nt35">
+            <div class="baseline-label" style="color:var(--accent-amber);">基线 B · NT3.5</div>
+            <p style="font-size:0.82rem; color:var(--text-secondary);">对接 3.5 服务接口<br>读取 NT3.5 配置房间</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Layer 2: Room Split -->
+      <div class="solution-layer">
+        <div class="layer-header">
+          <div class="layer-icon data">ROOM</div>
+          <div>
+            <h3>数据层面：各品牌拆分 3.0 与 3.5 独立房间 <span style="font-weight:400; color:var(--text-muted); font-size:0.85rem;">Configuration Room Split</span></h3>
+          </div>
+        </div>
+        <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:14px;">
+          各品牌（NIO、ONVO、Mollary）在现有 NT3.0 配置表基础上，<strong style="color:var(--text-primary);">各新增一个独立的 NT3.5 配置房间</strong>。
+          需求方直接提交至对应平台房间，无需额外打标。
+        </p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>品牌</th><th>NT3.0 房间</th><th>NT3.5 房间</th><th>对接基线</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>NIO</td><td><span class="mono" style="color:var(--accent-blue);">NIO_NT30</span></td><td><span class="mono" style="color:var(--accent-amber);">NIO_NT35</span></td><td>基线A / 基线B</td></tr>
+              <tr><td>ONVO</td><td><span class="mono" style="color:var(--accent-blue);">ONVO_NT30</span></td><td><span class="mono" style="color:var(--accent-amber);">ONVO_NT35</span></td><td>基线A / 基线B</td></tr>
+              <tr><td>Mollary</td><td><span class="mono" style="color:var(--accent-blue);">MOLLARY_NT30</span></td><td><span class="mono" style="color:var(--accent-amber);">MOLLARY_NT35</span></td><td>基线A / 基线B</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="advantage-grid">
+          <div class="advantage-card">
+            <div class="adv-num">01</div>
+            <h4>消除人工打标</h4>
+            <p>需求方直接提交至对应平台房间，无需逐条评估兼容性</p>
+          </div>
+          <div class="advantage-card">
+            <div class="adv-num">02</div>
+            <h4>基线天然对齐</h4>
+            <p>数据源与代码基线一一对应，逻辑清晰无歧义</p>
+          </div>
+          <div class="advantage-card">
+            <div class="adv-num">03</div>
+            <h4>独立演进</h4>
+            <p>两平台配置表独立迭代，互不干扰，稳定性隔离</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card accent-green reveal reveal-delay-2" style="margin-top:28px;">
+      <div class="card-label" style="color:var(--accent-green);">管理闭环</div>
+      <p style="font-size:0.9rem; color:var(--text-secondary);">
+        VAS 开发团队以<strong style="color:var(--accent-green);">配置房间的平台归属为唯一依据</strong>，
+        在两条独立的软件基线中分别提取、开发和测试对应的 WTI 功能。
+        两条基线各自对接专属的配置房间，从根本上消除了配置统一与接口断代之间的架构冲突。
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <span class="mono" style="color:var(--accent-blue);">VAS WTI Architecture Report</span>
+    <span style="margin:0 14px; color:var(--text-muted);">·</span>
+    NT3.0 → NT3.5 Platform Evolution
+    <span style="margin:0 14px; color:var(--text-muted);">·</span>
+    Room Split + Software Forking
+    <span style="margin:0 14px; color:var(--text-muted);">·</span>
+    Simulink → Hand-Code + AI
+  </div>
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.classList.add('visible');
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
