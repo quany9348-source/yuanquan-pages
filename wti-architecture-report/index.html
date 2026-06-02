@@ -479,21 +479,21 @@
     <span class="section-num reveal">Section 01</span>
     <h2 class="reveal">核心背景与配置管理机制</h2>
     <p class="reveal" style="color:var(--text-secondary); margin:12px 0 32px;">
-      WTI 系统遵循 <strong style="color:var(--accent-blue);">"横向品牌隔离，纵向代际分离，全局ID唯一"</strong> 的核心原则
+      WTI 系统遵循 <strong style="color:var(--accent-blue);">"横向品牌隔离，纵向代际统一，全局ID唯一"</strong> 的核心原则
     </p>
 
     <div class="brand-stack reveal reveal-delay-1" style="margin-bottom: 32px;">
       <div class="brand-card brand-nio">
         <div class="brand-name">NIO</div>
-        <div class="brand-desc">蔚来主品牌<br>NT3.0 + NT3.5 双房间独立维护</div>
+        <div class="brand-desc">蔚来主品牌<br>统一配置表（NT3.0 + NT3.5）</div>
       </div>
       <div class="brand-card brand-onvo">
         <div class="brand-name">ONVO</div>
-        <div class="brand-desc">乐道品牌<br>NT3.0 + NT3.5 双房间独立维护</div>
+        <div class="brand-desc">乐道品牌<br>统一配置表（NT3.0 + NT3.5）</div>
       </div>
       <div class="brand-card brand-mollary">
         <div class="brand-name">Mollary</div>
-        <div class="brand-desc">NT3.0 NIO 衍生分支<br>NT3.0 + NT3.5 双房间独立维护</div>
+        <div class="brand-desc">NT3.0 NIO 衍生分支<br>统一配置表（NT3.0 + NT3.5）</div>
       </div>
     </div>
 
@@ -501,13 +501,13 @@
       <div class="card accent-blue reveal reveal-delay-2">
         <div class="card-label" style="color:var(--accent-blue);">全局ID唯一</div>
         <p style="font-size:0.9rem; color:var(--text-secondary);">
-          虽然分为多个品牌和平台房间，但 <span class="mono" style="color:var(--accent-blue);">WTI ID</span> 在全局范围保持唯一性，从根源上杜绝跨品牌、跨平台的 ID 冲突。
+          虽然分为三个独立品牌空间，但 <span class="mono" style="color:var(--accent-blue);">WTI ID</span> 在全局范围保持唯一性，从根源上杜绝跨品牌、跨车型的 ID 冲突。
         </p>
       </div>
       <div class="card accent-amber reveal reveal-delay-3">
-        <div class="card-label" style="color:var(--accent-amber);">纵向代际分离</div>
+        <div class="card-label" style="color:var(--accent-amber);">纵向代际统一</div>
         <p style="font-size:0.9rem; color:var(--text-secondary);">
-          单一品牌内 NT3.0 和 NT3.5 各自拥有<strong>独立的配置房间</strong>，分开维护，互不交叉。需求方直接提交至对应平台房间，无需额外打标。
+          单一品牌内<strong>不区分</strong>NT3.0和NT3.5平台，一份配置表覆盖该品牌下所有车型和代际的WTI条目。
         </p>
       </div>
     </div>
@@ -603,7 +603,7 @@
     <span class="section-num reveal" style="color:var(--accent-amber);">Section 03.5</span>
     <h2 class="reveal">Simulink 模型的负荷与瓶颈</h2>
     <p class="reveal" style="color:var(--text-secondary); margin-bottom:28px;">
-      在"双基线 + 双房间"的新架构下，基于 Simulink 模型的开发模式面临五个核心挑战
+      在"双基线软件分叉"的新架构下，基于 Simulink 模型的开发模式面临五个核心挑战
     </p>
 
     <div class="pain-grid">
