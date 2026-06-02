@@ -629,27 +629,8 @@
       </div>
     </div>
 
-    <div class="conclusion-box reveal" style="margin-top:36px;">
-      <p style="font-size:0.92rem; color:var(--text-secondary);">
-        继续沿用 Simulink 人工开发模式，将面临<br>
-        <strong style="color:var(--accent-red); font-size:1rem;">人力投入线性膨胀 · 交付周期持续拉长 · 质量风险累积</strong><br>
-        的不可持续局面
-      </p>
-      <div style="margin-top:20px; padding-top:20px; border-top:1px solid var(--border-subtle);">
-        <p style="font-size:0.9rem;">
-          必然路径：
-          <strong style="color:var(--accent-purple);">手写代码（Hand-Code）替代 Simulink 建模</strong>
-          +
-          <strong style="color:var(--accent-green);">AI 赋能</strong>
-        </p>
-        <div class="arrow-down-chain">
-          <span class="chain-item">WTI 逻辑自动生成</span>
-          <span class="chain-arrow">+</span>
-          <span class="chain-item">双基线代码自动同步</span>
-          <span class="chain-arrow">+</span>
-          <span class="chain-item">配置表到代码自动映射</span>
-        </div>
-      </div>
+    <div class="section-divider reveal" style="margin-top:36px;">
+      <span class="trace"></span><span class="dot"></span><span class="trace"></span>
     </div>
   </div>
 </section>
@@ -741,6 +722,69 @@
         在两条独立的软件基线中分别提取、开发和测试对应的 WTI 功能。
         两条基线各自对接专属的配置房间，从根本上消除了配置统一与接口断代之间的架构冲突。
       </p>
+    </div>
+
+    <div class="section-divider reveal" style="margin-top:44px;">
+      <span class="trace"></span><span class="dot"></span><span class="trace"></span>
+    </div>
+
+    <h3 class="reveal" style="margin-bottom:20px;">开发模式转型：手写代码 + AI 赋能</h3>
+    <p class="reveal" style="color:var(--text-secondary); margin-bottom:28px; font-size:0.9rem;">
+      在"软件双基线 + 配置双房间"的新架构下，同步推进开发范式的根本性变革，从根源上突破效率瓶颈
+    </p>
+
+    <div class="solution-layers reveal reveal-delay-1">
+      <div class="solution-layer">
+        <div class="layer-header">
+          <div class="layer-icon soft" style="background:var(--accent-purple-dim); color:var(--accent-purple); border-color:rgba(124,58,237,0.2);">HC</div>
+          <div>
+            <h3>手写代码替代 Simulink 建模 <span style="font-weight:400; color:var(--text-muted); font-size:0.85rem;">Hand-Code over Model-Based</span></h3>
+          </div>
+        </div>
+        <div class="card-grid cols-2">
+          <div class="card" style="background:var(--bg-elevated);">
+            <h4 style="color:var(--accent-red); font-size:0.88rem; margin-bottom:8px;">Simulink 的代价</h4>
+            <p style="font-size:0.82rem; color:var(--text-secondary); line-height:1.7;">
+              .slx 二进制/XML 格式难以 diff/merge/审查 · 人工拖拽建模效率低下 · 版本合并冲突频发 · MIL/SIL/HIL 全链路验证周期长 · 跨基线人工实现易产生行为差异
+            </p>
+          </div>
+          <div class="card" style="background:var(--bg-elevated);">
+            <h4 style="color:var(--accent-green); font-size:0.88rem; margin-bottom:8px;">手写代码的优势</h4>
+            <p style="font-size:0.82rem; color:var(--text-secondary); line-height:1.7;">
+              Git 原生 diff/merge/代码审查 · 文本编辑器高效编写 · CI/CD 自动化集成 · 跨基线代码可复用与共享 · 逻辑实现可精确追溯
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="solution-layer">
+        <div class="layer-header">
+          <div class="layer-icon data" style="background:rgba(5,150,105,0.08); color:var(--accent-green); border-color:rgba(5,150,105,0.2);">AI</div>
+          <div>
+            <h3>AI 赋能自动化开发链路 <span style="font-weight:400; color:var(--text-muted); font-size:0.85rem;">AI-Empowered Pipeline</span></h3>
+          </div>
+        </div>
+        <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:20px;">
+          在手写代码的基础上，引入 AI 实现端到端的开发自动化，将 WTI 逻辑从需求到代码的链路系统化、可重复、可追溯
+        </p>
+        <div class="card-grid cols-3">
+          <div class="card" style="text-align:center;">
+            <div class="adv-num" style="color:var(--accent-purple);">01</div>
+            <h4 style="font-size:0.88rem;">WTI 逻辑自动生成</h4>
+            <p style="font-size:0.8rem; color:var(--text-secondary);">AI 解析 summary 字段规则，自动生成对应平台的手写代码逻辑</p>
+          </div>
+          <div class="card" style="text-align:center;">
+            <div class="adv-num" style="color:var(--accent-purple);">02</div>
+            <h4 style="font-size:0.88rem;">双基线代码自动同步</h4>
+            <p style="font-size:0.8rem; color:var(--text-secondary);">跨基线共性逻辑自动映射与同步，消除人工重复实现</p>
+          </div>
+          <div class="card" style="text-align:center;">
+            <div class="adv-num" style="color:var(--accent-purple);">03</div>
+            <h4 style="font-size:0.88rem;">配置表到代码自动映射</h4>
+            <p style="font-size:0.8rem; color:var(--text-secondary);">配置房间增量自动触发代码变更，打通数据到代码的最后一公里</p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
