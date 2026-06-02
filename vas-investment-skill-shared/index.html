@@ -487,7 +487,7 @@ a.src-link:hover { color: var(--copper); border-bottom-color: var(--copper); }
   background: var(--bg); padding: 4px 14px;
   z-index: 2; border: 1px solid var(--border-b);
 }
-.dual-cmp .dc-col { background: var(--elevated); padding: 24px; }
+.dual-cmp .dc-col { background: var(--elevated); padding: 24px; display: flex; flex-direction: column; }
 .dual-cmp .dc-col h4 {
   font-family: "Chivo", sans-serif;
   font-size: 11px; font-weight: 700;
@@ -495,6 +495,8 @@ a.src-link:hover { color: var(--copper); border-bottom-color: var(--copper); }
   color: var(--teal); margin-bottom: 12px;
 }
 .dual-cmp .dc-col p { font-size: 13.5px; color: var(--text-dim); line-height: 1.68; margin-bottom: 10px; }
+.dual-cmp .dc-col .formula-box { flex: 1; display: flex; flex-direction: column; }
+.dual-cmp .dc-col .formula-box em { margin-top: auto; }
 .dual-cmp .dc-col .pro {
   font-size: 11px; margin-top: 10px;
   padding: 6px 10px;
