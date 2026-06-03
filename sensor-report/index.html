@@ -73,7 +73,7 @@ tbody tr:hover{background:var(--bg-hover)}tbody tr:last-child td{border-bottom:n
 .svg-diagram{margin:32px 0;padding:24px;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);overflow-x:auto}
 .svg-diagram svg{max-width:100%;height:auto;display:block;margin:0 auto}
 footer{text-align:center;padding:48px 24px;border-top:1px solid var(--border);color:var(--text-3);font-size:12px}
-.reveal{opacity:0;transform:translateY(20px);transition:all .65s cubic-bezier(0.16,1,0.3,1)}
+.refs{margin-top:18px;padding:10px 14px;background:var(--bg);border-radius:6px;font-size:11px;color:var(--text-3);line-height:1.7}.refs span{font-weight:600;color:var(--text-2);margin-right:6px}.refs a{color:var(--blue);text-decoration:none;margin:0 6px;white-space:nowrap}.refs a:hover{text-decoration:underline}.reveal{opacity:0;transform:translateY(20px);transition:all .65s cubic-bezier(0.16,1,0.3,1)}
 .reveal.visible{opacity:1;transform:translateY(0)}
 @media(max-width:640px){
   nav{gap:8px;font-size:10px;padding:0 8px}
@@ -119,8 +119,8 @@ footer{text-align:center;padding:48px 24px;border-top:1px solid var(--border);co
 <!-- Section 2: Chassis -->
 <h3 class="reveal">二、智能底盘运动控制</h3>
 <div class="svg-diagram reveal">
-<svg viewBox="0 0 900 160" xmlns="http://www.w3.org/2000/svg">
-<rect x="0" y="0" width="900" height="152" rx="8" fill="#e8f0fe" stroke="#c4d8f8" stroke-width="1"/>
+<svg viewBox="0 0 940 160" xmlns="http://www.w3.org/2000/svg">
+<rect x="0" y="0" width="940" height="152" rx="8" fill="#e8f0fe" stroke="#c4d8f8" stroke-width="1"/>
 <text x="450" y="20" text-anchor="middle" fill="#1e5fd9" font-size="11" font-weight="700" font-family="DM Sans,sans-serif">底盘域：「趋势 → 技术路线 → 传感器 → 架构 → 业务场景」</text>
 <g transform="translate(16,32)">
   <rect x="0" y="0" width="158" height="54" rx="5" fill="#fff" stroke="#c4d8f8" stroke-width="1"/><text x="79" y="16" text-anchor="middle" fill="#1e5fd9" font-size="9" font-weight="700">趋势</text><text x="79" y="30" text-anchor="middle" fill="#4b5566" font-size="7.5">被动事后响应</text><text x="79" y="42" text-anchor="middle" fill="#4b5566" font-size="7.5">→ 主动预判自适应</text>
@@ -141,8 +141,8 @@ footer{text-align:center;padding:48px 24px;border-top:1px solid var(--border);co
 <!-- Section 3: Body -->
 <h3 class="reveal">三、智能车身控制自动化</h3>
 <div class="svg-diagram reveal">
-<svg viewBox="0 0 900 160" xmlns="http://www.w3.org/2000/svg">
-<rect x="0" y="0" width="900" height="152" rx="8" fill="#fef9f0" stroke="#f0d4a8" stroke-width="1"/>
+<svg viewBox="0 0 940 160" xmlns="http://www.w3.org/2000/svg">
+<rect x="0" y="0" width="940" height="152" rx="8" fill="#fef9f0" stroke="#f0d4a8" stroke-width="1"/>
 <text x="450" y="20" text-anchor="middle" fill="#c2780a" font-size="11" font-weight="700" font-family="DM Sans,sans-serif">车身域：「趋势 → 技术路线 → 传感器 → 架构 → 业务场景」</text>
 <g transform="translate(16,32)">
   <rect x="0" y="0" width="158" height="54" rx="5" fill="#fff" stroke="#f0d4a8" stroke-width="1"/><text x="79" y="16" text-anchor="middle" fill="#c2780a" font-size="9" font-weight="700">趋势</text><text x="79" y="30" text-anchor="middle" fill="#4b5566" font-size="7.5">低优先级功能集合</text><text x="79" y="42" text-anchor="middle" fill="#4b5566" font-size="7.5">→ 第三空间主动服务</text>
@@ -163,8 +163,8 @@ footer{text-align:center;padding:48px 24px;border-top:1px solid var(--border);co
 <!-- Section 4: AI end-to-end -->
 <h3 class="reveal">四、AI端到端融合感知 —— 跨域数据闭环</h3>
 <div class="svg-diagram reveal">
-<svg viewBox="0 0 900 160" xmlns="http://www.w3.org/2000/svg">
-<rect x="0" y="0" width="900" height="152" rx="8" fill="#f0e8fd" stroke="#d8cdf8" stroke-width="1"/>
+<svg viewBox="0 0 940 160" xmlns="http://www.w3.org/2000/svg">
+<rect x="0" y="0" width="940" height="152" rx="8" fill="#f0e8fd" stroke="#d8cdf8" stroke-width="1"/>
 <text x="450" y="20" text-anchor="middle" fill="#6d3ad3" font-size="11" font-weight="700" font-family="DM Sans,sans-serif">AI融合：「趋势 → 技术路线 → 数据 → 架构 → 业务场景」</text>
 <g transform="translate(16,32)">
   <rect x="0" y="0" width="158" height="54" rx="5" fill="#fff" stroke="#d8cdf8" stroke-width="1"/><text x="79" y="16" text-anchor="middle" fill="#6d3ad3" font-size="9" font-weight="700">趋势</text><text x="79" y="30" text-anchor="middle" fill="#4b5566" font-size="7.5">规则级联后融合</text><text x="79" y="42" text-anchor="middle" fill="#4b5566" font-size="7.5">→ 数据驱动端到端前融合</text>
@@ -204,6 +204,7 @@ footer{text-align:center;padding:48px 24px;border-top:1px solid var(--border);co
 <g transform="translate(600,30)"><rect x="0" y="0" width="260" height="310" rx="8" fill="url(#g3)" stroke="#b8e0d8" stroke-width="1"/><rect x="0" y="0" width="260" height="34" rx="8" fill="#e6f5f3"/><text x="130" y="22" text-anchor="middle" fill="#0b8a7a" font-size="12" font-weight="700" font-family="DM Sans,sans-serif">第三代：中央+区域架构</text><rect x="50" y="50" width="160" height="48" rx="6" fill="#fff" stroke="#0b8a7a" stroke-width="1.5"/><text x="130" y="70" text-anchor="middle" fill="#0b8a7a" font-size="11" font-weight="700">中央计算平台</text><text x="130" y="86" text-anchor="middle" fill="#8899aa" font-size="9">异构 SoC &middot; AI 算力</text><rect x="25" y="116" width="95" height="34" rx="5" fill="#fff" stroke="#b8e0d8" stroke-width="1"/><text x="73" y="133" text-anchor="middle" fill="#0b8a7a" font-size="9">前部区域</text><text x="73" y="145" text-anchor="middle" fill="#8899aa" font-size="8">Zone Ctrl</text><rect x="140" y="116" width="95" height="34" rx="5" fill="#fff" stroke="#b8e0d8" stroke-width="1"/><text x="188" y="133" text-anchor="middle" fill="#0b8a7a" font-size="9">后部区域</text><text x="188" y="145" text-anchor="middle" fill="#8899aa" font-size="8">Zone Ctrl</text><rect x="80" y="166" width="100" height="34" rx="5" fill="#fff" stroke="#b8e0d8" stroke-width="1"/><text x="130" y="183" text-anchor="middle" fill="#0b8a7a" font-size="9">左/右区域</text><text x="130" y="195" text-anchor="middle" fill="#8899aa" font-size="8">Zone Ctrl</text><text x="130" y="228" text-anchor="middle" fill="#0b8a7a" font-size="10" font-family="Share Tech Mono,monospace">&#x25B2; 传感器 = 泛在感知触角</text><text x="130" y="248" text-anchor="middle" fill="#4b5566" font-size="9">低延迟 &middot; 无损透传 &middot; 高维数据</text><text x="130" y="266" text-anchor="middle" fill="#4b5566" font-size="9">为AI模型提供原材料</text><text x="130" y="286" text-anchor="middle" fill="#0b8a7a" font-size="10" font-family="Share Tech Mono,monospace">&#x2714; 线束削减 &middot; 算力集中</text></g>
 </svg></div>
 <p class="reveal">当前，行业正不可逆转地向中央集中式域控架构乃至最终的"中央计算+区域控制（Zonal）"架构演进。智能底盘操作系统作为支撑现代智能汽车全面智能化、实现更高级别安全与高效自动驾驶的关键技术基座，其重要性日益凸显。在多生态融合的车能路云宏观愿景下，中央域控架构将原本相互隔离的智能座舱、智能驾驶、智能底盘和车身域等关键系统集成于单一异构计算平台上——传感器不再仅仅是某个单一闭环控制系统的附属信息源，而是蜕变为整个车辆"数字神经系统"的泛在感知触角。</p>
+<div class="refs reveal"><span>参考：</span><a href="https://pdf.dfcfw.com/pdf/H3_AP202501131641899143_1.pdf?1736768282000.pdf" target="_blank">[1] 智能底盘操作系统白皮书</a></div>
 </div></section>
 
 <!-- CHAPTER 2: CHASSIS -->
@@ -213,6 +214,8 @@ footer{text-align:center;padding:48px 24px;border-top:1px solid var(--border);co
 
 <h3 class="reveal">2.1 路面附着系数估计</h3>
 <p class="reveal">路面附着系数（μ）是所有底层底盘动力学控制中最核心的非线性边界参数。早期基于原因（Cause-based）的光学/声学直接测量方法因成本高、鲁棒性差已被淘汰；当前主流全面转向基于效果（Effect-based）的高维状态观测器，利用轮速传感器+六轴IMU+制动压力传感器，通过卡尔曼滤波+车轮旋转动力学+载荷转移模型反演稳定可靠的μ值。衍生的"穿越计次法"利用轮侧加速度识别路面不平度，为CDC半主动悬架阻尼实时调节提供路况输入。</p>
+<div class="refs reveal"><span>参考：</span><a href="https://pubs.cstam.org.cn/article/doi/10.6052/0459-1879-22-211?viewType=HTML" target="_blank">[2] 路面附着系数估计</a><a href="https://nev.ofweek.com/2023-07/ART-77015-8420-30604449.html" target="_blank">[3] Cause-based综述</a><a href="https://patents.google.com/patent/CN103407450A/zh" target="_blank">[4] 制动力估算</a><a href="https://patents.google.com/patent/CN106183691A/zh" target="_blank">穿越计次法</a></div>
+
 <div class="svg-diagram reveal">
 <svg viewBox="0 0 880 340" xmlns="http://www.w3.org/2000/svg">
 <defs><marker id="aD" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><path d="M0,0 L7,2.5 L0,5 Z" fill="#8899aa"/></marker><marker id="aG" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><path d="M0,0 L7,2.5 L0,5 Z" fill="#0b8a7a"/></marker></defs>
@@ -222,16 +225,18 @@ footer{text-align:center;padding:48px 24px;border-top:1px solid var(--border);co
 </svg></div>
 
 <h3 class="reveal">2.2 智能轮胎（Cyber Tyre）与接触斑多维建模</h3>
-<p class="reveal">传统底盘感知存在一个阿喀琉斯之踵：车身IMU和悬架位移传感器采集的都是经过多级物理衰减后的"滞后信号"，当察觉侧滑时接触斑早已突破非线性拐点。智能轮胎将TMS贴胎传感器部署至轮胎内壁（MEMS压力/温度晶圆+高频陀螺仪+多轴加速度计），通过RF传输至车机端与CAN总线耦合，内置ML算法构建数字孪生模型。固特异SightLine可实现：水滑提前干预（80km/h湿滑制动缩短~1.8m）、慢漏气提前7天预警、快漏气提前10分钟报警。同时支持无硬件增量的纯软件方案——仅挖掘轮速+CAN数据实现基础摩擦力检测。</p>
+<p class="reveal">传统底盘感知存在一个阿喀琉斯之踵：车身IMU和悬架位移传感器采集的都是经过多级物理衰减后的"滞后信号"，当察觉侧滑时接触斑早已突破非线性拐点。智能轮胎将TMS贴胎传感器部署至轮胎内壁（MEMS压力/温度晶圆+高频陀螺仪+多轴加速度计），通过RF传输至车机端与CAN总线耦合，内置ML算法构建数字孪生模型。固特异SightLine可实现：水滑提前干预（80km/h湿滑制动缩短~1.8m）、慢漏气提前7天预警、快漏气提前10分钟报警。同时支持无硬件增量的纯软件方案——仅挖掘轮速+CAN数据实现基础摩擦力检测。</p><div class="refs reveal"><span>参考：</span><a href="https://www.pirelli.cn/tyres/zh-cn/car/tech-and-knowledge/cyber-tyre" target="_blank">[5] 倍耐力Cyber Tyre</a><a href="https://www.smartautoclub.com/p/5016/" target="_blank">[6] 固特异SightLine</a><a href="https://youjia.baidu.com/view/articleDetail/9508645353817369020?sa=pc_ss_article" target="_blank">[7] 智能轮胎综述</a></div>
+
 <div class="svg-diagram reveal">
-<svg viewBox="0 0 880 380" xmlns="http://www.w3.org/2000/svg"><text x="440" y="20" text-anchor="middle" fill="#1a2332" font-size="13" font-weight="700" font-family="DM Sans,sans-serif">智能轮胎 (Cyber Tyre) 系统架构 &mdash; 以固特异 SightLine 为例</text>
+<svg viewBox="0 0 920 380" xmlns="http://www.w3.org/2000/svg"><text x="460" y="20" text-anchor="middle" fill="#1a2332" font-size="13" font-weight="700" font-family="DM Sans,sans-serif">智能轮胎 (Cyber Tyre) 系统架构 &mdash; 以固特异 SightLine 为例</text>
 <g transform="translate(18,34)"><rect x="0" y="0" width="190" height="330" rx="10" fill="#fef9f0" stroke="#f0d4a8" stroke-width="1"/><ellipse cx="95" cy="100" rx="75" ry="65" fill="none" stroke="#8899aa" stroke-width="1.8"/><ellipse cx="95" cy="100" rx="46" ry="40" fill="none" stroke="#c4cdd8" stroke-width=".8" stroke-dasharray="5,3"/><circle cx="58" cy="72" r="13" fill="#fff" stroke="#c2780a" stroke-width="1.5"/><text x="58" y="69" text-anchor="middle" fill="#c2780a" font-size="7" font-weight="700">TMS</text><text x="58" y="78" text-anchor="middle" fill="#8899aa" font-size="5">贴胎</text><rect x="28" y="190" width="134" height="80" rx="5" fill="#fff" stroke="#f0d4a8" stroke-width=".8"/><text x="95" y="206" text-anchor="middle" fill="#c2780a" font-size="9" font-weight="700">TMS 传感器模块</text><text x="95" y="220" text-anchor="middle" fill="#4b5566" font-size="8">&middot; MEMS 压力晶圆</text><text x="95" y="234" text-anchor="middle" fill="#4b5566" font-size="8">&middot; 温度感应晶圆</text><text x="95" y="248" text-anchor="middle" fill="#4b5566" font-size="8">&middot; 高频陀螺仪</text><text x="95" y="262" text-anchor="middle" fill="#4b5566" font-size="8">&middot; 多轴加速度计</text><text x="95" y="290" text-anchor="middle" fill="#8899aa" font-size="7">形变刚度 &middot; 压缩幅度</text><text x="95" y="303" text-anchor="middle" fill="#8899aa" font-size="7">磨损状态 &middot; 接触斑振动</text></g>
-<g transform="translate(226,34)"><rect x="0" y="44" width="120" height="42" rx="5" fill="#fff" stroke="#f0d4a8" stroke-width="1"/><text x="60" y="62" text-anchor="middle" fill="#c2780a" font-size="10" font-weight="600">无线射频</text><text x="60" y="76" text-anchor="middle" fill="#8899aa" font-size="8">RF Transmission</text><line x1="190" y1="65" x2="120" y2="65" stroke="#f0d4a8" stroke-width="1" stroke-dasharray="4,2"/><text x="155" y="60" text-anchor="middle" fill="#8899aa" font-size="7">RF</text><rect x="140" y="44" width="140" height="42" rx="5" fill="#fff" stroke="#c4d8f8" stroke-width="1"/><text x="210" y="62" text-anchor="middle" fill="#1e5fd9" font-size="10" font-weight="600">车机端接收器</text><text x="210" y="76" text-anchor="middle" fill="#8899aa" font-size="8">CAN 总线深度耦合</text><rect x="300" y="44" width="140" height="42" rx="5" fill="#fff" stroke="#b8e0d8" stroke-width="1"/><text x="370" y="62" text-anchor="middle" fill="#0b8a7a" font-size="10" font-weight="600">ML 算法处理</text><text x="370" y="76" text-anchor="middle" fill="#8899aa" font-size="8">数字孪生 + 预测</text><rect x="130" y="110" width="400" height="76" rx="6" fill="#f3faf8" stroke="#b8e0d8" stroke-width=".8"/><text x="330" y="130" text-anchor="middle" fill="#0b8a7a" font-size="10" font-weight="700">系统能力输出</text><text x="330" y="148" text-anchor="middle" fill="#4b5566" font-size="9">&middot; 慢漏气提前 7 天预警 &middot; 快漏气提前 10 分钟报警</text><text x="330" y="164" text-anchor="middle" fill="#4b5566" font-size="9">&middot; 水滑效应提前检测 &middot; 轮胎磨耗推演</text><text x="330" y="180" text-anchor="middle" fill="#4b5566" font-size="9">&middot; 80km/h 湿滑路面制动距离缩短 ~1.8m</text><rect x="50" y="206" width="480" height="64" rx="6" fill="#fff" stroke="#c4d8f8" stroke-width="1" stroke-dasharray="4,3"/><text x="290" y="226" text-anchor="middle" fill="#1e5fd9" font-size="10" font-weight="700">纯软件算法方案（无硬件增量）</text><text x="290" y="244" text-anchor="middle" fill="#4b5566" font-size="9">仅挖掘现有轮速信号 + CAN 报文 &#x2192; 基础路面摩擦力检测与磨耗推演</text><text x="290" y="260" text-anchor="middle" fill="#8899aa" font-size="8">&ldquo;软件定义传感器&rdquo; &middot; 零硬件成本 &middot; 极高灵活性</text></g>
-<rect x="226" y="330" width="480" height="32" rx="5" fill="#e6f5f3" stroke="#0b8a7a" stroke-width="1.2"/><text x="466" y="351" text-anchor="middle" fill="#0b8a7a" font-size="10" font-weight="600">&#x2192; ADAS 控制器 &middot; 底盘域控制器 &mdash; 预填压 &middot; 扭矩分配 &middot; ESP 干预</text>
+<g transform="translate(220,34)"><rect x="0" y="44" width="120" height="42" rx="5" fill="#fff" stroke="#f0d4a8" stroke-width="1"/><text x="60" y="62" text-anchor="middle" fill="#c2780a" font-size="10" font-weight="600">无线射频</text><text x="60" y="76" text-anchor="middle" fill="#8899aa" font-size="8">RF Transmission</text><line x1="190" y1="65" x2="120" y2="65" stroke="#f0d4a8" stroke-width="1" stroke-dasharray="4,2"/><text x="155" y="60" text-anchor="middle" fill="#8899aa" font-size="7">RF</text><rect x="140" y="44" width="140" height="42" rx="5" fill="#fff" stroke="#c4d8f8" stroke-width="1"/><text x="210" y="62" text-anchor="middle" fill="#1e5fd9" font-size="10" font-weight="600">车机端接收器</text><text x="210" y="76" text-anchor="middle" fill="#8899aa" font-size="8">CAN 总线深度耦合</text><rect x="300" y="44" width="140" height="42" rx="5" fill="#fff" stroke="#b8e0d8" stroke-width="1"/><text x="370" y="62" text-anchor="middle" fill="#0b8a7a" font-size="10" font-weight="600">ML 算法处理</text><text x="370" y="76" text-anchor="middle" fill="#8899aa" font-size="8">数字孪生 + 预测</text><rect x="130" y="110" width="400" height="76" rx="6" fill="#f3faf8" stroke="#b8e0d8" stroke-width=".8"/><text x="330" y="130" text-anchor="middle" fill="#0b8a7a" font-size="10" font-weight="700">系统能力输出</text><text x="330" y="148" text-anchor="middle" fill="#4b5566" font-size="9">&middot; 慢漏气提前 7 天预警 &middot; 快漏气提前 10 分钟报警</text><text x="330" y="164" text-anchor="middle" fill="#4b5566" font-size="9">&middot; 水滑效应提前检测 &middot; 轮胎磨耗推演</text><text x="330" y="180" text-anchor="middle" fill="#4b5566" font-size="9">&middot; 80km/h 湿滑路面制动距离缩短 ~1.8m</text><rect x="50" y="206" width="480" height="64" rx="6" fill="#fff" stroke="#c4d8f8" stroke-width="1" stroke-dasharray="4,3"/><text x="290" y="226" text-anchor="middle" fill="#1e5fd9" font-size="10" font-weight="700">纯软件算法方案（无硬件增量）</text><text x="290" y="244" text-anchor="middle" fill="#4b5566" font-size="9">仅挖掘现有轮速信号 + CAN 报文 &#x2192; 基础路面摩擦力检测与磨耗推演</text><text x="290" y="260" text-anchor="middle" fill="#8899aa" font-size="8">&ldquo;软件定义传感器&rdquo; &middot; 零硬件成本 &middot; 极高灵活性</text></g>
+<rect x="220" y="330" width="500" height="32" rx="5" fill="#e6f5f3" stroke="#0b8a7a" stroke-width="1.2"/><text x="470" y="351" text-anchor="middle" fill="#0b8a7a" font-size="10" font-weight="600">&#x2192; ADAS 控制器 &middot; 底盘域控制器 &mdash; 预填压 &middot; 扭矩分配 &middot; ESP 干预</text>
 </svg></div>
 
 <h3 class="reveal">2.3 预瞄式主动悬架：跨域视觉感知与激光雷达的降维赋能</h3>
-<p class="reveal">主动悬架要实现"魔毯"级平顺体验，仅靠底盘域内传感器远远不够。引入智驾感知域的双目立体相机/固态LiDAR进行"路面预瞄"成为跨域融合的经典应用：LiDAR百万点/秒构建前方数十米三维拓扑高程图 → 前视计算单元特征提取 → 底盘ECU结合车速解算毫秒级接触时间戳和最优刚度/阻尼调控矢量矩阵 → 悬架主动化解垂向冲击。代表案例：比亚迪云辇（复用大疆双目方案）、华为途灵 MFSS+DATS 3.0+xMotion（6自由度全域协同）。</p>
+<p class="reveal">主动悬架要实现"魔毯"级平顺体验，仅靠底盘域内传感器远远不够。引入智驾感知域的双目立体相机/固态LiDAR进行"路面预瞄"成为跨域融合的经典应用：LiDAR百万点/秒构建前方数十米三维拓扑高程图 → 前视计算单元特征提取 → 底盘ECU结合车速解算毫秒级接触时间戳和最优刚度/阻尼调控矢量矩阵 → 悬架主动化解垂向冲击。代表案例：比亚迪云辇（复用大疆双目方案）、华为途灵 MFSS+DATS 3.0+xMotion（6自由度全域协同）。</p><div class="refs reveal"><span>参考：</span><a href="https://patents.google.com/patent/CN109820373A/zh" target="_blank">[9] LiDAR预瞄专利</a><a href="https://auto.sina.cn/jishu/2023-12-04/detail-imzwvmtx4378297.d.html" target="_blank">[10] 比亚迪云辇</a><a href="https://auto.ifeng.com/c/8isVBEXWBkL" target="_blank">[11] 华为途灵MFSS+DATS</a></div>
+
 <div class="svg-diagram reveal">
 <svg viewBox="0 0 880 300" xmlns="http://www.w3.org/2000/svg"><text x="440" y="20" text-anchor="middle" fill="#1a2332" font-size="13" font-weight="700" font-family="DM Sans,sans-serif">预瞄式主动悬架 &mdash; 跨域感知融合数据流</text>
 <rect x="20" y="38" width="250" height="90" rx="6" fill="#fff" stroke="#c4d8f8" stroke-width="1"/><text x="145" y="56" text-anchor="middle" fill="#1e5fd9" font-size="10" font-weight="700">智能驾驶感知域</text><rect x="35" y="70" width="95" height="40" rx="5" fill="#e8f0fe" stroke="#c4d8f8" stroke-width=".8"/><text x="83" y="86" text-anchor="middle" fill="#1e5fd9" font-size="9">双目立体相机</text><text x="83" y="100" text-anchor="middle" fill="#8899aa" font-size="7">深度估计</text><rect x="150" y="70" width="95" height="40" rx="5" fill="#e8f0fe" stroke="#c4d8f8" stroke-width=".8"/><text x="198" y="86" text-anchor="middle" fill="#1e5fd9" font-size="9">固态/半固态 LiDAR</text><text x="198" y="100" text-anchor="middle" fill="#8899aa" font-size="7">百万点/秒</text>
@@ -266,9 +271,11 @@ footer{text-align:center;padding:48px 24px;border-top:1px solid var(--border);co
 
 <h3 class="reveal">3.1 智能车门系统：毫米波雷达的高精度避障革命</h3>
 <p class="reveal">电动门（Power Doors）和自动开合尾门的安全红线成为焦点——避障感知必须覆盖从车身表面到周围数米的三维空间，且需识别矮柱、透明玻璃、移动儿童等极端目标。传统超声波雷达波束发散角大、无俯仰角分辨率、易受风噪干扰，常致车门撞击低矮障碍物。77/79GHz CMOS毫米波雷达迅速崛起成为核心解决方案：加特兰（Calterah）率先实现22nm工艺+6T6R射频通道，并首创RoP（封装上辐射器）技术实现硬币大小隐蔽安装；森思泰克STA79-6/7雷达可生成高密度近场点云、构建车门摆动轨迹三维障碍物模型，毫秒级电机悬停+预判行人/非机动车轨迹防止"开门杀"。全球毫米波雷达市场预计2029年突破3亿颗。</p>
+<div class="refs reveal"><span>参考：</span><a href="https://www.calterah.com/company-news-detail/480" target="_blank">加特兰 22nm/RoP 毫米波雷达</a><a href="https://www.whst.com/product/8/" target="_blank">森思泰克 STA79-6/7 避障雷达</a></div>
 
 <h3 class="reveal">3.2 UWB数字钥匙与舱内生命体征监测：功能复用的极致演绎</h3>
 <p class="reveal">UWB凭借纳秒级ToF测距和500MHz+带宽实现厘米级定位与防中继攻击安全，成为数字钥匙主流标准（2035年渗透率预计50%）。但真正的颠覆在于"通信即感知"的复用范式：同一UWB SoC芯片在不同整车状态下切换工作模式——靠近时作为通信节点（AoA/TDOA精准迎宾无感解锁），锁车后切换为高敏锐度UWB雷达模式（穿座椅感知儿童/宠物呼吸微米级位移实现CPD舱内活体检测），同时还能替代电容传感器实现"一脚踢"感应尾门。这种单芯片涵盖通信与空间多维感知的路线，大幅削减BOM成本，展现车身传感器系统集成化的巅峰水准。</p>
+<div class="refs reveal"><span>参考：</span><a href="https://www.whst.com/product/70.html" target="_blank">森思泰克 STA6-1 UWB定位系统</a><a href="https://www.calterah.com/company-news-detail/480" target="_blank">加特兰 UWB SoC (802.15.4ab)</a></div>
 <div class="svg-diagram reveal">
 <svg viewBox="0 0 880 280" xmlns="http://www.w3.org/2000/svg"><text x="440" y="20" text-anchor="middle" fill="#1a2332" font-size="13" font-weight="700" font-family="DM Sans,sans-serif">车身传感器技术矩阵：毫米波雷达 + UWB 多模复用</text>
 <rect x="18" y="38" width="408" height="226" rx="8" fill="#fff" stroke="#c4cdd8" stroke-width="1"/><rect x="18" y="38" width="408" height="30" rx="8" fill="#f2f5f9"/><text x="222" y="58" text-anchor="middle" fill="#1e5fd9" font-size="11" font-weight="700">智能车门 — 77/79GHz mmWave Radar</text>
@@ -302,6 +309,7 @@ footer{text-align:center;padding:48px 24px;border-top:1px solid var(--border);co
 <p class="reveal"><b>多模态时空对齐</b>：六轴IMU输出宏观刚体动力学姿态数据，固特异TMS以数百Hz频率发送微观胎内瞬态温度梯度、接触斑剪切应力波形——异构数据在底层OS基于IEEE 802.1AS PTP协议实现微秒级时间同步，转化为同一时间戳的特征向量。</p>
 <p class="reveal"><b>Transformer动态摩擦力预测</b>：海量宏微观特征向量送入注意力机制模块。模型隐式提取出：当TMS反馈的胎面高频微小滑移振动信号与温度出现特定组合时，即使中心IMU尚未察觉车身偏航，当前局部动态非线性摩擦极限（μ地图）也已骤降——这在传统因果动力学中无法用显式偏微分方程描述。</p>
 <p class="reveal"><b>端到端协同规控</b>：AI大模型不输出离散制动指令，而是直接输出未来轨迹分布，并联动华为DATS以1000Hz频率连续、丝滑地重分配四轮电机扭矩+同步调整悬架四角垂向载荷以压榨最后抓地力。<b>关键洞察：增加轮胎传感器的底层逻辑在于——IMU感知的是"已发生的宏观结果"，TMS感知的是"正在发生的微观诱因"。两种跨度极大的物理域数据AI级融合，为规控大模型偷取了数百毫秒先发优势，将"危险的救车"转变为"平顺的预调整"。</b></p>
+<div class="refs reveal"><span>参考：</span><a href="https://www.pirelli.cn/tyres/zh-cn/car/tech-and-knowledge/cyber-tyre" target="_blank">[5] Cyber Tyre</a><a href="https://pdf.dfcfw.com/pdf/H3_AP202501131641899143_1.pdf?1736768282000.pdf" target="_blank">[1] 智能底盘OS白皮书</a><a href="https://www.calterah.com/company-news-detail/480" target="_blank">加特兰 RSP</a></div>
 
 <h3 class="reveal">4.4 车身域场景剖析：基于多模态感知的近车与座舱三维空间建模</h3>
 <p class="reveal">车身控制同样正经历从"单一功能响应"向"全场景三维环境与人物建模"的跨越。典型场景<b>智能车门全维防夹避障与多座椅空间自适应</b>：车外B柱/门把手毫米波雷达+UWB高频协作勾勒车门轨迹三维非结构化障碍物轮廓；椅面阵列式压力传感器+舱内微波雷达协同采集人与座椅接触面微观压力分布拓扑。中央域控AI模型（CNN/Transformer）基于受力分布特征迭代运算乘员精确体型、骨骼坐姿与肌肉状态，实现多座椅空间自适应+跨域联动（高速过弯时预判离心侧倾→联动调节主动悬架阻尼+座椅侧气囊）；车外基于微多普勒特征判定靠近者类型并预测运动轨迹→电机接收动态悬停与速度调节矢量→毫米级绝对安全避障。</p>
@@ -322,6 +330,7 @@ footer{text-align:center;padding:48px 24px;border-top:1px solid var(--border);co
 
 <h3 class="reveal">4.5 智能操作系统的实时性与安全护城河</h3>
 <p class="reveal">极高频异构传感器端到端融合对下层软件底座施加极端压力。中央域控异构芯片（NPU+高冗余MCU）上集成的广义OS微内核架构需具备硬实时调度能力（传感器中断响应锁定微秒级）、硬件Hypervisor虚拟化、细粒度安全沙箱及ISO 26262 ASIL-D功能安全体系——确保在云端断开、大模型概率性失效或外设受强电磁干扰等极端情况下，系统仍可利用轮速与制压等底层冗余传感器降级执行安全停车，构筑不可逾越的安全护城河。</p>
+<div class="refs reveal"><span>参考：</span><a href="https://pdf.dfcfw.com/pdf/H3_AP202501131641899143_1.pdf?1736768282000.pdf" target="_blank">[1] 智能底盘OS白皮书 — 实时性与功能安全</a></div>
 </div></section>
 
 <!-- CHAPTER 5: FUTURE EVOLUTION -->
@@ -331,6 +340,7 @@ footer{text-align:center;padding:48px 24px;border-top:1px solid var(--border);co
 
 <h3 class="reveal">5.1 硬件层的微型化、低功耗与高维成像化</h3>
 <p class="reveal">依托CMOS毫米波雷达与UWB SoC持续制程缩减（22nm→更先进制程）及AiP/RoP三维堆叠封装，传感器可自由嵌入保险杠内侧、门锁机构乃至内饰织物内部。多片级联8发8收4D成像雷达（加特兰Andes方案）输出距离/速度多普勒/俯仰角/水平方位角，在雨雾和低反光场景下替代传统摄像头，为主动悬架预瞄和车门避障提供全天候稠密三维点云。</p>
+<div class="refs reveal"><span>参考：</span><a href="https://www.calterah.com/company-news-detail/480" target="_blank">加特兰 Andes 8T8R 4D成像雷达方案</a></div>
 
 <h3 class="reveal">5.2 软件定义传感器的全面普及</h3>
 <p class="reveal">OTA升级底层DSP逻辑或射频调制波形，实现场景自适应多路复用：UWB在高速通信与雷达微距探测间自由切换；数字轮胎系统在有无TMS传感器时均依靠自适应算法挖掘摩擦力特征。"一专多能"大幅优化BOM成本，主机厂可在整车生命周期持续解锁手势车控、预测性维护等增值服务。</p>
@@ -340,6 +350,7 @@ footer{text-align:center;padding:48px 24px;border-top:1px solid var(--border);co
 
 <h3 class="reveal">5.4 车能路云多生态的众包与群体智能感知</h3>
 <p class="reveal">搭载Cyber Tyre的车辆化身流动数据勘探队。前车贴胎传感器感知暗冰导致摩擦力微观衰减→通过V2X/5G将精确地理坐标μ拓扑地图上传云端→后方数公里外车辆提前完成悬架阻尼放软、四驱扭矩锁止的超视距防御性底盘重构。</p>
+<div class="refs reveal"><span>参考：</span><a href="http://www.caam.org.cn/chn/1/cate_81/con_5236723.html" target="_blank">车能路云群体智能</a><a href="https://patents.google.com/patent/CN114572183A/zh" target="_blank">V2X底盘协同专利</a></div>
 
 <div class="svg-diagram reveal">
 <svg viewBox="0 0 880 200" xmlns="http://www.w3.org/2000/svg"><text x="440" y="22" text-anchor="middle" fill="#1a2332" font-size="13" font-weight="700" font-family="DM Sans,sans-serif">四大演进战略路线图</text>
