@@ -14,7 +14,7 @@
   --blue:#1e5fd9;--blue-bg:#e8f0fe;--teal:#0b8a7a;--teal-bg:#e6f5f3;
   --amber:#c2780a;--amber-bg:#fef3e0;--red:#c8203b;--red-bg:#fde8ec;
   --purple:#6d3ad3;--purple-bg:#f0e8fd;--radius:8px;--max-w:920px;
-  --font-body:'Noto Sans SC',sans-serif;--font-mono:'Share Tech Mono',monospace;
+  --font-body:'Noto Sans SC',sans-serif;--font-mono:'Share Tech Mono','Courier New',monospace;
   --font-en:'DM Sans','Noto Sans SC',sans-serif;
 }
 *{margin:0;padding:0;box-sizing:border-box}
@@ -51,7 +51,7 @@ nav .dot{width:6px;height:6px;border-radius:50%;background:var(--blue);flex-shri
 section{padding:80px 24px}
 .section-inner{max-width:var(--max-w);margin:0 auto}
 h2{font-size:clamp(22px,3.5vw,30px);font-weight:800;margin-bottom:32px;padding-bottom:14px;border-bottom:2px solid var(--border);display:flex;align-items:center;gap:14px;color:var(--text)}
-h2 .num{font-family:var(--font-mono);font-size:15px;color:var(--blue);background:var(--blue-bg);padding:3px 12px;border-radius:5px;font-weight:400;min-width:32px;text-align:center}
+h2 .num{display:inline-flex;align-items:center;justify-content:center;font-family:'Share Tech Mono','Courier New',monospace;font-size:15px;color:var(--blue);background:var(--blue-bg);padding:4px 12px;border-radius:5px;font-weight:400;min-width:32px;text-align:center;line-height:1.4}
 h3{font-size:19px;font-weight:700;margin:44px 0 14px;color:var(--text)}
 p{margin-bottom:16px;color:var(--text-2)}
 .card{background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 26px;margin-bottom:18px}
@@ -110,23 +110,82 @@ footer{text-align:center;padding:48px 24px;border-top:1px solid var(--border);co
 <section id="s0"><div class="section-inner">
 <h2><span class="num">0</span> 摘要</h2>
 <div class="card card-callout reveal"><div class="label">CORE FINDING</div>
-<p><b>在中央域控与AI端到端大模型的双重驱动下，汽车传感器正从"被动功能元件"向"多维智能感知基座"蜕变。</b>本报告覆盖<b>六大章节</b>，系统梳理从E/E架构演进、底盘与车身感知技术重构，到AI融合规控、未来产业战略的全景图：分布式架构 → 域集中式 → 中央+区域（Zonal），传感器从闭环附属源蜕变为泛在感知触角；底盘领域以Effect-based状态观测、Cyber Tyre接触斑建模、跨域预瞄悬架实现四代演进；车身领域以77GHz毫米波雷达和UWB"通信即感知"复用技术重构近场安全；AI端到端大模型（BEV+Transformer）以前融合范式驱动虚拟传感器与占用网络，数字轮胎+IMU联合建模为规控偷取数百毫秒先发优势；未来沿硬件微型化、软件定义、跨域协同、群体智能四大战略方向演进。</p></div>
+<p><b>在软件定义汽车与中央域控架构演进下，传感器正从被动功能元件蜕变为整车数字神经系统的泛在感知触角。</b>智能底盘与智能车身两大物理执行领域，分别沿着<b>"事后响应→前馈预判→端到端自进化"</b>和<b>"功能孤岛→多维感知→主动服务"</b>的路径，通过传感器硬件迭代、跨域数据融合与AI大模型规控，共同推进汽车向超级智能体进化。</p></div>
 
-<div class="findings-grid reveal">
-  <div class="finding-item"><div class="f-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1e5fd9" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></div><div class="title">E/E 架构演进</div><div class="desc">分布式 ECU → 域集中式 → 中央计算+区域控制（Zonal）。传感器从闭环附属源蜕变为整车数字神经系统的泛在感知触角。</div></div>
-  <div class="finding-item"><div class="f-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0b8a7a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div><div class="title">智能底盘四代演进</div><div class="desc">Effect-based μ估计、Cyber Tyre接触斑建模、跨域预瞄悬架 → 端到端数字底盘，以数字孪生逼近物理极限。</div></div>
-  <div class="finding-item"><div class="f-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c2780a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div><div class="title">车身感知重构</div><div class="desc">77/79GHz CMOS毫米波雷达（RoP封装）替代超声波；UWB"通信即感知"单芯片复用：数字钥匙+舱内CPD生命体征监测。</div></div>
-  <div class="finding-item"><div class="f-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6d3ad3" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg></div><div class="title">AI端到端融合感知</div><div class="desc">BEV+Transformer前融合、虚拟传感器与占用网络、数字轮胎+IMU多模态建模——为规控偷取数百毫秒先发优势。</div></div>
-</div>
+<!-- Section 1: Architecture Trend -->
+<h3 class="reveal" style="margin-top:28px">一、整体技术架构趋势</h3>
+<p class="reveal">在SDV浪潮与高阶自动驾驶的双重驱动下，电子电气架构正从分布式ECU经域集中式向<b>中央计算+区域控制（Zonal）</b>不可逆演进。传感器不再为单一ECU私有，而是以低延迟、无损透传方式将原始高维数据（点云、振动波形、应变张量）注入中央异构计算平台，为BEV+Transformer等AI大模型提供推演原料。</p>
 
-<ol class="reveal" style="color:var(--text-2);font-size:13px;line-height:2;padding-left:20px;">
-<li><b>架构范式转移</b>：中央+区域架构下传感器无损透传至中央计算，为AI模型提供"原材料"</li>
-<li><b>底盘感知重构</b>：μ估计→Cyber Tyre→预瞄悬架→四代演进矩阵</li>
-<li><b>车身感知重构</b>：毫米波雷达智能车门 + UWB数字钥匙/CPD生命体征监测</li>
-<li><b>AI融合规控</b>：端到端架构、虚拟传感器、占用网络、数字轮胎+IMU联合建模</li>
-<li><b>未来战略</b>：硬件微型化/高维成像、软件定义传感器、跨域协同、车能路云群体智能</li>
-<li><b>结论</b>：传感器是AI端到端数据闭环的真正起点</li>
-</ol>
+<!-- Section 2: Chassis -->
+<h3 class="reveal">二、智能底盘运动控制</h3>
+<div class="svg-diagram reveal">
+<svg viewBox="0 0 900 160" xmlns="http://www.w3.org/2000/svg">
+<rect x="0" y="0" width="900" height="152" rx="8" fill="#e8f0fe" stroke="#c4d8f8" stroke-width="1"/>
+<text x="450" y="20" text-anchor="middle" fill="#1e5fd9" font-size="11" font-weight="700" font-family="DM Sans,sans-serif">底盘域：「趋势 → 技术路线 → 传感器 → 架构 → 业务场景」</text>
+<g transform="translate(16,32)">
+  <rect x="0" y="0" width="158" height="54" rx="5" fill="#fff" stroke="#c4d8f8" stroke-width="1"/><text x="79" y="16" text-anchor="middle" fill="#1e5fd9" font-size="9" font-weight="700">趋势</text><text x="79" y="30" text-anchor="middle" fill="#4b5566" font-size="7.5">被动事后响应</text><text x="79" y="42" text-anchor="middle" fill="#4b5566" font-size="7.5">→ 主动预判自适应</text>
+  <text x="168" y="30" fill="#8899aa" font-size="13">→</text>
+  <rect x="184" y="0" width="158" height="54" rx="5" fill="#fff" stroke="#c4d8f8" stroke-width="1"/><text x="263" y="16" text-anchor="middle" fill="#1e5fd9" font-size="9" font-weight="700">技术路线</text><text x="263" y="30" text-anchor="middle" fill="#4b5566" font-size="7.5">Effect-based观测器</text><text x="263" y="42" text-anchor="middle" fill="#4b5566" font-size="7.5">+ Cyber Tyre + 跨域预瞄</text>
+  <text x="352" y="30" fill="#8899aa" font-size="13">→</text>
+  <rect x="368" y="0" width="170" height="54" rx="5" fill="#fff" stroke="#c4d8f8" stroke-width="1"/><text x="453" y="16" text-anchor="middle" fill="#1e5fd9" font-size="9" font-weight="700">传感器矩阵</text><text x="453" y="30" text-anchor="middle" fill="#4b5566" font-size="7.5">轮速·IMU·制压·TMS</text><text x="453" y="42" text-anchor="middle" fill="#4b5566" font-size="7.5">·双目·LiDAR</text>
+  <text x="546" y="30" fill="#8899aa" font-size="13">→</text>
+  <rect x="562" y="0" width="148" height="54" rx="5" fill="#fff" stroke="#c4d8f8" stroke-width="1"/><text x="636" y="16" text-anchor="middle" fill="#1e5fd9" font-size="9" font-weight="700">架构</text><text x="636" y="30" text-anchor="middle" fill="#4b5566" font-size="7.5">中央计算+底盘域控</text><text x="636" y="42" text-anchor="middle" fill="#4b5566" font-size="7.5">+ ADAS跨域协同</text>
+  <text x="718" y="30" fill="#8899aa" font-size="13">→</text>
+  <rect x="734" y="0" width="148" height="54" rx="5" fill="#e6f5f3" stroke="#0b8a7a" stroke-width="1.2"/><text x="808" y="16" text-anchor="middle" fill="#0b8a7a" font-size="9" font-weight="700">业务场景</text><text x="808" y="30" text-anchor="middle" fill="#0b8a7a" font-size="7.5">μ实时反演·CDC魔毯</text><text x="808" y="42" text-anchor="middle" fill="#0b8a7a" font-size="7.5">水滑干预·四轮矢量</text>
+</g>
+<text x="450" y="120" text-anchor="middle" fill="#8899aa" font-size="8.5">代际演进：被动阈值控制 → 状态观测自适应 → 跨域预瞄协同 → 端到端数字底盘（数字孪生+云端预测+极限寻优）</text>
+<text x="450" y="144" text-anchor="middle" fill="#4b5566" font-size="8">最终目标：逼近物理操稳极限，实现"危险的救车"→"平顺的预调整"</text>
+</svg></div>
+<p class="reveal">在底盘从<b>"被动响应与事后干预"向"主动预见性自适应调节"跨越</b>的趋势下，基于<b>Effect-based高维状态观测器 + Cyber Tyre接触斑微观建模 + 跨域视觉/LiDAR预瞄前馈</b>的技术路线，通过<b>轮速传感器、六轴IMU、制动压力传感器、TMS贴胎传感器（MEMS压力/温度/陀螺仪/加速度计）、双目立体相机、固态/半固态激光雷达</b>等多层级传感器矩阵，依托<b>中央计算平台 + 底盘域控制器 + ADAS感知域跨域协同</b>架构，实现：路面附着系数（μ）实时反演与滑移率精准控制、CDC半主动悬架阻尼连续调节、"魔毯"级预瞄主动悬架化解减速带/坑洼冲击、水滑效应提前干预（80km/h制动缩短~1.8m）、四轮独立矢量扭矩微秒级极限寻优——最终逼近<b>端到端数字底盘</b>的物理操稳极限。</p>
+
+<!-- Section 3: Body -->
+<h3 class="reveal">三、智能车身控制自动化</h3>
+<div class="svg-diagram reveal">
+<svg viewBox="0 0 900 160" xmlns="http://www.w3.org/2000/svg">
+<rect x="0" y="0" width="900" height="152" rx="8" fill="#fef9f0" stroke="#f0d4a8" stroke-width="1"/>
+<text x="450" y="20" text-anchor="middle" fill="#c2780a" font-size="11" font-weight="700" font-family="DM Sans,sans-serif">车身域：「趋势 → 技术路线 → 传感器 → 架构 → 业务场景」</text>
+<g transform="translate(16,32)">
+  <rect x="0" y="0" width="158" height="54" rx="5" fill="#fff" stroke="#f0d4a8" stroke-width="1"/><text x="79" y="16" text-anchor="middle" fill="#c2780a" font-size="9" font-weight="700">趋势</text><text x="79" y="30" text-anchor="middle" fill="#4b5566" font-size="7.5">低优先级功能集合</text><text x="79" y="42" text-anchor="middle" fill="#4b5566" font-size="7.5">→ 第三空间主动服务</text>
+  <text x="168" y="30" fill="#8899aa" font-size="13">→</text>
+  <rect x="184" y="0" width="158" height="54" rx="5" fill="#fff" stroke="#f0d4a8" stroke-width="1"/><text x="263" y="16" text-anchor="middle" fill="#c2780a" font-size="9" font-weight="700">技术路线</text><text x="263" y="30" text-anchor="middle" fill="#4b5566" font-size="7.5">mmWave 3D避障</text><text x="263" y="42" text-anchor="middle" fill="#4b5566" font-size="7.5">+ UWB通信即感知 + AI建模</text>
+  <text x="352" y="30" fill="#8899aa" font-size="13">→</text>
+  <rect x="368" y="0" width="170" height="54" rx="5" fill="#fff" stroke="#f0d4a8" stroke-width="1"/><text x="453" y="16" text-anchor="middle" fill="#c2780a" font-size="9" font-weight="700">传感器</text><text x="453" y="30" text-anchor="middle" fill="#4b5566" font-size="7.5">77GHz雷达(RoP)·UWB SoC</text><text x="453" y="42" text-anchor="middle" fill="#4b5566" font-size="7.5">·阵列压力·舱内雷达</text>
+  <text x="546" y="30" fill="#8899aa" font-size="13">→</text>
+  <rect x="562" y="0" width="148" height="54" rx="5" fill="#fff" stroke="#f0d4a8" stroke-width="1"/><text x="636" y="16" text-anchor="middle" fill="#c2780a" font-size="9" font-weight="700">架构</text><text x="636" y="30" text-anchor="middle" fill="#4b5566" font-size="7.5">中央域控+车身域控</text><text x="636" y="42" text-anchor="middle" fill="#4b5566" font-size="7.5">+ 底盘/座舱跨域联动</text>
+  <text x="718" y="30" fill="#8899aa" font-size="13">→</text>
+  <rect x="734" y="0" width="148" height="54" rx="5" fill="#e6f5f3" stroke="#0b8a7a" stroke-width="1.2"/><text x="808" y="16" text-anchor="middle" fill="#0b8a7a" font-size="9" font-weight="700">业务场景</text><text x="808" y="30" text-anchor="middle" fill="#0b8a7a" font-size="7.5">全维防夹·开门杀预防</text><text x="808" y="42" text-anchor="middle" fill="#0b8a7a" font-size="7.5">CPD·数字钥匙·座椅自适应</text>
+</g>
+<text x="450" y="120" text-anchor="middle" fill="#8899aa" font-size="8.5">单芯片三模复用：通信节点（无感解锁）→ UWB雷达（CPD活体检测）→ 一脚踢感应尾门</text>
+<text x="450" y="144" text-anchor="middle" fill="#4b5566" font-size="8">核心价值：单一硬件+单一链路 → 通信与空间多维感知全覆盖，大幅削减BOM成本</text>
+</svg></div>
+<p class="reveal">在车身控制从<b>"门锁/雨刮/防夹等低优先级功能集合"向"第三空间情感化交互与主动智能服务"跃迁</b>的趋势下，基于<b>毫米波雷达高精度三维避障 + UWB"通信即感知"多模复用 + AI多模态人物与环境建模</b>的技术路线，通过<b>77/79GHz CMOS毫米波雷达（22nm制程、6T6R、RoP®封装）、UWB SoC（IEEE 802.15.4ab、ToF厘米级定位）、阵列式压力传感器、舱内微波雷达</b>等传感器，依托<b>中央域控 + 车身域控制器 + 底盘/座舱跨域联动</b>架构，实现：智能车门全维防夹避障与"开门杀"预判强制锁止、UWB数字钥匙无感解锁 + 舱内CPD活体检测（感知呼吸微米级位移）+ 一脚踢感应尾门的单芯片三模复用、基于受力分布与骨骼坐姿迭代运算的多座椅空间自适应、高速过弯时跨域预联动悬架阻尼与座椅侧气囊的人车一体无感姿态维持。</p>
+
+<!-- Section 4: AI end-to-end -->
+<h3 class="reveal">四、AI端到端融合感知 —— 跨域数据闭环</h3>
+<div class="svg-diagram reveal">
+<svg viewBox="0 0 900 160" xmlns="http://www.w3.org/2000/svg">
+<rect x="0" y="0" width="900" height="152" rx="8" fill="#f0e8fd" stroke="#d8cdf8" stroke-width="1"/>
+<text x="450" y="20" text-anchor="middle" fill="#6d3ad3" font-size="11" font-weight="700" font-family="DM Sans,sans-serif">AI融合：「趋势 → 技术路线 → 数据 → 架构 → 业务场景」</text>
+<g transform="translate(16,32)">
+  <rect x="0" y="0" width="158" height="54" rx="5" fill="#fff" stroke="#d8cdf8" stroke-width="1"/><text x="79" y="16" text-anchor="middle" fill="#6d3ad3" font-size="9" font-weight="700">趋势</text><text x="79" y="30" text-anchor="middle" fill="#4b5566" font-size="7.5">规则级联后融合</text><text x="79" y="42" text-anchor="middle" fill="#4b5566" font-size="7.5">→ 数据驱动端到端前融合</text>
+  <text x="168" y="30" fill="#8899aa" font-size="13">→</text>
+  <rect x="184" y="0" width="158" height="54" rx="5" fill="#fff" stroke="#d8cdf8" stroke-width="1"/><text x="263" y="16" text-anchor="middle" fill="#6d3ad3" font-size="9" font-weight="700">技术路线</text><text x="263" y="30" text-anchor="middle" fill="#4b5566" font-size="7.5">BEV+Transformer前融合</text><text x="263" y="42" text-anchor="middle" fill="#4b5566" font-size="7.5">+ 虚拟传感器 + 占用网络</text>
+  <text x="352" y="30" fill="#8899aa" font-size="13">→</text>
+  <rect x="368" y="0" width="170" height="54" rx="5" fill="#fff" stroke="#d8cdf8" stroke-width="1"/><text x="453" y="16" text-anchor="middle" fill="#6d3ad3" font-size="9" font-weight="700">数据</text><text x="453" y="30" text-anchor="middle" fill="#4b5566" font-size="7.5">多源异构传感器原始数据</text><text x="453" y="42" text-anchor="middle" fill="#4b5566" font-size="7.5">ADC/点云/应力波无损透传</text>
+  <text x="546" y="30" fill="#8899aa" font-size="13">→</text>
+  <rect x="562" y="0" width="148" height="54" rx="5" fill="#fff" stroke="#d8cdf8" stroke-width="1"/><text x="636" y="16" text-anchor="middle" fill="#6d3ad3" font-size="9" font-weight="700">架构</text><text x="636" y="30" text-anchor="middle" fill="#4b5566" font-size="7.5">异构SoC(NPU+MCU)</text><text x="636" y="42" text-anchor="middle" fill="#4b5566" font-size="7.5">+ 硬实时OS + ASIL-D</text>
+  <text x="718" y="30" fill="#8899aa" font-size="13">→</text>
+  <rect x="734" y="0" width="148" height="54" rx="5" fill="#e6f5f3" stroke="#0b8a7a" stroke-width="1.2"/><text x="808" y="16" text-anchor="middle" fill="#0b8a7a" font-size="9" font-weight="700">业务场景</text><text x="808" y="30" text-anchor="middle" fill="#0b8a7a" font-size="7.5">TMS+IMU联合建模</text><text x="808" y="42" text-anchor="middle" fill="#0b8a7a" font-size="7.5">3D占用网络·无损规控</text>
+</g>
+<text x="450" y="120" text-anchor="middle" fill="#8899aa" font-size="8.5">核心机制：IEEE 802.1AS PTP微秒时间同步 → Transformer隐式非线性物理建模</text>
+<text x="450" y="144" text-anchor="middle" fill="#4b5566" font-size="8">关键突破：为规控偷取数百毫秒先发优势，从根本上消除分类错误导致的控制失效</text>
+</svg></div>
+<p class="reveal">在规控体系从<b>"基于规则的后融合级联模块"向"数据驱动的端到端前融合大模型"跨越</b>的趋势下，基于<b>BEV+Transformer前融合 + 虚拟传感器 + 占用网络（Occupancy Networks）</b>的技术路线，要求所有传感器底层基带单元<b>以无延时、高并发方式将原始ADC/点云/应力波数据透传</b>至中央计算平台，依托<b>异构SoC（NPU+高冗余MCU）+ 硬实时微内核OS（微秒级中断响应）+ Hypervisor虚拟化 + ISO 26262 ASIL-D安全体系</b>架构，实现：数字轮胎TMS微观应力+整车IMU宏观姿态的IEEE 802.1AS PTP微秒级时空对齐与Transformer注意力机制隐式非线性物理建模——为规控偷取<b>数百毫秒先发优势</b>，将"危险的救车"转变为"平顺的预调整"；以及车外近场+车内座舱的三维占用网络重建，从根本上消除因分类错误导致的控制失效。</p>
+
+<!-- Section 5: Future -->
+<h3 class="reveal">五、未来演进与结论</h3>
+<p class="reveal">传感器将沿<b>硬件微型化/高维成像</b>（先进制程+AiP/RoP 3D封装+8T8R 4D雷达）→ <b>软件定义传感器</b>（OTA升级DSP/波形、单芯片多模复用）→ <b>跨物理域泛在协同</b>（DDS数据总线交汇车内外全源数据）→ <b>车能路云群体智能</b>（Cyber Tyre众包μ地图+V2X/5G超视距防御性底盘重构）四大战略方向持续演进。</p>
+<div class="card card-callout reveal"><div class="label">FINAL TAKEAWAY</div><p>汽车不再是一组机械零件的集合，而是一个长满高灵敏度数字触角、具备自我进化与车云协同能力的超级智能体——<b>传感器是AI端到端数据闭环的真正起点</b>，用底层物理感知深度的突破，兑现绝对安全与极致舒适出行的终极愿景。</p></div>
 </div></section>
 
 <!-- CHAPTER 1: E/E ARCHITECTURE -->
