@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>fmea-from-fds — 从功能设计规范到 SFMEA 的智能生成引擎</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #fafaf9;
+  --bg-card: #ffffff;
+  --bg-alt: #f4f3f0;
+  --text: #1a1a1e;
+  --text-secondary: #5a5a64;
+  --text-tertiary: #8a8a94;
+  --border: #e4e3e0;
+  --border-light: #f0efed;
+  --blue: #1e5fd8;
+  --blue-bright: #2563eb;
+  --blue-light: #e8f0fe;
+  --blue-bg: #f5f8fd;
+  --amber: #d97706;
+  --amber-light: #fef7ed;
+  --red: #dc2626;
+  --red-light: #fef2f2;
+  --green: #059669;
+  --green-light: #ecfdf5;
+  --slate: #64748b;
+  --radius: 8px;
+  --radius-lg: 14px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.04);
+  --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-lg: 0 4px 16px rgba(0,0,0,.06), 0 2px 4px rgba(0,0,0,.03);
+  --max-w: 1440px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; font-size: 16px; }
+
+body {
+  font-family: 'DM Sans', 'Noto Sans SC', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Typography ── */
+h1, h2, h3, h4 { font-weight: 600; line-height: 1.25; letter-spacing: -0.01em; }
+h1 { font-size: clamp(2.4rem, 3.5vw, 3.6rem); }
+h2 { font-size: clamp(1.6rem, 2.2vw, 2.2rem); }
+h3 { font-size: 1.2rem; font-weight: 600; }
+code, .mono { font-family: 'JetBrains Mono', 'Noto Sans SC', monospace; font-size: 0.85em; }
+
+/* ── Layout ── */
+.container { max-width: var(--max-w); margin: 0 auto; padding: 0 clamp(2rem, 4vw, 5rem); }
+
+/* ── Nav ── */
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(250,250,249,.88); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 0;
+}
+.nav-inner { max-width: var(--max-w); margin: 0 auto; padding: 0 clamp(2rem, 4vw, 5rem); display: flex; align-items: center; gap: 1.5rem; }
+.nav-logo { font-weight: 700; font-size: 1rem; letter-spacing: -0.02em; color: var(--text); text-decoration: none; display: flex; align-items: center; gap: .5rem; line-height: 1; }
+.nav-logo-icon { width: 28px; height: 28px; flex-shrink: 0; }
+.nav-links { display: flex; gap: 1.25rem; margin-left: auto; flex-wrap: wrap; align-items: center; }
+.nav-links a { color: var(--text-secondary); text-decoration: none; font-size: .825rem; font-weight: 500; transition: color .15s; line-height: 1; display: flex; align-items: center; }
+.nav-links a:hover { color: var(--blue); }
+.nav-cta {
+  background: var(--blue); color: #fff !important;
+  padding: .35rem .9rem; border-radius: 100px; font-size: .8rem; font-weight: 600;
+  transition: background .15s;
+}
+.nav-cta:hover { background: #1a4fc0; }
+
+/* ── Hero ── */
+.hero {
+  padding: clamp(3rem, 6vw, 6rem) 0 clamp(3rem, 5vw, 5rem);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -60%; right: -15%;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(30,95,216,.06) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 5rem); align-items: center; position: relative; }
+.hero-badge { display: inline-flex; align-items: center; gap: .5rem; background: var(--blue-light); color: var(--blue); padding: .35rem .85rem; border-radius: 100px; font-size: .8rem; font-weight: 600; margin-bottom: 1.25rem; }
+.hero-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blue); animation: pulse-dot 2s infinite; }
+@keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+.hero h1 { margin-bottom: 1rem; }
+.hero-desc { color: var(--text-secondary); font-size: 1.1rem; line-height: 1.7; max-width: 540px; margin-bottom: 2rem; }
+.hero-stats { display: flex; gap: 2.5rem; }
+.hero-stat-value { font-size: 2rem; font-weight: 700; color: var(--blue); letter-spacing: -0.02em; }
+.hero-stat-label { font-size: .8rem; color: var(--text-tertiary); margin-top: .15rem; }
+
+.hero-svg { width: 100%; max-width: 560px; }
+.hero-svg svg { width: 100%; height: auto; }
+
+/* ── Sections ── */
+.section { padding: clamp(3rem, 5vw, 5rem) 0; }
+.section-header { text-align: center; max-width: 680px; margin: 0 auto clamp(2.5rem, 4vw, 4rem); }
+.section-header h2 { margin-bottom: .75rem; }
+.section-header p { color: var(--text-secondary); font-size: 1.05rem; }
+.section-alt { background: var(--bg-alt); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+
+/* ── Cards ── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  box-shadow: var(--shadow-sm);
+}
+.card-accent-l { border-left: 3px solid var(--blue); }
+.card-accent-a { border-left: 3px solid var(--amber); }
+.card-accent-r { border-left: 3px solid var(--red); }
+.card-accent-g { border-left: 3px solid var(--green); }
+
+/* ── Grids ── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; }
+
+/* ── Workflow Steps ── */
+.workflow { display: grid; grid-template-columns: repeat(7, 1fr); gap: .75rem; }
+.workflow-step {
+  text-align: center; padding: 1.25rem .75rem;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); position: relative;
+}
+.workflow-step-num {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--blue); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: .85rem; margin: 0 auto .75rem;
+}
+.workflow-step h4 { font-size: .85rem; margin-bottom: .25rem; }
+.workflow-step p { font-size: .75rem; color: var(--text-tertiary); line-height: 1.4; }
+
+/* ── 3-round confirmation ── */
+.confirm-row { display: grid; grid-template-columns: 60px 1fr 1fr; gap: 1rem; align-items: start; padding: 1rem; border-radius: var(--radius); margin-bottom: .75rem; border: 1px solid var(--border-light); background: var(--bg-card); }
+.confirm-round { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; }
+.confirm-round.r1 { background: var(--blue-light); color: var(--blue); }
+.confirm-round.r2 { background: var(--amber-light); color: var(--amber); }
+.confirm-round.r3 { background: var(--red-light); color: var(--red); }
+.confirm-content h4 { margin-bottom: .25rem; }
+.confirm-content p { font-size: .875rem; color: var(--text-secondary); }
+.confirm-action { font-size: .8rem; color: var(--text-tertiary); text-align: right; align-self: center; }
+
+/* ── FMEA Table preview ── */
+.fmea-table-wrap {
+  overflow-x: auto; border: 1px solid var(--border);
+  border-radius: var(--radius-lg); background: var(--bg-card);
+  box-shadow: var(--shadow);
+}
+.fmea-table { width: 100%; border-collapse: collapse; font-size: .8rem; min-width: 1100px; }
+.fmea-table th {
+  background: var(--bg-alt); padding: .65rem .6rem; text-align: left;
+  font-weight: 600; font-size: .72rem; color: var(--text-secondary); white-space: nowrap;
+  border-bottom: 2px solid var(--border);
+}
+.fmea-table td { padding: .6rem .6rem; border-bottom: 1px solid var(--border-light); vertical-align: top; line-height: 1.45; }
+.fmea-table tr:last-child td { border-bottom: none; }
+.badge { display: inline-block; padding: .15rem .5rem; border-radius: 100px; font-size: .72rem; font-weight: 600; }
+.badge-h { background: var(--red-light); color: var(--red); }
+.badge-m { background: var(--amber-light); color: var(--amber); }
+.badge-l { background: var(--green-light); color: var(--green); }
+.badge-sc { background: var(--red-light); color: var(--red); }
+
+/* ── Failure Chain SVG ── */
+.chain-diagram { text-align: center; padding: 2rem 0; }
+.chain-diagram svg { max-width: 800px; width: 100%; height: auto; }
+
+/* ── Base Table Schema ── */
+.schema-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: .75rem; }
+.schema-item { padding: .85rem 1rem; background: var(--bg-card); border: 1px solid var(--border-light); border-radius: var(--radius); display: flex; align-items: center; gap: .65rem; }
+.schema-icon { width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: .8rem; }
+.schema-icon.text { background: #f0f4ff; color: #4a6cf7; }
+.schema-icon.select { background: #fef7ed; color: #d97706; }
+.schema-icon.num { background: #ecfdf5; color: #059669; }
+.schema-info strong { display: block; font-size: .8rem; }
+.schema-info span { font-size: .72rem; color: var(--text-tertiary); }
+
+/* ── Domain coverage ── */
+.domain-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; }
+.domain-card { padding: 1.25rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); }
+.domain-card h4 { font-size: .9rem; margin-bottom: .5rem; color: var(--blue); }
+.domain-card ul { list-style: none; }
+.domain-card li { font-size: .8rem; color: var(--text-secondary); padding: .15rem 0; }
+.domain-card li::before { content: '— '; color: var(--text-tertiary); }
+
+/* ── Footer ── */
+.footer { padding: 3rem 0; border-top: 1px solid var(--border); text-align: center; color: var(--text-tertiary); font-size: .8rem; }
+
+/* ── Responsive ── */
+@media (max-width: 1200px) {
+  .workflow { grid-template-columns: repeat(4, 1fr); }
+  .hero-grid { grid-template-columns: 1fr; }
+  .hero-svg { max-width: 100%; }
+}
+@media (max-width: 768px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .workflow { grid-template-columns: repeat(2, 1fr); }
+  .confirm-row { grid-template-columns: 48px 1fr; }
+  .confirm-action { display: none; }
+  .nav-links { display: none; }
+}
+
+/* ── Animations ── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-in { animation: fade-up .5s ease-out both; }
+.delay-1 { animation-delay: .1s; }
+.delay-2 { animation-delay: .2s; }
+.delay-3 { animation-delay: .3s; }
+.delay-4 { animation-delay: .4s; }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <svg class="nav-logo-icon" viewBox="0 0 28 28" fill="none">
+        <rect x="2" y="2" width="24" height="24" rx="5" stroke="#1e5fd8" stroke-width="1.8"/>
+        <path d="M8 10h12M8 14h12M8 18h8" stroke="#1e5fd8" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      fmea-from-fds
+    </a>
+    <div class="nav-links">
+      <a href="#overview">总览</a>
+      <a href="#workflow">工作流</a>
+      <a href="#methodology">方法论</a>
+      <a href="#output">输出</a>
+      <a href="#architecture">执行架构</a>
+      <a href="#coverage">覆盖范围</a>
+      <a href="https://nio.feishu.cn/drive/folder/PwgzfFzjtlykTDdtkjwceEX8nzf?from=from_copylink" target="_blank" class="nav-cta">获取 Skill</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div>
+        <div class="hero-badge animate-in">
+          <span class="hero-badge-dot"></span> Claude Code Skill · AIAG & VDA 2019
+        </div>
+        <h1 class="animate-in delay-1">从 FDS 到 SFMEA<br>一步智能推导</h1>
+        <p class="hero-desc animate-in delay-2">
+          输入一份 NIO 功能设计规范（FDS）文档，AI 自动按 AIAG & VDA 7 步法推导失效模式、评定 S/O/D 风险等级、
+          查表确定 Action Priority，输出飞书多维表格——基于 NT3.5 平台 1057 个已审批子功能的真实 ASIL 等级作为评级基线，
+          全程按功能块分步交互确认，工程师始终掌握最终决策权。
+        </p>
+        <div class="hero-stats animate-in delay-3">
+          <div><div class="hero-stat-value">7</div><div class="hero-stat-label">AIAG & VDA 步法</div></div>
+          <div><div class="hero-stat-value">11</div><div class="hero-stat-label">Body VMBC 系统</div></div>
+          <div><div class="hero-stat-value">1057</div><div class="hero-stat-label">已审批子功能</div></div>
+          <div><div class="hero-stat-value">231</div><div class="hero-stat-label">安全相关功能</div></div>
+        </div>
+      </div>
+      <div class="hero-svg animate-in delay-2">
+        <!-- System Flow SVG -->
+        <svg viewBox="0 0 520 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arrowBlue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0 0l8 3-8 3V0z" fill="#1e5fd8"/></marker>
+            <marker id="arrowAmber" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0 0l8 3-8 3V0z" fill="#d97706"/></marker>
+            <linearGradient id="grdBox" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f8faff"/><stop offset="100%" stop-color="#eef3ff"/></linearGradient>
+          </defs>
+          <!-- FDS Input -->
+          <rect x="20" y="30" width="160" height="56" rx="10" fill="url(#grdBox)" stroke="#1e5fd8" stroke-width="1.6"/>
+          <text x="100" y="54" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="13" font-weight="600" fill="#1a1a1e">飞书 FDS 文档</text>
+          <text x="100" y="72" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#64748b">wiki.feishu.cn/xxx</text>
+          <!-- Arrow 1 -->
+          <line x1="180" y1="58" x2="230" y2="58" stroke="#1e5fd8" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+          <!-- parse_fds.py -->
+          <rect x="232" y="30" width="128" height="56" rx="10" fill="#fff" stroke="#64748b" stroke-width="1.2"/>
+          <text x="296" y="50" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="12" font-weight="600" fill="#1a1a1e">parse_fds.py</text>
+          <text x="296" y="70" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="10" fill="#64748b">结构解析</text>
+          <!-- generate_fmea.py -->
+          <rect x="232" y="110" width="128" height="56" rx="10" fill="#fff" stroke="#64748b" stroke-width="1.2"/>
+          <text x="296" y="130" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="12" font-weight="600" fill="#1a1a1e">generate_fmea.py</text>
+          <text x="296" y="150" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="10" fill="#64748b">FMEA 骨架生成</text>
+          <!-- Down arrow from parse to generate -->
+          <path d="M296 86v24" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arrowBlue)"/>
+          <!-- Claude AI box -->
+          <rect x="232" y="190" width="128" height="56" rx="10" fill="#f5f8fd" stroke="#1e5fd8" stroke-width="1.6" stroke-dasharray="4 3"/>
+          <text x="296" y="210" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="12" font-weight="600" fill="#1e5fd8">Claude AI</text>
+          <text x="296" y="230" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="10" fill="#64748b">失效推导 + 评级</text>
+          <!-- Down arrow from generate to Claude -->
+          <path d="M296 166v24" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arrowBlue)"/>
+          <!-- Arrow 3 -->
+          <line x1="360" y1="218" x2="412" y2="218" stroke="#1e5fd8" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+          <!-- Base Table output -->
+          <rect x="412" y="165" width="92" height="110" rx="10" fill="url(#grdBox)" stroke="#059669" stroke-width="1.8"/>
+          <text x="458" y="195" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="12" font-weight="600" fill="#059669">飞书</text>
+          <text x="458" y="212" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="12" font-weight="600" fill="#059669">Base 表</text>
+          <text x="458" y="235" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="10" fill="#64748b">多维表格</text>
+          <text x="458" y="255" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="10" fill="#64748b">可嵌入Doc</text>
+          <!-- Feedback loop: from Base bottom-center, down, left, up to FDS center-bottom -->
+          <path d="M458 275v10H100v-199" stroke="#d97706" stroke-width="1.2" stroke-dasharray="5 4" fill="none" marker-end="url(#arrowAmber)"/>
+          <text x="280" y="300" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="9" fill="#d97706">3 轮交互确认</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Overview Section -->
+<section class="section" id="overview">
+  <div class="container">
+    <div class="section-header">
+      <h2>解决什么问题</h2>
+      <p>FMEA 是汽车电子开发中最耗时却最关键的交付物之一。从数百页 FDS 中逐条推导失效模式、
+      手工查表评定 S/O/D、跨团队对齐评级尺度——这些重复劳动消耗大量工程资源。</p>
+    </div>
+    <div class="grid-3">
+      <div class="card card-accent-l animate-in">
+        <h3 style="color:var(--blue)">自动化推导</h3>
+        <p style="color:var(--text-secondary);font-size:.9rem;">基于 FDS 需求语句 + Body 域失效模式知识库，AI 自动推导失效模式、失效影响与失效原因，覆盖 5 种失效类型。</p>
+      </div>
+      <div class="card card-accent-a animate-in delay-1">
+        <h3 style="color:var(--amber)">标准合规</h3>
+        <p style="color:var(--text-secondary);font-size:.9rem;">严格遵循 AIAG & VDA 2019 标准：7 步法结构、Action Priority 查表（废除 RPN）、S/O/D 评级指南、预防/探测控制分离。</p>
+      </div>
+      <div class="card card-accent-g animate-in delay-2">
+        <h3 style="color:var(--green)">人机协作</h3>
+        <p style="color:var(--text-secondary);font-size:.9rem;">按功能块分 3 轮交互确认——需求审查 → 失效分析 → 风险评估。工程师始终有最终决定权，AP=H 条目自动高亮提醒。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- SKILL 执行架构 -->
+<section class="section" id="architecture">
+  <div class="container">
+    <div class="section-header">
+      <h2>SKILL 执行架构</h2>
+      <p>泳道图展示人类、AI 助手、脚本、文档&amp;数据的完整协作流程 · 标注 <span style="color:#d97706;font-weight:600;">NT3.5</span> 的节点基于真实平台数据</p>
+    </div>
+    <div style="overflow-x:auto;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;box-shadow:var(--shadow);">
+      <svg viewBox="0 0 1100 1350" xmlns="http://www.w3.org/2000/svg" style="min-width:1100px;width:100%;height:auto;">
+        <defs>
+          <marker id="arc-arrow-blue" viewBox="0 0 8 8" refX="0" refY="4" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto">
+            <path d="M 0 0 L 8 4 L 0 8 z" fill="#1e5fd8"/>
+          </marker>
+          <marker id="arc-arrow-purple" viewBox="0 0 8 8" refX="0" refY="4" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto">
+            <path d="M 0 0 L 8 4 L 0 8 z" fill="#7c3aed"/>
+          </marker>
+          <marker id="arc-arrow-teal" viewBox="0 0 8 8" refX="0" refY="4" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto">
+            <path d="M 0 0 L 8 4 L 0 8 z" fill="#0d9488"/>
+          </marker>
+          <marker id="arc-arrow-amber" viewBox="0 0 8 8" refX="0" refY="4" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto">
+            <path d="M 0 0 L 8 4 L 0 8 z" fill="#d97706"/>
+          </marker>
+          <style>
+            .arc-lane-bg { rx: 12px; }
+            .arc-lane-user { fill: #eef3ff; }
+            .arc-lane-ai { fill: #f5f0ff; }
+            .arc-lane-script { fill: #ecfdf5; }
+            .arc-lane-artifact { fill: #fef9f0; }
+            .arc-lane-title { font-family:'DM Sans','Noto Sans SC',sans-serif; font-size:15px; font-weight:700; fill:#1a1a1e; text-anchor:middle; }
+            .arc-node-rect { rx:8px; stroke-width:2px; }
+            .arc-node-user { fill:#fff; stroke:#1e5fd8; }
+            .arc-node-ai { fill:#fff; stroke:#7c3aed; }
+            .arc-node-script { fill:#fff; stroke:#0d9488; }
+            .arc-node-artifact { fill:#fffef5; stroke:#d97706; }
+            .arc-text-title { font-family:'DM Sans','Noto Sans SC',sans-serif; font-size:13px; font-weight:700; fill:#1a1a1e; text-anchor:middle; }
+            .arc-text-sub { font-family:'DM Sans','Noto Sans SC',sans-serif; font-size:11px; fill:#5a5a64; text-anchor:middle; }
+            .arc-path-line { fill:none; stroke-width:2px; stroke-dasharray:4,4; }
+            .arc-path-solid { fill:none; stroke-width:2px; }
+            .arc-path-user { stroke:#1e5fd8; }
+            .arc-path-ai { stroke:#7c3aed; }
+            .arc-path-script { stroke:#0d9488; }
+            .arc-path-artifact { stroke:#d97706; }
+            .arc-loop-box { fill:rgba(250,250,249,.6); stroke:#e4e3e0; stroke-width:1px; rx:16px; }
+            .arc-loop-label { fill:#d97706; font-family:'DM Sans','Noto Sans SC',sans-serif; font-size:14px; font-weight:700; }
+            .arc-step-heading { font-family:'DM Sans','Noto Sans SC',sans-serif!important; fill:#dc2626!important; font-weight:900!important; font-size:13px!important; }
+          </style>
+        </defs>
+
+        <!-- 泳道背景 -->
+        <rect class="arc-lane-bg arc-lane-user" x="10" y="10" width="260" height="1320"/>
+        <rect class="arc-lane-bg arc-lane-ai" x="280" y="10" width="260" height="1320"/>
+        <rect class="arc-lane-bg arc-lane-script" x="550" y="10" width="260" height="1320"/>
+        <rect class="arc-lane-bg arc-lane-artifact" x="820" y="10" width="270" height="1320"/>
+
+        <!-- 泳道标题 -->
+        <text x="140" y="45" class="arc-lane-title">FO (Function Owner)</text>
+        <text x="410" y="45" class="arc-lane-title">AI 助手 (LLM)</text>
+        <text x="680" y="45" class="arc-lane-title">执行脚本 (Scripts)</text>
+        <text x="955" y="45" class="arc-lane-title">文档&数据</text>
+
+        <!-- 循环区域 -->
+        <rect class="arc-loop-box" x="20" y="620" width="1060" height="510"/>
+        <rect x="36" y="606" width="305" height="28" fill="#fff" stroke="rgba(0,0,0,.08)" stroke-width="1" rx="6"/>
+        <text x="50" y="625" class="arc-loop-label arc-step-heading">Step 4 (逐块确认模式): 3 轮循环</text>
+
+        <!-- ===== 节点 ===== -->
+        <!-- Y=80 -->
+        <g transform="translate(45,80)"><rect class="arc-node-rect arc-node-user" width="200" height="60"/><text x="100" y="26" class="arc-text-title">提供 FDS 来源</text><text x="100" y="46" class="arc-text-sub">飞书文档 URL 或 Token</text></g>
+        <g transform="translate(315,80)"><rect class="arc-node-rect arc-node-ai" width="200" height="60"/><text x="100" y="26" class="arc-text-title arc-step-heading">Step 1: 接收并初始化</text><text x="100" y="46" class="arc-text-sub">提取 Token, 调用拉取命令</text></g>
+
+        <!-- Y=180 -->
+        <g transform="translate(585,180)"><rect class="arc-node-rect arc-node-script" width="200" height="60"/><text x="100" y="26" class="arc-text-title">lark-cli docs +fetch</text><text x="100" y="46" class="arc-text-sub">拉取飞书文档内容</text></g>
+        <g transform="translate(855,180)"><rect class="arc-node-rect arc-node-artifact" width="200" height="60"/><text x="100" y="26" class="arc-text-title">fds_content.md</text><text x="100" y="46" class="arc-text-sub">文档原始 Markdown</text></g>
+
+        <!-- Y=280 -->
+        <g transform="translate(585,280)"><rect class="arc-node-rect arc-node-script" width="200" height="60"/><text x="100" y="26" class="arc-text-title">parse_fds.py</text><text x="100" y="46" class="arc-text-sub">提取结构化功能块/需求</text></g>
+        <g transform="translate(855,280)"><rect class="arc-node-rect arc-node-artifact" width="200" height="60"/><text x="100" y="26" class="arc-text-title">fds_parsed.json</text><text x="100" y="46" class="arc-text-sub">结构化数据源 (过滤未完成项)</text></g>
+
+        <!-- Y=380 -->
+        <g transform="translate(315,380)"><rect class="arc-node-rect arc-node-ai" width="200" height="60"/><text x="100" y="26" class="arc-text-title arc-step-heading">Step 2: 展示功能块摘要</text><text x="100" y="46" class="arc-text-sub">向用户展示解析统计</text></g>
+        <g transform="translate(45,380)"><rect class="arc-node-rect arc-node-user" width="200" height="60"/><text x="100" y="26" class="arc-text-title">确认工作范围</text><text x="100" y="46" class="arc-text-sub">确认是否排除特定块</text></g>
+
+        
+        <!-- Y=430: Mode Selection (new Step 2b) -->
+        <g transform="translate(45,468)"><rect class="arc-node-rect arc-node-user" width="200" height="40"/><text x="100" y="18" class="arc-text-title">选择交互模式</text><text x="100" y="34" class="arc-text-sub">快速 / 草稿 / 逐块确认</text></g>
+        <g transform="translate(315,468)"><rect class="arc-node-rect arc-node-ai" width="200" height="40"/><text x="100" y="18" class="arc-text-title arc-step-heading">Step 2b: 模式选择</text><text x="100" y="34" class="arc-text-sub">根据用户偏好决定流程</text></g>
+
+        <!-- Y=530 (shifted from 480) -->
+        <g transform="translate(315,530)"><rect class="arc-node-rect arc-node-ai" width="200" height="60"/><text x="100" y="26" class="arc-text-title arc-step-heading">Step 3: 建立数据容器</text><text x="100" y="46" class="arc-text-sub">调用 lark-base 生成结构</text></g>
+        <g transform="translate(585,530)"><rect class="arc-node-rect arc-node-script" width="200" height="60"/><text x="100" y="26" class="arc-text-title">lark-base 建表工具</text><text x="100" y="46" class="arc-text-sub">依据 AIAG&amp;VDA 模板生成</text></g>
+        <g transform="translate(855,530)"><rect class="arc-node-rect arc-node-artifact" width="200" height="60"/><text x="100" y="26" class="arc-text-title">Base 多维表格</text><text x="100" y="46" class="arc-text-sub">创建带标准列的空表</text></g>
+
+        <!-- Y=600 (Loop R1) -->
+        <g transform="translate(855,650)"><rect class="arc-node-rect arc-node-artifact" width="200" height="60"/><text x="100" y="26" class="arc-text-title">fds_to_fmea_mapping</text><text x="100" y="46" class="arc-text-sub" fill="#d97706">基于 NT3.5 真实功能清单</text></g>
+        <g transform="translate(315,650)"><rect class="arc-node-rect arc-node-ai" width="200" height="60"/><text x="100" y="26" class="arc-text-title">4a: 提取功能与需求</text><text x="100" y="46" class="arc-text-sub">生成聚焦点与上一/下一级</text></g>
+        <g transform="translate(45,650)"><rect class="arc-node-rect arc-node-user" width="200" height="60"/><text x="100" y="26" class="arc-text-title">第 1 轮交互确认</text><text x="100" y="46" class="arc-text-sub">修改需求描述 / 跳过</text></g>
+
+        <!-- Y=700 (Loop R2) -->
+        <g transform="translate(855,750)"><rect class="arc-node-rect arc-node-artifact" width="200" height="60"/><text x="100" y="26" class="arc-text-title">failure_mode_library</text><text x="100" y="46" class="arc-text-sub" fill="#d97706">NT3.5 真实 ASIL 对齐</text></g>
+        <g transform="translate(315,750)"><rect class="arc-node-rect arc-node-ai" width="200" height="60"/><text x="100" y="26" class="arc-text-title">4b: 推导失效分析</text><text x="100" y="46" class="arc-text-sub">推演模式/原因/影响及探测</text></g>
+        <g transform="translate(45,750)"><rect class="arc-node-rect arc-node-user" width="200" height="60"/><text x="100" y="26" class="arc-text-title">第 2 轮交互确认</text><text x="100" y="46" class="arc-text-sub">增删条目 / 调整归因</text></g>
+
+        <!-- Y=800 (Loop R3) -->
+        <g transform="translate(855,850)"><rect class="arc-node-rect arc-node-artifact" width="200" height="60"/><text x="100" y="26" class="arc-text-title">rating_tables.md</text><text x="100" y="46" class="arc-text-sub" fill="#d97706">S/O/D 对齐 NT3.5 ASIL</text></g>
+        <g transform="translate(315,850)"><rect class="arc-node-rect arc-node-ai" width="200" height="60"/><text x="100" y="26" class="arc-text-title">4c: 风险评估与建议</text><text x="100" y="46" class="arc-text-sub">对 S/O/D 打分,输出 AP 与措施</text></g>
+        <g transform="translate(45,850)"><rect class="arc-node-rect arc-node-user" width="200" height="60"/><text x="100" y="26" class="arc-text-title">第 3 轮交互确认</text><text x="100" y="46" class="arc-text-sub">调整严重度等评级</text></g>
+
+        <!-- Y=900 (Loop Write) -->
+        <g transform="translate(585,950)"><rect class="arc-node-rect arc-node-script" width="200" height="60"/><text x="100" y="26" class="arc-text-title">base batch-add</text><text x="100" y="46" class="arc-text-sub">确认无误后写入多维表格</text></g>
+        <g transform="translate(855,920)"><rect class="arc-node-rect arc-node-artifact" width="200" height="60"/><text x="100" y="26" class="arc-text-title">fmea_batch.json</text><text x="100" y="46" class="arc-text-sub">待写入的数据批次</text></g>
+        <g transform="translate(855,985)"><rect class="arc-node-rect arc-node-artifact" width="200" height="60"/><text x="100" y="26" class="arc-text-title">fmea_decisions.json</text><text x="100" y="46" class="arc-text-sub">记录人工干预与调整日志</text></g>
+
+        <!-- Y=1000 (Loop Decision) -->
+        <g transform="translate(315,1050)"><rect class="arc-node-rect arc-node-ai" width="200" height="60"/><text x="100" y="26" class="arc-text-title">询问下一步指令</text><text x="100" y="46" class="arc-text-sub">是否继续下一个功能块？</text></g>
+        <g transform="translate(45,1050)"><rect class="arc-node-rect arc-node-user" width="200" height="60"/><text x="100" y="26" class="arc-text-title">决策</text><text x="100" y="46" class="arc-text-sub">确认继续 / 中途暂停</text></g>
+
+        <!-- Y=1120 (Finish) -->
+        <g transform="translate(315,1170)"><rect class="arc-node-rect arc-node-ai" width="200" height="60"/><text x="100" y="26" class="arc-text-title arc-step-heading">Step 5: 输出汇总报告</text><text x="100" y="46" class="arc-text-sub">提供飞书 Base 链接与高危提醒</text></g>
+        <g transform="translate(45,1170)"><rect class="arc-node-rect arc-node-user" width="200" height="60"/><text x="100" y="26" class="arc-text-title">项目验收</text><text x="100" y="46" class="arc-text-sub">审查 FMEA 表格, 配置视图</text></g>
+
+        <!-- ===== 连线 ===== -->
+        <path class="arc-path-solid arc-path-user" d="M 245 110 L 307 110" marker-end="url(#arc-arrow-blue)"/>
+        <path class="arc-path-solid arc-path-ai" d="M 515 110 C 550 110, 550 200, 577 200" marker-end="url(#arc-arrow-purple)"/>
+        <path class="arc-path-solid arc-path-script" d="M 785 200 L 847 200" marker-end="url(#arc-arrow-teal)"/>
+        <path class="arc-path-solid arc-path-artifact" d="M 855 220 C 820 220, 820 290, 793 290" marker-end="url(#arc-arrow-amber)"/>
+        <path class="arc-path-solid arc-path-script" d="M 785 310 L 847 310" marker-end="url(#arc-arrow-teal)"/>
+        <path class="arc-path-solid arc-path-artifact" d="M 855 330 C 820 330, 820 400, 523 400" marker-end="url(#arc-arrow-amber)"/>
+        <path class="arc-path-solid arc-path-ai" d="M 315 400 L 253 400" marker-end="url(#arc-arrow-purple)"/>
+        <!-- Step 2b: User confirm → User mode-select (vertical within User lane) -->
+        <path class="arc-path-solid arc-path-user" d="M 145 440 L 145 460" marker-end="url(#arc-arrow-blue)"/>
+        <!-- Step 2b: User → AI mode selection -->
+        <path class="arc-path-solid arc-path-user" d="M 245 488 L 307 488" marker-end="url(#arc-arrow-blue)"/>
+        <!-- User mode-select → AI Step 3 -->
+        <path class="arc-path-solid arc-path-user" d="M 245 495 C 280 495, 280 560, 307 560" marker-end="url(#arc-arrow-blue)"/>
+        <path class="arc-path-solid arc-path-ai" d="M 515 560 L 577 560" marker-end="url(#arc-arrow-purple)"/>
+        <path class="arc-path-solid arc-path-script" d="M 785 560 L 847 560" marker-end="url(#arc-arrow-teal)"/>
+
+        <!-- 循环 R1 -->
+        <path class="arc-path-line arc-path-artifact" d="M 855 680 L 523 680" marker-end="url(#arc-arrow-amber)"/>
+        <path class="arc-path-solid arc-path-ai" d="M 315 670 L 253 670" marker-end="url(#arc-arrow-purple)"/>
+        <path class="arc-path-solid arc-path-user" d="M 245 690 C 280 690, 280 760, 307 760" marker-end="url(#arc-arrow-blue)"/>
+
+        <!-- 循环 R2 -->
+        <path class="arc-path-line arc-path-artifact" d="M 855 780 L 523 780" marker-end="url(#arc-arrow-amber)"/>
+        <path class="arc-path-solid arc-path-ai" d="M 315 770 L 253 770" marker-end="url(#arc-arrow-purple)"/>
+        <path class="arc-path-solid arc-path-user" d="M 245 790 C 280 790, 280 860, 307 860" marker-end="url(#arc-arrow-blue)"/>
+
+        <!-- 循环 R3 -->
+        <path class="arc-path-line arc-path-artifact" d="M 855 880 L 523 880" marker-end="url(#arc-arrow-amber)"/>
+        <path class="arc-path-solid arc-path-ai" d="M 315 870 L 253 870" marker-end="url(#arc-arrow-purple)"/>
+        <path class="arc-path-solid arc-path-user" d="M 245 890 C 270 890, 270 960, 310 960 L 577 960" marker-end="url(#arc-arrow-blue)"/>
+
+        <!-- 写入与返回 -->
+        <path class="arc-path-solid arc-path-script" d="M 785 960 C 820 960, 820 950, 847 950" marker-end="url(#arc-arrow-teal)"/>
+        <path class="arc-path-solid arc-path-script" d="M 785 990 C 820 990, 820 1015, 847 1015" marker-end="url(#arc-arrow-teal)"/>
+        <path class="arc-path-solid arc-path-script" d="M 585 990 C 550 990, 550 1070, 523 1070" marker-end="url(#arc-arrow-teal)"/>
+        <path class="arc-path-solid arc-path-ai" d="M 315 1070 L 253 1070" marker-end="url(#arc-arrow-purple)"/>
+        <path class="arc-path-line arc-path-user" d="M 45 1080 C 15 1080, 15 1080, 15 1050 L 15 710 C 15 680, 15 680, 37 680" marker-end="url(#arc-arrow-blue)"/>
+        <path class="arc-path-solid arc-path-user" d="M 245 1090 C 280 1090, 280 1190, 307 1190" marker-end="url(#arc-arrow-blue)"/>
+        <path class="arc-path-solid arc-path-ai" d="M 315 1200 L 253 1200" marker-end="url(#arc-arrow-purple)"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- Workflow Section -->
+<section class="section section-alt" id="workflow">
+  <div class="container">
+    <div class="section-header">
+      <h2>7 步法执行流程</h2>
+      <p>映射到 AIAG & VDA 标准，从拉取 FDS 到输出飞书 Base 表</p>
+    </div>
+    <div class="workflow">
+      <div class="workflow-step animate-in"><div class="workflow-step-num">1</div><h4>获取 FDS</h4><p>lark-cli 拉取飞书文档</p></div>
+      <div class="workflow-step animate-in delay-1"><div class="workflow-step-num">2</div><h4>解析结构</h4><p>parse_fds.py 提取功能块/信号/系统</p></div>
+      <div class="workflow-step animate-in delay-1"><div class="workflow-step-num">2b</div><h4>选择模式</h4><p>快速 / 草稿 / 逐块确认</p></div>
+      <div class="workflow-step animate-in delay-2"><div class="workflow-step-num">3</div><h4>创建 Base</h4><p>飞书多维表格 20 字段 Schema</p></div>
+      <div class="workflow-step animate-in delay-2"><div class="workflow-step-num">4</div><h4>AI 生成 FMEA</h4><p>全量推导 FM/FE/FC/S/O/D/AP</p></div>
+      <div class="workflow-step animate-in delay-3"><div class="workflow-step-num">5</div><h4>按模式确认</h4><p>快速: 仅AP=H / 草稿: 无 / 逐块: 3轮</p></div>
+      <div class="workflow-step animate-in delay-4"><div class="workflow-step-num">6</div><h4>汇总报告</h4><p>统计 + 高风险清单 + Docx 报告</p></div>
+    </div>
+
+    <!-- 3-Mode Comparison -->
+    <h3 style="text-align:center;margin-top:3rem;margin-bottom:1.5rem;">交互模式选择（Step 2b）</h3>
+    <div class="grid-3" style="max-width:960px;margin:0 auto;">
+      <div class="card card-accent-g animate-in" style="text-align:center;">
+        <div style="font-size:2.5rem;margin-bottom:.25rem;">⚡</div>
+        <h4>快速模式</h4>
+        <p style="font-size:.8rem;color:var(--text-secondary);margin:.4rem 0;">AI 全量生成，静默写入 Base</p>
+        <div style="font-size:.75rem;color:var(--text-tertiary);">
+          仅最终审查 <span class="badge badge-h">AP=H</span> 条目<br>
+          <strong>2 次交互</strong> / 推荐
+        </div>
+      </div>
+      <div class="card animate-in delay-1" style="text-align:center;">
+        <div style="font-size:2.5rem;margin-bottom:.25rem;">📝</div>
+        <h4>草稿模式</h4>
+        <p style="font-size:.8rem;color:var(--text-secondary);margin:.4rem 0;">全量写入 Base，无任何打断</p>
+        <div style="font-size:.75rem;color:var(--text-tertiary);">
+          事后飞书审查修改<br>
+          <strong>0 次交互</strong>
+        </div>
+      </div>
+      <div class="card animate-in delay-2" style="text-align:center;">
+        <div style="font-size:2.5rem;margin-bottom:.25rem;">🔍</div>
+        <h4>逐块确认模式</h4>
+        <p style="font-size:.8rem;color:var(--text-secondary);margin:.4rem 0;">每功能块 3 轮确认后写入</p>
+        <div style="font-size:.75rem;color:var(--text-tertiary);">
+          需求→失效→评级<br>
+          <strong>3N 次交互</strong> / 首次使用
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Failure Chain SVG -->
+<section class="section" id="methodology">
+  <div class="container">
+    <div class="section-header">
+      <h2>失效链推导逻辑</h2>
+      <p>从 FDS 需求语句到 FMEA 失效链的完整映射</p>
+    </div>
+    <div class="chain-diagram">
+      <svg viewBox="0 0 880 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrChain" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto"><path d="M0 0l9 3.5-9 3.5V0z" fill="#64748b"/></marker>
+          <marker id="arrCause" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto"><path d="M0 0l9 3.5-9 3.5V0z" fill="#dc2626"/></marker>
+          <marker id="arrMode" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto"><path d="M0 0l9 3.5-9 3.5V0z" fill="#d97706"/></marker>
+          <marker id="arrEffect" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto"><path d="M0 0l9 3.5-9 3.5V0z" fill="#1e5fd8"/></marker>
+        </defs>
+
+        <!-- Top: FDS Requirement -->
+        <rect x="280" y="10" width="320" height="48" rx="8" fill="#f8faff" stroke="#1e5fd8" stroke-width="1.5"/>
+        <text x="440" y="40" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="13" font-weight="600" fill="#1a1a1e">FDS 需求: "车速 ≥ 8km/h 时自动锁止车门"</text>
+
+        <!-- Arrow down from FDS -->
+        <line x1="440" y1="58" x2="440" y2="90" stroke="#64748b" stroke-width="1.2" marker-end="url(#arrChain)"/>
+
+        <!-- 5 Failure Mode Templates -->
+        <rect x="28" y="90" width="824" height="68" rx="8" fill="#fef7ed" stroke="#d97706" stroke-width="1.2" stroke-dasharray="6 3"/>
+        <text x="440" y="112" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="11" font-weight="600" fill="#92400e">5 类失效模式推导模板</text>
+
+        <rect x="44" y="122" width="144" height="26" rx="5" fill="#fff" stroke="#d97706" stroke-width="1"/>
+        <text x="116" y="139" text-anchor="middle" font-size="11" fill="#92400e">Loss — 功能丧失</text>
+        <rect x="198" y="122" width="144" height="26" rx="5" fill="#fff" stroke="#d97706" stroke-width="1"/>
+        <text x="270" y="139" text-anchor="middle" font-size="11" fill="#92400e">Incorrect — 功能错误</text>
+        <rect x="352" y="122" width="144" height="26" rx="5" fill="#fff" stroke="#d97706" stroke-width="1"/>
+        <text x="424" y="139" text-anchor="middle" font-size="11" fill="#92400e">Intermittent — 功能间歇</text>
+        <rect x="506" y="122" width="168" height="26" rx="5" fill="#fff" stroke="#d97706" stroke-width="1"/>
+        <text x="590" y="139" text-anchor="middle" font-size="11" fill="#92400e">Unintended — 非预期激活</text>
+        <rect x="684" y="122" width="152" height="26" rx="5" fill="#fff" stroke="#d97706" stroke-width="1"/>
+        <text x="760" y="139" text-anchor="middle" font-size="11" fill="#92400e">Delayed — 功能延迟</text>
+
+        <!-- Arrow down from templates -->
+        <line x1="440" y1="158" x2="440" y2="188" stroke="#64748b" stroke-width="1.2" marker-end="url(#arrChain)"/>
+
+        <!-- Failure Chain: FC → FM → FE -->
+        <!-- FC -->
+        <rect x="28" y="188" width="224" height="60" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5"/>
+        <text x="140" y="210" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="12" font-weight="600" fill="#991b1b">失效原因 FC</text>
+        <text x="140" y="232" text-anchor="middle" font-size="10" fill="#7f1d1d">车速信号丢失 / 信号 E2E 校验失败</text>
+
+        <line x1="252" y1="218" x2="296" y2="218" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arrCause)"/>
+
+        <!-- FM -->
+        <rect x="296" y="188" width="224" height="60" rx="8" fill="#fef7ed" stroke="#d97706" stroke-width="1.5"/>
+        <text x="408" y="210" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="12" font-weight="600" fill="#92400e">失效模式 FM</text>
+        <text x="408" y="232" text-anchor="middle" font-size="10" fill="#78350f">车速 &gt;8km/h 后未自动锁止（功能丧失）</text>
+
+        <line x1="520" y1="218" x2="564" y2="218" stroke="#d97706" stroke-width="1.5" marker-end="url(#arrMode)"/>
+
+        <!-- FE -->
+        <rect x="564" y="188" width="288" height="60" rx="8" fill="#f0f4ff" stroke="#1e5fd8" stroke-width="1.5"/>
+        <text x="708" y="210" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="12" font-weight="600" fill="#1e40af">失效影响 FE</text>
+        <text x="708" y="232" text-anchor="middle" font-size="10" fill="#1e3a8a">行驶中车门未锁 → 乘员误开门风险 → 安全威胁 S=9</text>
+
+        <!-- Upward chain: ECU → System → Vehicle → User -->
+        <rect x="564" y="260" width="288" height="24" rx="5" fill="#e8f0fe" stroke="#1e5fd8" stroke-width="0.8" stroke-dasharray="3 2"/>
+        <text x="708" y="277" text-anchor="middle" font-size="9" fill="#1e5fd8">ECU 级 → 系统级 → 整车级 → 用户感知（逐级上溯）</text>
+        <line x1="708" y1="248" x2="708" y2="260" stroke="#1e5fd8" stroke-width="0.8"/>
+      </svg>
+    </div>
+
+    <!-- FDS → FMEA Mapping Table -->
+    <h3 style="text-align:center;margin-bottom:1.5rem;">FDS → FMEA 映射规则</h3>
+    <div class="grid-2">
+      <div class="card animate-in" style="padding:1.25rem;">
+        <table style="width:100%;font-size:.82rem;border-collapse:collapse;">
+          <tr style="border-bottom:1px solid var(--border);"><th style="text-align:left;padding:.5rem .25rem;color:var(--blue);">FDS 元素</th><th style="text-align:left;padding:.5rem .25rem;color:var(--amber);">FMEA 目标列</th></tr>
+          <tr style="border-bottom:1px solid var(--border-light);"><td style="padding:.45rem .25rem;">文档标题 + 功能 ID</td><td style="padding:.45rem .25rem;font-weight:500;">系统 / 上一级要素</td></tr>
+          <tr style="border-bottom:1px solid var(--border-light);"><td style="padding:.45rem .25rem;">功能块标题</td><td style="padding:.45rem .25rem;font-weight:500;">聚焦要素</td></tr>
+          <tr style="border-bottom:1px solid var(--border-light);"><td style="padding:.45rem .25rem;">参与系统表 / 接口信号表</td><td style="padding:.45rem .25rem;font-weight:500;">下一级要素 / 失效原因候选</td></tr>
+          <tr style="border-bottom:1px solid var(--border-light);"><td style="padding:.45rem .25rem;">需求语句 (shall/条件式)</td><td style="padding:.45rem .25rem;font-weight:500;">聚焦要素功能与要求</td></tr>
+          <tr style="border-bottom:1px solid var(--border-light);"><td style="padding:.45rem .25rem;">故障降级策略</td><td style="padding:.45rem .25rem;font-weight:500;">预防 / 探测控制</td></tr>
+          <tr style="border-bottom:1px solid var(--border-light);"><td style="padding:.45rem .25rem;">Latency / ASIL 标注</td><td style="padding:.45rem .25rem;font-weight:500;">O / S 评级参考</td></tr>
+          <tr><td style="padding:.45rem .25rem;">功能块审批状态</td><td style="padding:.45rem .25rem;font-weight:500;">是否纳入分析范围</td></tr>
+        </table>
+      </div>
+      <div class="card animate-in delay-1" style="padding:1.25rem;">
+        <table style="width:100%;font-size:.82rem;border-collapse:collapse;">
+          <tr style="border-bottom:1px solid var(--border);"><th style="text-align:left;padding:.5rem .25rem;color:var(--red);">失效原因维度</th><th style="text-align:left;padding:.5rem .25rem;color:var(--text-secondary);">典型描述模板</th></tr>
+          <tr style="border-bottom:1px solid var(--border-light);"><td style="padding:.45rem .25rem;">信号</td><td style="padding:.45rem .25rem;font-size:.8rem;color:var(--text-secondary);">信号丢失 / 值域异常 / E2E 校验失败 / 延迟</td></tr>
+          <tr style="border-bottom:1px solid var(--border-light);"><td style="padding:.45rem .25rem;">ECU</td><td style="padding:.45rem .25rem;font-size:.8rem;color:var(--text-secondary);">MCU 故障 / 电源异常 / 看门狗复位</td></tr>
+          <tr style="border-bottom:1px solid var(--border-light);"><td style="padding:.45rem .25rem;">执行器</td><td style="padding:.45rem .25rem;font-size:.8rem;color:var(--text-secondary);">电机卡滞 / 开路 / 短路 / 过热保护</td></tr>
+          <tr style="border-bottom:1px solid var(--border-light);"><td style="padding:.45rem .25rem;">通信</td><td style="padding:.45rem .25rem;font-size:.8rem;color:var(--text-secondary);">CAN Bus-off / 网关路由失败 / 超时</td></tr>
+          <tr style="border-bottom:1px solid var(--border-light);"><td style="padding:.45rem .25rem;">软件</td><td style="padding:.45rem .25rem;font-size:.8rem;color:var(--text-secondary);">状态机卡死 / 任务超时 / 初始化失败</td></tr>
+          <tr><td style="padding:.45rem .25rem;">参数</td><td style="padding:.45rem .25rem;font-size:.8rem;color:var(--text-secondary);">标定值超出范围 / Variant Coding 错误</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AP + S/O/D Section -->
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-header">
+      <h2>风险评级：S / O / D → Action Priority</h2>
+      <p>AIAG & VDA 2019 废除 RPN (S×O×D)，改用 AP 查表法，优先保障安全相关条目的行动优先级</p>
+    </div>
+    <div class="grid-3">
+      <div class="card animate-in" style="text-align:center;">
+        <div style="font-size:3rem;font-weight:700;color:var(--red);line-height:1;">S</div>
+        <h4 style="margin:.5rem 0;">严重度 Severity</h4>
+        <p style="font-size:.8rem;color:var(--text-secondary);">失效影响的最终后果</p>
+        <div style="margin-top:.75rem;text-align:left;font-size:.75rem;line-height:1.6;">
+          <div><strong>10</strong> — 安全/法规（无预警）</div>
+          <div><strong>9</strong> — 安全/法规（有预警）</div>
+          <div><strong>7-8</strong> — 功能丧失</div>
+          <div><strong>4-6</strong> — 功能降级</div>
+          <div><strong>1-3</strong> — 轻微影响</div>
+        </div>
+      </div>
+      <div class="card animate-in delay-1" style="text-align:center;">
+        <div style="font-size:3rem;font-weight:700;color:var(--amber);line-height:1;">O</div>
+        <h4 style="margin:.5rem 0;">频度 Occurrence</h4>
+        <p style="font-size:.8rem;color:var(--text-secondary);">失效原因发生的可能性</p>
+        <div style="margin-top:.75rem;text-align:left;font-size:.75rem;line-height:1.6;">
+          <div><strong>8-10</strong> — 全新设计 / 高复杂度</div>
+          <div><strong>5-7</strong> — 已有设计 / 显著修改</div>
+          <div><strong>3-4</strong> — 成熟设计 / 已验证</div>
+          <div><strong>1-2</strong> — 多代量产 / 预防控制充分</div>
+        </div>
+      </div>
+      <div class="card animate-in delay-2" style="text-align:center;">
+        <div style="font-size:3rem;font-weight:700;color:var(--slate);line-height:1;">D</div>
+        <h4 style="margin:.5rem 0;">探测度 Detection</h4>
+        <p style="font-size:.8rem;color:var(--text-secondary);">量产前探测失效的有效性</p>
+        <div style="margin-top:.75rem;text-align:left;font-size:.75rem;line-height:1.6;">
+          <div><strong>9-10</strong> — 无法/极难探测</div>
+          <div><strong>6-8</strong> — 手动/有限测试</div>
+          <div><strong>3-5</strong> — 自动化测试+诊断</div>
+          <div><strong>1-2</strong> — 自诊断+E2E保护</div>
+        </div>
+      </div>
+    </div>
+    <!-- AP Result -->
+    <div style="max-width:500px;margin:2rem auto 0;text-align:center;" class="animate-in delay-3">
+      <div style="font-size:.85rem;color:var(--text-secondary);margin-bottom:.75rem;">S/O/D 组合 → 查表得 Action Priority</div>
+      <div style="display:flex;gap:1.5rem;justify-content:center;">
+        <div style="text-align:center;"><span class="badge badge-h" style="font-size:1.2rem;padding:.4rem 1.2rem;">H</span><div style="font-size:.72rem;color:var(--text-tertiary);margin-top:.35rem;">必须改进</div></div>
+        <div style="text-align:center;"><span class="badge badge-m" style="font-size:1.2rem;padding:.4rem 1.2rem;">M</span><div style="font-size:.72rem;color:var(--text-tertiary);margin-top:.35rem;">应该改进</div></div>
+        <div style="text-align:center;"><span class="badge badge-l" style="font-size:1.2rem;padding:.4rem 1.2rem;">L</span><div style="font-size:.72rem;color:var(--text-tertiary);margin-top:.35rem;">可选改进</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FMEA Table Preview -->
+<section class="section" id="output">
+  <div class="container">
+    <div class="section-header">
+      <h2>输出：飞书多维表格 (Base)</h2>
+      <p>20 个字段，每条失效模式一行，可嵌入飞书 Docx / Wiki，支持多视图筛选</p>
+    </div>
+    <div class="fmea-table-wrap animate-in">
+      <table class="fmea-table">
+        <thead>
+          <tr>
+            <th>聚焦要素</th><th>聚焦要素功能与要求</th><th>失效模式 FM</th><th>失效影响 FE</th>
+            <th>S</th><th>失效原因 FC</th><th>O</th><th>预防控制</th><th>D</th><th>AP</th><th>建议措施</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="white-space:nowrap;">Speed Lock</td>
+            <td>车速 ≥8km/h 且全部车门关闭时，自动锁止全部车门</td>
+            <td>车速 &gt;8km/h 后未自动锁止</td>
+            <td>行驶中车门未上锁，乘员（尤其儿童）误开门风险</td>
+            <td style="text-align:center;font-weight:700;color:var(--red)">9</td>
+            <td>车速信号 bcu_veh_spd 无效/丢失；门状态信号卡在"开门"</td>
+            <td style="text-align:center;">2</td>
+            <td>速度信号有效性校验；门状态去抖</td>
+            <td style="text-align:center;">3</td>
+            <td style="text-align:center;"><span class="badge badge-h">H</span></td>
+            <td>增加 ESP 车速冗余源交叉校验；门状态增加 E2E 保护</td>
+          </tr>
+          <tr>
+            <td style="white-space:nowrap;">Crash Unlock</td>
+            <td>碰撞检测后，所有车门自动解锁</td>
+            <td>碰撞后门锁未解锁</td>
+            <td>乘员无法逃生 — 违反 GB 11551 / ECE R94</td>
+            <td style="text-align:center;font-weight:700;color:var(--red)">10</td>
+            <td>ACM 碰撞 PWM 信号接收电路故障；锁电机供电在碰撞中断开</td>
+            <td style="text-align:center;">1</td>
+            <td>独立冗余解锁路径；碰撞电容备份供电</td>
+            <td style="text-align:center;">2</td>
+            <td style="text-align:center;"><span class="badge badge-h">H</span></td>
+            <td>增加碰撞信号独立硬件冗余判断路径；碰撞解锁逻辑最高任务优先级</td>
+          </tr>
+          <tr>
+            <td>Door Handle Light</td>
+            <td>解锁后，门把手灯呼吸渐变点亮</td>
+            <td>门把手灯不亮</td>
+            <td>夜间用户找不到门把手，使用便利性显著降低</td>
+            <td style="text-align:center;">5</td>
+            <td>LED 驱动输出端口故障；灯带供电回路断路</td>
+            <td style="text-align:center;">3</td>
+            <td>LED 开路/短路诊断</td>
+            <td style="text-align:center;">4</td>
+            <td style="text-align:center;"><span class="badge badge-m">M</span></td>
+            <td>增加 LED 驱动电流监控；EOL 灯光功能全检</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Base Table Schema Preview -->
+    <h3 style="text-align:center;margin-top:3rem;margin-bottom:1.5rem;">Base 表字段结构</h3>
+    <div class="schema-grid">
+      <div class="schema-item animate-in"><div class="schema-icon text">Tx</div><div class="schema-info"><strong>系统/上一级要素</strong><span>文本 — FDS 文档标题</span></div></div>
+      <div class="schema-item animate-in"><div class="schema-icon text">Tx</div><div class="schema-info"><strong>聚焦要素</strong><span>文本 — 功能块名称</span></div></div>
+      <div class="schema-item animate-in"><div class="schema-icon text">Tx</div><div class="schema-info"><strong>下一级要素</strong><span>文本 — 参与 ECU / SWC</span></div></div>
+      <div class="schema-item animate-in delay-1"><div class="schema-icon text">¶</div><div class="schema-info"><strong>聚焦要素功能与要求</strong><span>多行文本 — FDS 需求语句</span></div></div>
+      <div class="schema-item animate-in delay-1"><div class="schema-icon text">¶</div><div class="schema-info"><strong>失效影响 (FE)</strong><span>多行文本 — 对用户/车辆的后果</span></div></div>
+      <div class="schema-item animate-in delay-1"><div class="schema-icon text">¶</div><div class="schema-info"><strong>失效模式 (FM)</strong><span>多行文本 — 需求否定形式</span></div></div>
+      <div class="schema-item animate-in delay-1"><div class="schema-icon text">¶</div><div class="schema-info"><strong>失效原因 (FC)</strong><span>多行文本 — 信号/ECU/通信维度</span></div></div>
+      <div class="schema-item animate-in delay-2"><div class="schema-icon select">1-10</div><div class="schema-info"><strong>严重度 (S)</strong><span>单选 — 1-10 评分</span></div></div>
+      <div class="schema-item animate-in delay-2"><div class="schema-icon select">1-10</div><div class="schema-info"><strong>频度 (O)</strong><span>单选 — 1-10 评分</span></div></div>
+      <div class="schema-item animate-in delay-2"><div class="schema-icon select">1-10</div><div class="schema-info"><strong>探测度 (D)</strong><span>单选 — 1-10 评分</span></div></div>
+      <div class="schema-item animate-in delay-2"><div class="schema-icon select">HML</div><div class="schema-info"><strong>措施优先级 (AP)</strong><span>单选 — H / M / L</span></div></div>
+      <div class="schema-item animate-in delay-3"><div class="schema-icon text">¶</div><div class="schema-info"><strong>建议措施</strong><span>多行文本 — AI 建议</span></div></div>
+      <div class="schema-item animate-in delay-3"><div class="schema-icon text">Tx</div><div class="schema-info"><strong>功能块来源</strong><span>文本 — FDS Section 编号</span></div></div>
+      <div class="schema-item animate-in delay-3" style="background:var(--bg-alt);"><div class="schema-icon num">…</div><div class="schema-info"><strong>+ 6 个手动填写字段</strong><span>责任、措施状态、新评级等</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Body Domain Coverage (real NT3.5 VMBC data) -->
+<section class="section section-alt" id="coverage">
+  <div class="container">
+    <div class="section-header">
+      <h2>Body 域覆盖范围</h2>
+      <p>基于 NT3.5 VMBC 真实系统架构，11 个 Body 系统 · 778 个子功能 · 231 个安全相关</p>
+    </div>
+    <div class="domain-grid">
+      <div class="domain-card animate-in">
+        <h4>Sys-01 进入系统</h4>
+        <ul><li>PE Keyless Entry</li><li>Door Lock / Unlock</li><li>Crash Unlock</li><li>Door Handle Control</li><li>Child Lock</li><li>Ice Break</li></ul>
+      </div>
+      <div class="domain-card animate-in delay-1">
+        <h4>Sys-02 智能外设</h4>
+        <ul><li>Power Liftgate</li><li>Kick Sensor</li><li>Charge Port Cover</li></ul>
+      </div>
+      <div class="domain-card animate-in delay-1">
+        <h4>Sys-03 可视系统</h4>
+        <ul><li>Wiper / Wash</li><li>Dimming Glass</li><li>Electric Side Step</li><li>Horn</li><li>Exterior Mirror</li></ul>
+      </div>
+      <div class="domain-card animate-in delay-2">
+        <h4>Sys-04 座舱舒适</h4>
+        <ul><li>Seat Control</li><li>Seat Memory / Easy Entry</li><li>Steering Column</li><li>Safe Box</li><li>Steering Wheel Heating</li></ul>
+      </div>
+      <div class="domain-card animate-in delay-2">
+        <h4>Sys-05 乘员安全</h4>
+        <ul><li>Seatbelt Reminder</li><li>Airbag / ACM</li><li>Occupant Detection</li></ul>
+      </div>
+      <div class="domain-card animate-in delay-3">
+        <h4>Sys-10/11 灯光系统</h4>
+        <ul><li>Exterior Lighting</li><li>Welcome / Handle Light</li><li>Interior Ambient Light</li><li>Turn Signal</li></ul>
+      </div>
+    </div>
+    <p style="text-align:center;margin-top:1.5rem;font-size:.85rem;color:var(--text-tertiary);">
+      完整功能清单见 <code>references/nt35_function_catalog.md</code> — 含真实 ASIL 等级、FO、适用车型
+    </p>
+  </div>
+</section>
+
+<!-- Constraints -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <h2>关键约束</h2>
+      <p>明确边界，确保工程严谨性</p>
+    </div>
+    <div class="grid-2">
+      <div class="card card-accent-r animate-in">
+        <h4 style="margin-bottom:.5rem;">仅分析已完成的功能块</h4>
+        <p style="font-size:.85rem;color:var(--text-secondary);">跳过模板、预留、部分填充和草稿状态，仅处理已完成审批的功能块。</p>
+      </div>
+      <div class="card card-accent-r animate-in delay-1">
+        <h4 style="margin-bottom:.5rem;">不替代 FUSA 安全分析</h4>
+        <p style="font-size:.85rem;color:var(--text-secondary);">FMEA 不做 ASIL 分解或 HARA 分析。安全相关标记为 SC 分类，但安全完整性等级由独立的安全分析确定。</p>
+      </div>
+      <div class="card card-accent-a animate-in delay-2">
+        <h4 style="margin-bottom:.5rem;">AP=H 条目标注"待人工确认"</h4>
+        <p style="font-size:.85rem;color:var(--text-secondary);">高优先级条目 AI 自动评定后必须经过人工审查确认方可定稿。</p>
+      </div>
+      <div class="card card-accent-a animate-in delay-3">
+        <h4 style="margin-bottom:.5rem;">决策追踪全面留存</h4>
+        <p style="font-size:.85rem;color:var(--text-secondary);">每轮交互确认结果存入 fmea_decisions.json，支持审计追溯。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <p><strong>fmea-from-fds</strong> · Claude Code Skill · AIAG & VDA 2019 · Body Domain · 基于 NT3.5 VMBC 真实数据</p>
+    <p style="margin-top:.25rem;">数据源: NT3.5 功能层次结构 (1057 子功能 / 231 安全相关) · VMBC 22 系统架构 · 15+ Body FDS 文档</p>
+  </div>
+</footer>
+
+<!-- Intersection Observer for scroll animations -->
+<script>
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('animate-in'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.card, .workflow-step, .confirm-row, .domain-card, .schema-item').forEach(el => {
+  el.style.opacity = '0';
+  observer.observe(el);
+});
+// Also observe elements already animated by hero
+</script>
+</body>
+</html>
