@@ -347,6 +347,117 @@ code, .mono { font-family: 'JetBrains Mono', 'Noto Sans SC', monospace; font-siz
 </section>
 
 
+<!-- SKILL 内部全景 -->
+<section class="section" id="internals">
+  <div class="container">
+    <div class="section-header">
+      <h2>SKILL 内部内容全景</h2>
+      <p>fmea-from-fds 的文件结构、参考数据与执行脚本总览</p>
+    </div>
+    <div style="overflow-x:auto;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;box-shadow:var(--shadow);">
+      <svg viewBox="0 0 1060 580" xmlns="http://www.w3.org/2000/svg" style="min-width:1060px;width:100%;height:auto;">
+        <defs>
+          <style>
+            .iv-root-text { font-family:&quot;DM Sans&quot;,&quot;Noto Sans SC&quot;,sans-serif; font-size:14px; font-weight:700; fill:#1a1a1e; }
+            .iv-dir-text { font-family:&quot;JetBrains Mono&quot;,&quot;Noto Sans SC&quot;,monospace; font-size:13px; font-weight:700; fill:#1e5fd8; }
+            .iv-file-text { font-family:&quot;JetBrains Mono&quot;,&quot;Noto Sans SC&quot;,monospace; font-size:12px; fill:#1a1a1e; }
+            .iv-file-sub { font-family:&quot;DM Sans&quot;,&quot;Noto Sans SC&quot;,sans-serif; font-size:10px; fill:#5a5a64; }
+            .iv-head-text { font-family:&quot;DM Sans&quot;,&quot;Noto Sans SC&quot;,sans-serif; font-size:11px; font-weight:600; fill:#64748b; }
+            .iv-data-text { font-family:&quot;DM Sans&quot;,&quot;Noto Sans SC&quot;,sans-serif; font-size:10px; fill:#d97706; }
+            .iv-line { fill:none; stroke-width:1.5; }
+            .iv-line-struct { stroke:#cbd5e1; }
+            .iv-line-flow { stroke:#1e5fd8; stroke-dasharray:5,3; }
+            .iv-line-data { stroke:#d97706; stroke-dasharray:3,3; }
+            .iv-box-root { fill:#f8faff; stroke:#1e5fd8; stroke-width:1.8; rx:10; }
+            .iv-box-file { fill:#fff; stroke:#e4e3e0; stroke-width:1; rx:6; }
+            .iv-box-data { fill:#fef9f0; stroke:#d97706; stroke-width:1; rx:6; }
+            .iv-box-script { fill:#ecfdf5; stroke:#0d9488; stroke-width:1; rx:6; }
+            .iv-box-entry { fill:#eef3ff; stroke:#1e5fd8; stroke-width:1.5; rx:8; }
+          </style>
+        </defs>
+
+        <!-- ROOT -->
+        <rect class="iv-box-root" x="30" y="20" width="180" height="42"/>
+        <text x="120" y="47" text-anchor="middle" class="iv-root-text">fmea-from-fds</text>
+
+        <!-- Tree line -->
+        <line class="iv-line iv-line-struct" x1="120" y1="62" x2="120" y2="82"/>
+        <line class="iv-line iv-line-struct" x1="30" y1="82" x2="1020" y2="82"/>
+
+        <!-- COL 1: SKILL.md -->
+        <rect class="iv-box-entry" x="30" y="92" width="180" height="52"/>
+        <text x="120" y="117" text-anchor="middle" class="iv-root-text">SKILL.md</text>
+        <text x="120" y="135" text-anchor="middle" class="iv-file-sub">入口 / 7步工作流编排</text>
+
+        <!-- COL 2: scripts/ -->
+        <text x="290" y="76" class="iv-dir-text">scripts/</text>
+        <line class="iv-line iv-line-struct" x1="290" y1="82" x2="290" y2="172"/>
+
+        <rect class="iv-box-script" x="250" y="92" width="220" height="44"/>
+        <text x="360" y="112" text-anchor="middle" class="iv-file-text">parse_fds.py</text>
+        <text x="360" y="128" text-anchor="middle" class="iv-file-sub">FDS文档 → 结构化JSON</text>
+
+        <rect class="iv-box-script" x="250" y="148" width="220" height="44"/>
+        <text x="360" y="168" text-anchor="middle" class="iv-file-text">generate_fmea.py</text>
+        <text x="360" y="184" text-anchor="middle" class="iv-file-sub">JSON → FMEA骨架 + AP引擎</text>
+
+        <line class="iv-line iv-line-flow" x1="360" y1="136" x2="360" y2="144"/>
+
+        <!-- COL 3: references/ -->
+        <text x="570" y="76" class="iv-dir-text">references/</text>
+        <text x="570" y="120" class="iv-head-text">方法论与模板</text>
+        <line class="iv-line iv-line-struct" x1="530" y1="82" x2="530" y2="308"/>
+
+        <rect class="iv-box-file" x="540" y="130" width="250" height="34"/>
+        <text x="665" y="148" text-anchor="middle" class="iv-file-text">fmea_template.md</text>
+        <text x="665" y="160" text-anchor="middle" class="iv-file-sub">AIAG&amp;VDA 7步法列定义</text>
+
+        <rect class="iv-box-file" x="540" y="172" width="250" height="34"/>
+        <text x="665" y="190" text-anchor="middle" class="iv-file-text">rating_tables.md</text>
+        <text x="665" y="202" text-anchor="middle" class="iv-file-sub">S/O/D评分 + AP查表引擎</text>
+
+        <rect class="iv-box-file" x="540" y="214" width="250" height="34"/>
+        <text x="665" y="232" text-anchor="middle" class="iv-file-text">fds_to_fmea_mapping.md</text>
+        <text x="665" y="244" text-anchor="middle" class="iv-file-sub">FDS元素 → FMEA列 映射规则</text>
+
+        <rect class="iv-box-file" x="540" y="256" width="250" height="34"/>
+        <text x="665" y="274" text-anchor="middle" class="iv-file-text">failure_mode_library.md</text>
+        <text x="665" y="286" text-anchor="middle" class="iv-file-sub">Body域预置失效模式 / NT3.5对齐</text>
+
+        <text x="570" y="348" class="iv-head-text">NT3.5 真实平台数据</text>
+        <line class="iv-line iv-line-struct" x1="530" y1="336" x2="530" y2="440"/>
+
+        <rect class="iv-box-data" x="540" y="358" width="250" height="34"/>
+        <text x="665" y="376" text-anchor="middle" class="iv-file-text">nt35_function_catalog.md</text>
+        <text x="665" y="388" text-anchor="middle" class="iv-data-text">1057子功能 · ASIL等级 · FO · 适用车型</text>
+
+        <rect class="iv-box-data" x="540" y="400" width="250" height="34"/>
+        <text x="665" y="418" text-anchor="middle" class="iv-file-text">nt35_system_map.md</text>
+        <text x="665" y="430" text-anchor="middle" class="iv-data-text">VMBC 22系统 · 中英文名 · 子系统</text>
+
+        <text x="800" y="455" text-anchor="end" class="iv-file-sub">数据源: data/architecture/</text>
+        <text x="800" y="470" text-anchor="end" class="iv-file-sub">function_hierarchy.json</text>
+        <text x="800" y="485" text-anchor="end" class="iv-file-sub">sys_definition.json</text>
+
+        <!-- COL 4: assets/ -->
+        <text x="960" y="76" class="iv-dir-text">assets/</text>
+        <line class="iv-line iv-line-struct" x1="920" y1="82" x2="920" y2="144"/>
+
+        <rect class="iv-box-file" x="930" y="92" width="100" height="44"/>
+        <text x="980" y="112" text-anchor="middle" class="iv-file-text">Base模板</text>
+        <text x="980" y="128" text-anchor="middle" class="iv-file-sub">schema</text>
+
+        <!-- Legend -->
+        <line class="iv-line iv-line-flow" x1="430" y1="560" x2="480" y2="560"/>
+        <text x="488" y="564" class="iv-file-sub">执行流</text>
+        <line class="iv-line iv-line-data" x1="560" y1="560" x2="610" y2="560"/>
+        <text x="618" y="564" class="iv-file-sub">NT3.5真实数据</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+
 <!-- SKILL 执行架构 -->
 <section class="section" id="architecture">
   <div class="container">
