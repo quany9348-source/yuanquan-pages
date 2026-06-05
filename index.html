@@ -202,7 +202,7 @@
         }
 
         .category.open .category-body {
-            max-height: 600px;
+            max-height: 3000px;
         }
 
         .project-list {
@@ -241,12 +241,21 @@
 
         .project-list li a .name {
             flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .project-list li a .desc {
             font-size: 0.78rem;
             color: var(--text-dim);
             font-weight: 400;
+            flex-shrink: 0;
+            max-width: 180px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .project-list li a .arrow {
@@ -286,7 +295,31 @@
             .header h1 { font-size: 1.6rem; }
             .header { margin-bottom: 36px; }
             .category-header { padding: 14px 16px; }
-            .project-list { padding: 0 16px 14px; }
+            .project-list { padding: 0 12px 14px; gap: 4px; }
+
+            /* 移动端：name 和 desc 上下堆叠，避免水平撑开 */
+            .project-list li a {
+                flex-wrap: wrap;
+                padding: 10px 12px;
+                gap: 2px 8px;
+            }
+            .project-list li a .name {
+                flex: 1 1 calc(100% - 42px);
+                min-width: 0;
+                font-size: 0.82rem;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            .project-list li a .desc {
+                flex: 0 0 100%;
+                font-size: 0.7rem;
+                margin-left: 32px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            .project-list li a .arrow { display: none; }
         }
     </style>
 </head>
