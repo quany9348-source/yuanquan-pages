@@ -180,7 +180,7 @@ code, .mono { font-family: 'JetBrains Mono', 'Noto Sans SC', monospace; font-siz
 
 /* ── Failure Chain SVG ── */
 .chain-diagram { text-align: center; padding: 2rem 0; }
-.chain-diagram svg { max-width: 800px; width: 100%; height: auto; }
+.chain-diagram svg { max-width: 960px; width: 100%; height: auto; }
 
 /* ── Base Table Schema ── */
 .schema-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: .75rem; }
@@ -682,63 +682,97 @@ code, .mono { font-family: 'JetBrains Mono', 'Noto Sans SC', monospace; font-siz
       <p>从 FDS 需求语句到 FMEA 失效链的完整映射</p>
     </div>
     <div class="chain-diagram">
-      <svg viewBox="0 0 880 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 900 420" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <marker id="arrChain" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto"><path d="M0 0l9 3.5-9 3.5V0z" fill="#64748b"/></marker>
+          <marker id="arrDown" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0 0l8 3-8 3V0z" fill="#64748b"/></marker>
           <marker id="arrCause" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto"><path d="M0 0l9 3.5-9 3.5V0z" fill="#dc2626"/></marker>
           <marker id="arrMode" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto"><path d="M0 0l9 3.5-9 3.5V0z" fill="#d97706"/></marker>
           <marker id="arrEffect" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto"><path d="M0 0l9 3.5-9 3.5V0z" fill="#1e5fd8"/></marker>
+          <linearGradient id="grdHi" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f0f4ff"/><stop offset="100%" stop-color="#e8f0fe"/></linearGradient>
+          <linearGradient id="grdFo" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fef9f0"/><stop offset="100%" stop-color="#fef3e0"/></linearGradient>
+          <linearGradient id="grdLo" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fef2f2"/><stop offset="100%" stop-color="#fee8e8"/></linearGradient>
         </defs>
 
-        <!-- Top: FDS Requirement -->
-        <rect x="280" y="10" width="320" height="48" rx="8" fill="#f8faff" stroke="#1e5fd8" stroke-width="1.5"/>
-        <text x="440" y="40" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="13" font-weight="600" fill="#1a1a1e">FDS 需求: "车速 ≥ 8km/h 时自动锁止车门"</text>
+        <!-- ===== Layer 0: FDS Input ===== -->
+        <rect x="300" y="14" width="300" height="38" rx="8" fill="#f8faff" stroke="#1e5fd8" stroke-width="1.4"/>
+        <text x="450" y="38" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="12" font-weight="600" fill="#1a1a1e">FDS 需求: "车速 ≥ 8km/h 自动锁止车门"</text>
 
-        <!-- Arrow down from FDS -->
-        <line x1="440" y1="58" x2="440" y2="90" stroke="#64748b" stroke-width="1.2" marker-end="url(#arrChain)"/>
+        <!-- ===== Layer 1: Template container + pills ===== -->
+        <rect x="80" y="72" width="740" height="54" rx="10" fill="#fefcf5" stroke="#d97706" stroke-width="1" stroke-dasharray="5 3"/>
+        <rect x="350" y="62" width="200" height="18" rx="4" fill="#fefcf5"/>
+        <text x="450" y="75" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="10" font-weight="600" fill="#92400e">5 类失效模式推导模板</text>
+        <rect x="95" y="98" width="110" height="22" rx="11" fill="#fff" stroke="#d97706" stroke-width="0.8"/>
+        <text x="150" y="113" text-anchor="middle" font-size="9" fill="#92400e">Loss 功能丧失</text>
+        <rect x="214" y="98" width="124" height="22" rx="11" fill="#fff" stroke="#d97706" stroke-width="0.8"/>
+        <text x="276" y="113" text-anchor="middle" font-size="9" fill="#92400e">Incorrect 功能错误</text>
+        <rect x="347" y="98" width="136" height="22" rx="11" fill="#fff" stroke="#d97706" stroke-width="0.8"/>
+        <text x="415" y="113" text-anchor="middle" font-size="9" fill="#92400e">Intermittent 功能间歇</text>
+        <rect x="492" y="98" width="144" height="22" rx="11" fill="#fff" stroke="#d97706" stroke-width="0.8"/>
+        <text x="564" y="113" text-anchor="middle" font-size="9" fill="#92400e">Unintended 非预期激活</text>
+        <rect x="645" y="98" width="124" height="22" rx="11" fill="#fff" stroke="#d97706" stroke-width="0.8"/>
+        <text x="707" y="113" text-anchor="middle" font-size="9" fill="#92400e">Delayed 功能延迟</text>
 
-        <!-- 5 Failure Mode Templates -->
-        <rect x="28" y="90" width="824" height="68" rx="8" fill="#fef7ed" stroke="#d97706" stroke-width="1.2" stroke-dasharray="6 3"/>
-        <text x="440" y="112" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="11" font-weight="600" fill="#92400e">5 类失效模式推导模板</text>
+        <!-- ===== Layer 2: Vertical arrows (after template box, so they paint on top) ===== -->
+        <line x1="450" y1="52" x2="450" y2="70" stroke="#64748b" stroke-width="1.2" marker-end="url(#arrDown)"/>
+        <line x1="450" y1="126" x2="450" y2="146" stroke="#64748b" stroke-width="1.2" marker-end="url(#arrDown)"/>
+        <text x="468" y="140" font-size="8" fill="#94a3b8">筛选套用</text>
 
-        <rect x="44" y="122" width="144" height="26" rx="5" fill="#fff" stroke="#d97706" stroke-width="1"/>
-        <text x="116" y="139" text-anchor="middle" font-size="11" fill="#92400e">Loss — 功能丧失</text>
-        <rect x="198" y="122" width="144" height="26" rx="5" fill="#fff" stroke="#d97706" stroke-width="1"/>
-        <text x="270" y="139" text-anchor="middle" font-size="11" fill="#92400e">Incorrect — 功能错误</text>
-        <rect x="352" y="122" width="144" height="26" rx="5" fill="#fff" stroke="#d97706" stroke-width="1"/>
-        <text x="424" y="139" text-anchor="middle" font-size="11" fill="#92400e">Intermittent — 功能间歇</text>
-        <rect x="506" y="122" width="168" height="26" rx="5" fill="#fff" stroke="#d97706" stroke-width="1"/>
-        <text x="590" y="139" text-anchor="middle" font-size="11" fill="#92400e">Unintended — 非预期激活</text>
-        <rect x="684" y="122" width="152" height="26" rx="5" fill="#fff" stroke="#d97706" stroke-width="1"/>
-        <text x="760" y="139" text-anchor="middle" font-size="11" fill="#92400e">Delayed — 功能延迟</text>
+        <!-- ===== Layer 3: Main area — all boxes first ===== -->
+        <!-- Column headers -->
+        <rect x="26" y="150" width="280" height="22" rx="5" fill="#e8f0fe"/>
+        <text x="166" y="165" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="10" font-weight="600" fill="#1e5fd8">结构分析 (Step 2)</text>
+        <rect x="594" y="150" width="280" height="22" rx="5" fill="#fef2f2"/>
+        <text x="734" y="165" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="10" font-weight="600" fill="#dc2626">失效分析 (Step 4)</text>
 
-        <!-- Arrow down from templates -->
-        <line x1="440" y1="158" x2="440" y2="188" stroke="#64748b" stroke-width="1.2" marker-end="url(#arrChain)"/>
+        <!-- Row 1: Higher / FE (boxes only) -->
+        <rect x="62" y="184" width="208" height="52" rx="8" fill="url(#grdHi)" stroke="#1e5fd8" stroke-width="1.4"/>
+        <text x="166" y="204" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="12" font-weight="700" fill="#1e40af">上一级要素</text>
+        <text x="166" y="224" text-anchor="middle" font-size="9" fill="#64748b">系统 / 整车功能</text>
+        <rect x="630" y="184" width="208" height="52" rx="8" fill="#f0f4ff" stroke="#1e5fd8" stroke-width="1.4"/>
+        <text x="734" y="204" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="12" font-weight="700" fill="#1e40af">失效影响 FE</text>
+        <text x="734" y="224" text-anchor="middle" font-size="9" fill="#1e3a8a">行驶中未锁 → 乘员误开门风险 S=9</text>
 
-        <!-- Failure Chain: FC → FM → FE -->
-        <!-- FC -->
-        <rect x="28" y="188" width="224" height="60" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5"/>
-        <text x="140" y="210" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="12" font-weight="600" fill="#991b1b">失效原因 FC</text>
-        <text x="140" y="232" text-anchor="middle" font-size="10" fill="#7f1d1d">车速信号丢失 / 信号 E2E 校验失败</text>
+        <!-- Row 1→2 vertical links -->
+        <line x1="166" y1="236" x2="166" y2="254" stroke="#94a3b8" stroke-width="0.8"/>
+        <text x="184" y="248" font-size="8" fill="#94a3b8">包含</text>
+        <line x1="734" y1="236" x2="734" y2="254" stroke="#94a3b8" stroke-width="0.8"/>
+        <text x="714" y="248" font-size="8" fill="#94a3b8">追溯</text>
 
-        <line x1="252" y1="218" x2="296" y2="218" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arrCause)"/>
+        <!-- Row 2: Focus / FM (boxes only) -->
+        <rect x="62" y="254" width="208" height="52" rx="8" fill="url(#grdFo)" stroke="#d97706" stroke-width="1.4"/>
+        <text x="166" y="274" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="12" font-weight="700" fill="#92400e">聚焦要素</text>
+        <text x="166" y="294" text-anchor="middle" font-size="9" fill="#64748b">功能块 — 当前分析对象</text>
+        <rect x="630" y="254" width="208" height="52" rx="8" fill="#fef7ed" stroke="#d97706" stroke-width="1.4"/>
+        <text x="734" y="274" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="12" font-weight="700" fill="#92400e">失效模式 FM</text>
+        <text x="734" y="294" text-anchor="middle" font-size="9" fill="#78350f">车速 &gt;8km/h 后未自动锁止 (功能丧失)</text>
 
-        <!-- FM -->
-        <rect x="296" y="188" width="224" height="60" rx="8" fill="#fef7ed" stroke="#d97706" stroke-width="1.5"/>
-        <text x="408" y="210" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="12" font-weight="600" fill="#92400e">失效模式 FM</text>
-        <text x="408" y="232" text-anchor="middle" font-size="10" fill="#78350f">车速 &gt;8km/h 后未自动锁止（功能丧失）</text>
+        <!-- Row 2→3 vertical links -->
+        <line x1="166" y1="306" x2="166" y2="324" stroke="#94a3b8" stroke-width="0.8"/>
+        <text x="184" y="318" font-size="8" fill="#94a3b8">组成</text>
+        <line x1="734" y1="306" x2="734" y2="324" stroke="#94a3b8" stroke-width="0.8"/>
+        <text x="714" y="318" font-size="8" fill="#94a3b8">追溯</text>
 
-        <line x1="520" y1="218" x2="564" y2="218" stroke="#d97706" stroke-width="1.5" marker-end="url(#arrMode)"/>
+        <!-- Row 3: Lower / FC (boxes only) -->
+        <rect x="62" y="324" width="208" height="52" rx="8" fill="url(#grdLo)" stroke="#dc2626" stroke-width="1.4"/>
+        <text x="166" y="344" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="12" font-weight="700" fill="#991b1b">下一级要素</text>
+        <text x="166" y="364" text-anchor="middle" font-size="9" fill="#64748b">ECU / 软件组件 / 信号接口</text>
+        <rect x="630" y="324" width="208" height="52" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="1.4"/>
+        <text x="734" y="344" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="12" font-weight="700" fill="#991b1b">失效原因 FC</text>
+        <text x="734" y="364" text-anchor="middle" font-size="9" fill="#7f1d1d">车速信号 bcu_veh_spd 无效/丢失</text>
 
-        <!-- FE -->
-        <rect x="564" y="188" width="288" height="60" rx="8" fill="#f0f4ff" stroke="#1e5fd8" stroke-width="1.5"/>
-        <text x="708" y="210" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="12" font-weight="600" fill="#1e40af">失效影响 FE</text>
-        <text x="708" y="232" text-anchor="middle" font-size="10" fill="#1e3a8a">行驶中车门未锁 → 乘员误开门风险 → 安全威胁 S=9</text>
+        <!-- ===== Layer 4: Cross-link arrows (last, on top of all boxes) ===== -->
+        <path d="M 270 210 C 320 210, 560 210, 626 210" stroke="#1e5fd8" stroke-width="1.3" stroke-dasharray="5 3" fill="none" marker-end="url(#arrEffect)"/>
+        <text x="448" y="204" text-anchor="middle" font-size="8" fill="#1e5fd8">失效影响向上传播</text>
+        <path d="M 270 280 C 320 280, 560 280, 626 280" stroke="#d97706" stroke-width="1.3" stroke-dasharray="5 3" fill="none" marker-end="url(#arrMode)"/>
+        <text x="448" y="274" text-anchor="middle" font-size="8" fill="#d97706">功能要求的否定形式</text>
+        <path d="M 270 350 C 320 350, 560 350, 626 350" stroke="#dc2626" stroke-width="1.6" fill="none" marker-end="url(#arrCause)"/>
+        <text x="448" y="344" text-anchor="middle" font-size="8" fill="#dc2626">失效原因追溯起点</text>
 
-        <!-- Upward chain: ECU → System → Vehicle → User -->
-        <rect x="564" y="260" width="288" height="24" rx="5" fill="#e8f0fe" stroke="#1e5fd8" stroke-width="0.8" stroke-dasharray="3 2"/>
-        <text x="708" y="277" text-anchor="middle" font-size="9" fill="#1e5fd8">ECU 级 → 系统级 → 整车级 → 用户感知（逐级上溯）</text>
-        <line x1="708" y1="248" x2="708" y2="260" stroke="#1e5fd8" stroke-width="0.8"/>
+        <!-- ===== Layer 5: Bottom principle ===== -->
+        <rect x="80" y="392" width="740" height="22" rx="8" fill="#fafaf9" stroke="#e4e3e0" stroke-width="0.7"/>
+        <text x="450" y="407" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="9" font-weight="600" fill="#64748b">
+          FC 源于下一级要素 (ECU/信号) → FM 呈现于聚焦要素 (功能块) → FE 传播到上一级要素 (系统/用户/法规)
+        </text>
       </svg>
     </div>
 
