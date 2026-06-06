@@ -763,6 +763,41 @@ a.src-link:hover { color: var(--copper); border-bottom-color: var(--copper); }
   background: var(--teal-l);
   box-shadow: 0 3px 12px rgba(45,125,138,0.35);
 }
+.install-version-note {
+  text-align: left;
+  margin: 0 auto 20px;
+  max-width: 420px;
+  background: #faf8f4;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 14px 18px;
+}
+.install-version-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--teal);
+  margin-bottom: 8px;
+}
+.install-version-note ul {
+  list-style: none;
+  padding: 0;
+}
+.install-version-note li {
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.7;
+  padding-left: 14px;
+  position: relative;
+}
+.install-version-note li::before {
+  content: "+";
+  position: absolute;
+  left: 0;
+  color: var(--brass);
+  font-weight: 600;
+}
 .df-connector {
   display: flex; align-items: center; justify-content: center;
   padding: 8px 0;
@@ -1579,6 +1614,13 @@ d_{j,t}(dir) ∈ { new: 1.0,  modify: 0.6,  delete: 0.3 }
       &gt; agent模型能力的差异可能会影响执行效率 &lt;<br>
       &gt; 使用skill的架构师应是方案分析的第一责任人 &lt;
     </div>
+    <div class="install-version-note">
+      <div class="install-version-label">V3.0 更新说明</div>
+      <ul>
+        <li>历史报价数据源升级为多维表格（Base），支持更灵活的查询与维护</li>
+        <li>新增多车型平台历史报价数据，共 180 条</li>
+      </ul>
+    </div>
     <a class="install-btn" href="https://nio.feishu.cn/drive/folder/MyPPf61zrlSCfVdGREbcjUmCnJz?from=from_copylink" target="_blank" rel="noopener">
       打开安装包目录 &nbsp;&#x2197;
     </a>
@@ -1590,7 +1632,7 @@ d_{j,t}(dir) ∈ { new: 1.0,  modify: 0.6,  delete: 0.3 }
 <div class="section-rule" aria-hidden="true"></div>
 
 <footer>
-  VAS Investment Analysis Skill &nbsp;&middot;&nbsp; Version 3 <span>(Risk-Adjusted)</span> &nbsp;&middot;&nbsp; Developer: <span>quan.yuan3</span> &nbsp;&middot;&nbsp; 2026
+  VAS Investment Analysis Skill &nbsp;&middot;&nbsp; Version 3.0 <span>(Risk-Adjusted)</span> &nbsp;&middot;&nbsp; Developer: <span>quan.yuan3</span> &nbsp;&middot;&nbsp; 2026
 </footer>
 
 <script>
