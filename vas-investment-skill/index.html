@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title> VAS 投入测算 — 精密估算引擎</title>
+<title>VAS 投入测算 V4.0 — 精密估算引擎</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=JetBrains+Mono:wght@400;500;600&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
@@ -154,17 +154,31 @@ section { padding: 72px 0; position: relative; z-index: 1; }
 }
 .hero h1 {
   font-family: "Cormorant Garamond", "Noto Serif SC", serif;
-  font-size: clamp(40px, 5.5vw, 64px);
-  font-weight: 650;
-  line-height: 1.15;
-  letter-spacing: 0.03em;
+  font-size: clamp(48px, 7vw, 80px);
+  font-weight: 680;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
   color: var(--text);
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
+  white-space: nowrap;
 }
-.hero h1 em {
-  font-style: italic;
+.hero h1 .accent {
   color: var(--brass);
+  letter-spacing: 0.04em;
+}
+.hero h1 .ver {
+  display: inline-block;
+  vertical-align: 0.2em;
+  font-family: "JetBrains Mono", "Chivo", monospace;
+  font-size: 0.38em; font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--teal);
+  background: rgba(45,125,138,0.07);
+  border: 1px solid rgba(45,125,138,0.16);
+  border-radius: 4px;
+  padding: 2px 10px;
+  margin-left: 10px;
 }
 .hero .sub {
   margin-top: 20px;
@@ -731,31 +745,35 @@ a.src-link:hover { color: var(--copper); border-bottom-color: var(--copper); }
 .install-card {
   background: var(--elevated);
   border: 1px solid var(--border-b);
-  padding: 32px 36px;
+  padding: 28px 36px;
   margin: 24px 0;
-  text-align: center;
   box-shadow: var(--shadow);
+  text-align: left;
 }
-.install-card .install-title {
+.install-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border-b);
+}
+.install-header .install-title {
   font-family: "Cormorant Garamond", "Noto Serif SC", serif;
   font-size: 22px; font-weight: 650;
-  margin-bottom: 8px;
-}
-.install-card .install-desc {
-  font-size: 13px; color: var(--text-dim);
-  margin-bottom: 20px;
-  line-height: 1.7;
+  flex-shrink: 0;
 }
 .install-btn {
   display: inline-block;
-  padding: 12px 32px;
+  padding: 10px 28px;
   font-family: "Chivo", "PingFang SC", sans-serif;
-  font-size: 13px; font-weight: 700;
+  font-size: 12.5px; font-weight: 700;
   letter-spacing: 0.06em;
   color: #fff;
   background: var(--teal);
   border: none;
   text-decoration: none;
+  white-space: nowrap;
   transition: background 0.2s, box-shadow 0.2s;
   box-shadow: 0 2px 6px rgba(45,125,138,0.25);
 }
@@ -763,40 +781,82 @@ a.src-link:hover { color: var(--copper); border-bottom-color: var(--copper); }
   background: var(--teal-l);
   box-shadow: 0 3px 12px rgba(45,125,138,0.35);
 }
-.install-version-note {
+.install-notes {
+  margin: 16px 0 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12.5px;
+  color: var(--text-dim);
+  line-height: 1.8;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 32px;
+}
+.install-notes li::before {
+  content: "— ";
+  color: var(--border-b);
+}
+
+/* ── Version history ── */
+.version-history {
+  background: linear-gradient(135deg, #fafaf7 0%, #f5f2ea 100%);
+  border: 1px solid #d8d0b8;
+  box-shadow: var(--shadow);
+  padding: 28px 36px 20px;
+  margin: 24px 0;
   text-align: left;
-  margin: 0 auto 20px;
-  max-width: 420px;
-  background: #faf8f4;
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  padding: 14px 18px;
 }
-.install-version-label {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--teal);
-  margin-bottom: 8px;
+.version-history h3 {
+  font-family: "Cormorant Garamond", "Noto Serif SC", serif;
+  font-size: 20px; font-weight: 650;
+  color: #8b6914;
+  margin: 0 0 20px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e8e0cc;
 }
-.install-version-note ul {
+.version-list {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
-.install-version-note li {
+.version-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px dashed #e8e0cc;
+}
+.version-list li:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+.ver-tag {
+  flex: 0 0 64px;
+  font-family: "JetBrains Mono", "Chivo", monospace;
   font-size: 13px;
-  color: var(--text-dim);
-  line-height: 1.7;
-  padding-left: 14px;
-  position: relative;
+  font-weight: 700;
+  color: #8b6914;
+  background: rgba(139,105,20,0.08);
+  border: 1px solid rgba(139,105,20,0.2);
+  border-radius: 4px;
+  padding: 2px 8px;
+  text-align: center;
+  line-height: 1.4;
 }
-.install-version-note li::before {
-  content: "+";
-  position: absolute;
-  left: 0;
-  color: var(--brass);
-  font-weight: 600;
+.ver-body {
+  flex: 1;
+  min-width: 0;
+}
+.ver-body strong {
+  font-size: 13.5px;
+  color: #3d3828;
+  display: block;
+  margin-bottom: 2px;
+}
+.ver-body span {
+  font-size: 12px;
+  color: #8a867e;
+  line-height: 1.55;
 }
 .df-connector {
   display: flex; align-items: center; justify-content: center;
@@ -836,6 +896,8 @@ footer span { color: var(--brass); }
   .df-reconcile { grid-template-columns: 1fr; }
   .df-vs-col { display: none; }
   .hero { padding: 64px 20px 48px; }
+  .hero h1 { white-space: normal; font-size: clamp(32px, 8vw, 52px); }
+  .hero h1 .ver { display: block; width: fit-content; margin: 4px auto 0; }
   section { padding: 48px 0; }
   .flow { gap: 2px; }
   .flow-step { width: 90px; padding: 12px 4px; }
@@ -857,7 +919,7 @@ footer span { color: var(--brass); }
 <!-- ════════════════ HERO ════════════════ -->
 <header class="hero">
   <div class="eyebrow">Vehicle Application Software &nbsp;·&nbsp; Investment Estimation Engine</div>
-  <h1>VAS<br><em>投入测算</em> Skill</h1>
+  <h1>VAS<span class="accent"> 投入测算 </span>SKILL<span class="ver">V4.0</span></h1>
   <p class="sub">
     对新提出的车辆应用软件需求进行<strong>风险调整投入估算</strong>——
     深度工程架构解析，严格对齐 L1-L6 工程开发分级，
@@ -886,7 +948,7 @@ footer span { color: var(--brass); }
   </div>
 
   <div class="badges">
-    <span class="badge v3">风险调整估算与标准化定级</span>
+    <span class="badge v3">V4.0 · 软件有效定级</span>
     <span class="badge risk">P50 &nbsp;/&nbsp; P80 &nbsp;/&nbsp; Max 三档模型</span>
     <span class="badge dual">双路核算 &nbsp;·&nbsp; 三角验证</span>
   </div>
@@ -936,8 +998,8 @@ footer span { color: var(--brass); }
       <tbody>
         <tr>
           <td><code>references/vas_data.json</code></td>
-          <td>数百条历史评估记录，覆盖 ONVO / NPE / NPD 等多平台车型</td>
-          <td><a class="src-link" href="https://nio.feishu.cn/base/AjtDb2ymvaK4P9sCdQ5cAN6Tn6c?table=tblwknjtZFeIu96N&view=vew4JbzTsc" target="_blank" rel="noopener">飞书多维表格 &nbsp;&#x2197;</a></td>
+          <td>180 条历史评估记录（ONVO / NPD / NPE / FY 四平台，含人月、费用、BU、车型）</td>
+          <td><a class="src-link" href="https://nio.feishu.cn/base/AjtDb2ymvaK4P9sCdQ5cAN6Tn6c" target="_blank" rel="noopener">飞书多维表格（Base） &nbsp;&#x2197;</a></td>
         </tr>
         <tr>
           <td><code>references/engineering_grading.json</code></td>
@@ -1206,7 +1268,7 @@ footer span { color: var(--brass); }
       <!-- Path A -->
       <rect x="338" y="252" width="246" height="74" rx="2" fill="#f2f7f9" stroke="#b8ccd8"/>
       <text x="350" y="270" font-size="8.5" font-weight="700" fill="#2d7d8a" letter-spacing="0.06em">路径 A · 自顶向下</text>
-      <text x="350" y="288" font-size="8" fill="#5c5a54">vas_data → 同L级筛选 → P50 / P80 / Max</text>
+      <text x="350" y="288" font-size="8" fill="#5c5a54">vas_data → 同L_sw级筛选 → P50 / P80 / Max</text>
       <text x="350" y="306" font-size="8" fill="#5c5a54">n &lt; 3 时自动降级，PM_bot 为主路径</text>
       <text x="476" y="306" font-size="8.5" font-weight="600" fill="#2d7d8a">→ PM_top</text>
 
@@ -1214,7 +1276,7 @@ footer span { color: var(--brass); }
       <rect x="338" y="342" width="246" height="74" rx="2" fill="#fef8f4" stroke="#e4c8b8"/>
       <text x="350" y="360" font-size="8.5" font-weight="700" fill="#9a4a22" letter-spacing="0.06em">路径 B · 自底向上</text>
       <text x="350" y="378" font-size="8" fill="#5c5a54">变更矩阵 × catalog → 逐 BU 展开</text>
-      <text x="350" y="396" font-size="8" fill="#5c5a54">Σ[(B + n·c) × d_factor] × (1 + αR4 + αR6)</text>
+      <text x="350" y="396" font-size="8" fill="#5c5a54">Σ[(B + n·c) × d_factor] × (1 + αR6)</text>
       <text x="476" y="396" font-size="8.5" font-weight="600" fill="#9a4a22">→ PM_bot</text>
 
       <!-- VS -->
@@ -1313,8 +1375,8 @@ footer span { color: var(--brass); }
       <circle cx="960" cy="82" r="4" fill="#8b6914"/>
       <line x1="960" y1="82" x2="1010" y2="82" stroke="#8b6914" stroke-width="1.3" marker-end="url(#d2-mb)"/>
       <rect x="1010" y="54" width="170" height="56" rx="4" fill="#f8f4ed" stroke="#c8a040" stroke-width="1.5" filter="url(#d2-sh)"/>
-      <text x="1028" y="74" font-size="10" font-weight="700" fill="#8b6914" font-family="'JetBrains Mono',monospace">MAX( D1..D6 )</text>
-      <text x="1028" y="96" font-size="11" font-weight="600" fill="#1a1a18">L_final</text>
+      <text x="1028" y="74" font-size="10" font-weight="700" fill="#8b6914" font-family="'JetBrains Mono',monospace">MAX( D1, D3 )</text>
+      <text x="1028" y="96" font-size="11" font-weight="600" fill="#1a1a18">L_sw</text>
       <circle cx="1180" cy="82" r="5" fill="#8b6914"/>
       <line x1="1185" y1="82" x2="1202" y2="82" stroke="#8b6914" stroke-width="1.3" marker-end="url(#d2-mb)"/>
       <circle cx="1210" cy="82" r="6" fill="none" stroke="#8b6914" stroke-width="1.3"/>
@@ -1381,13 +1443,13 @@ footer span { color: var(--brass); }
       <rect x="550" y="370" width="180" height="60" rx="4" fill="#fef8f4" stroke="#e0c0a8" stroke-width="1.2" filter="url(#d2-sh)"/>
       <text x="568" y="390" font-size="10" font-weight="700" fill="#9a4a22" font-family="'JetBrains Mono',monospace">PM_j = Σ_t [...]</text>
       <text x="568" y="410" font-size="8.5" fill="#5c5a54">逐 BU 逐任务求和</text>
-      <text x="568" y="426" font-size="8" fill="#8a867e">× ( 1 + αR4 + αR6 )</text>
+      <text x="568" y="426" font-size="8" fill="#8a867e">× ( 1 + αR6 )</text>
       <circle cx="730" cy="400" r="4" fill="#9a4a22"/>
       <rect x="300" y="444" width="210" height="16" rx="2" fill="#faf7ee" stroke="#e0d4b0" stroke-width="0.7"/>
       <text x="314" y="456" font-size="7.5" fill="#8b6914">bu_task_catalog.json (21项平台 + 7类功能BU)</text>
       <line x1="405" y1="444" x2="405" y2="438" stroke="#8b6914" stroke-width="0.7" marker-end="url(#d2-mb)"/>
       <rect x="550" y="438" width="180" height="16" rx="2" fill="#fcfcf8" stroke="#d0ccc0" stroke-width="0.7"/>
-      <text x="564" y="450" font-size="7.5" fill="#8b6914">αR4 (ZONE拓扑) / αR6 (跨BU联调)</text>
+      <text x="564" y="450" font-size="7.5" fill="#8b6914">αR6 (跨BU联调)</text>
       <line x1="640" y1="438" x2="640" y2="432" stroke="#8b6914" stroke-width="0.7" marker-end="url(#d2-mb)"/>
       <polyline points="690,280 800,280 800,502" fill="none" stroke="#2d7d8a" stroke-width="1.2" marker-end="url(#d2-mt)"/>
       <polyline points="730,400 760,400 760,502" fill="none" stroke="#9a4a22" stroke-width="1.2" marker-end="url(#d2-mc)"/>
@@ -1416,38 +1478,54 @@ footer span { color: var(--brass); }
       <text x="500" y="620" font-size="8" fill="#5c5a54">广播/参数馈线</text>
       <rect x="620" y="610" width="12" height="10" rx="2" fill="#7ab87a"/>
       <text x="638" y="620" font-size="8" fill="#5c5a54">端口</text>
-      <text x="28" y="644" font-size="8.5" fill="#5c5a54" font-family="'JetBrains Mono',monospace">L_final = MAX(D1..D6) &nbsp;·&nbsp; d_factor ∈ {1.0, 0.6, 0.3} &nbsp;·&nbsp; P80 = PERCENTILE(0.80) &nbsp;·&nbsp; PM_j = Σ[(B+n·c)×d] &nbsp;·&nbsp; PM_bot = ΣPM_j × (1+αR4+αR6) &nbsp;·&nbsp; Δ = |PM_bot − P80| / P80</text>
+      <text x="28" y="644" font-size="8.5" fill="#5c5a54" font-family="'JetBrains Mono',monospace">L_sw = MAX(D1, D3) &nbsp;·&nbsp; L_final = MAX(D1..D6) &nbsp;·&nbsp; d_factor ∈ {1.0, 0.6, 0.3} &nbsp;·&nbsp; P80 = PERCENTILE(0.80) &nbsp;·&nbsp; PM_j = Σ[(B+n·c)×d] &nbsp;·&nbsp; PM_bot = ΣPM_j × (1+αR6) &nbsp;·&nbsp; Δ = |PM_bot − P80| / P80</text>
     </svg>
   </div>
 
-  <!-- Mechanism 1: Six-dimension grading -->
-  <h3>核心机制 1：L1-L6 六维独立判级 + MAX 仲裁</h3>
+  <!-- Mechanism 1: Six-dimension grading + L_sw -->
+  <h3>核心机制 1：六维判级 + 软件有效等级 L_sw</h3>
   <p style="color:var(--text-dim);font-size:13px;margin-bottom:16px;">
-    传统做法是"新增 IO → L4"这种单一触发词锁定全局等级，会丢失不同工程维度的精度。
-    本 Skill 将工程变更拆解为 <strong>6 个独立维度</strong>，每维独立判级，最终取最高值——
-    <strong>宁可高估不可低估</strong>。
+    工程变更被拆解为 <strong>6 个独立维度</strong>，每维按 L1-L6 独立判级。但 VAS 投入测算的最终目标是估算
+    <strong>软件部门的人月</strong>，因此引入<strong>双轨制</strong>：
+    <span style="color:var(--teal-l);">L_sw = MAX(D1, D3)</span> 作为 PM 估算的输入等级，
+    L_final = MAX(D1~D6) 保留用于文档记录。硬件/造型/工业化变更 (D2/D4/D6) 若不伴随软件变更，不再放大工时估算。
   </p>
+
   <div class="tbl-wrap">
     <table>
-      <thead><tr><th>维度</th><th>名称</th><th>关注内容</th><th>仲裁规则</th></tr></thead>
+      <thead><tr><th>维度</th><th>名称</th><th>关注内容</th><th>PM 相关性</th><th>仲裁规则</th></tr></thead>
       <tbody>
-        <tr><td><strong>D1</strong></td><td>System Solution</td><td>系统方案、跨系统接口、拓扑变化</td><td>R1 信号增量</td></tr>
-        <tr><td><strong>D2</strong></td><td>Hardware Solution</td><td>芯片、传感器、执行器、控制器硬件变化</td><td>R2 服务增量</td></tr>
-        <tr><td><strong>D3</strong></td><td>Software Solution</td><td>4 子维：sw_architecture / service_signal_interface / sw_unit_logic / sw_unit_deployment</td><td>R3 部署增量</td></tr>
-        <tr><td><strong>D4</strong></td><td>Industrialization</td><td>量产、供应链、发布影响</td><td>R4 ZONE 拓扑</td></tr>
-        <tr><td><strong>D5</strong></td><td>Integration &amp; Virtual Validation</td><td>labcar、仿真、集成验证复杂度</td><td>R5 HW 增量</td></tr>
-        <tr><td><strong>D6</strong></td><td>Physical Validation</td><td>实车、台架、道路或法规验证复杂度</td><td>R6 BU 归属</td></tr>
+        <tr style="background:rgba(45,125,138,0.05);"><td><strong>D1</strong></td><td>System Solution</td><td>系统方案、跨 ECU 接口、SOA 服务拓扑</td><td><span style="color:var(--teal-l);font-weight:600;">&#10003; 计入 L_sw</span></td><td>R1 信号增量</td></tr>
+        <tr><td><strong>D2</strong></td><td>Hardware Solution</td><td>芯片、传感器、执行器、控制器硬件变化</td><td><span style="color:var(--red);">&#10007; 仅计入 L_final</span></td><td>R2 服务增量</td></tr>
+        <tr style="background:rgba(45,125,138,0.05);"><td><strong>D3</strong></td><td>Software Solution</td><td>4 子维：sw_architecture / service_signal_interface / sw_unit_logic / sw_unit_deployment</td><td><span style="color:var(--teal-l);font-weight:600;">&#10003; 计入 L_sw</span></td><td>R3 部署增量</td></tr>
+        <tr><td><strong>D4</strong></td><td>Industrialization</td><td>供应商、工艺、工装变更</td><td><span style="color:var(--red);">&#10007; 仅计入 L_final</span></td><td>&mdash;</td></tr>
+        <tr><td><strong>D5</strong></td><td>Integration &amp; Virtual Validation</td><td>labcar、仿真、集成验证复杂度</td><td><span style="color:var(--red);">&#10007; 仅计入 L_final</span></td><td>R5 HW 增量</td></tr>
+        <tr><td><strong>D6</strong></td><td>Physical Validation</td><td>实车、台架、道路或法规验证复杂度</td><td><span style="color:var(--red);">&#10007; 仅计入 L_final</span></td><td>R6 BU 归属</td></tr>
       </tbody>
     </table>
   </div>
+
   <div class="formula-box">
-    <span class="fb-label">L-GRADE</span>
+    <span class="fb-label">L-GRADE · V4.0 双轨制</span>
 D3  = MAX( sw_architecture, service_signal_interface, sw_unit_logic, sw_unit_deployment )
-L_final = MAX( D1, D2, D3, D4, D5, D6 )
+
+<span style="color:var(--teal-l);font-weight:700;">L_sw    = MAX( D1, D3 )</span>                     ← 软件有效等级，用于 PM 估算
+<span style="color:var(--text-dim);">L_final = MAX( D1, D2, D3, D4, D5, D6 )</span>     ← 工程综合等级，用于文档记录
 
 <em>D1 系统方案 / D2 硬件方案 / D3 软件方案 / D4 工业化 / D5 集成验证 / D6 物理验证</em>
   </div>
-  <p class="annotate">※ AI 语义初判与机械判级冲突时，以机械判级为准。无法机械判定的维度需显式标记依赖人工确认。</p>
+
+  <div style="background:rgba(45,125,138,0.05);border-left:3px solid var(--teal-l);padding:12px 16px;margin-top:14px;border-radius:0 4px 4px 0;">
+    <p style="margin:0;font-size:12.5px;color:#4a6a6a;"><strong>为什么 D1 计入 L_sw？</strong>
+    VAS 语境下 D1 衡量的是 SOA 服务拓扑、跨 ECU 系统接口、功能架构变更，直接对应软件架构和集成工作。
+    <strong>为什么 D2/D4/D6 不计入？</strong> 造型变更（D2）、供应商切换（D4）、DV/PV 计划调整（D6）若不伴随软件接口或逻辑变更，
+    对 VAS 软件部门的实际开发工作量影响为零。</p>
+    <p style="margin:8px 0 0 0;font-size:12.5px;color:#4a6a6a;"><strong>典型对比：</strong>
+    造型大改（D2=L5, D3=L1）→ 旧系统用 L5 系数，PM 严重高估；
+    新系统 L_sw=MAX(D1=L1, D3=L1)=L1 → 软件工时≈0，正确反映实际。</p>
+  </div>
+
+  <p class="annotate">※ AI 语义初判与机械判级冲突时，以机械判级为准。无法机械判定的维度需显式标记依赖人工确认。联调溢价 R6（跨 BU 联调）保留；拓扑溢价 R4 已移入 D1 在 L_sw 中天然体现。</p>
 
   <!-- Mechanism 2: Direction factor -->
   <h3 class="copper">核心机制 2：变更方向系数 (direction_factor)</h3>
@@ -1525,10 +1603,10 @@ d_{j,t}(dir) ∈ { new: 1.0,  modify: 0.6,  delete: 0.3 }
       <p>将需求拆解为<strong>变更矩阵</strong>（每条信号 / 服务变更的明细），逐 BU 匹配 catalog 中的任务模板，按 L 等级 + 数量变量 + 方向系数逐项累加计算。</p>
       <div class="formula-box" style="font-size:11px;">
         <span class="fb-label">BOTTOM-UP</span>
-  PM_j = Σ_t [(B(L) + n·c(L)) × d_factor]
-  PM_bot = (Σ_j PM_j) × (1 + αR4 + αR6)
+  PM_j = Σ_t [(B(L_sw) + n·c(L_sw)) × d_factor]
+  PM_bot = (Σ_j PM_j) × (1 + αR6)
 
-  <em>PM_j=单BU人月 / PM_bot=自底向上总计 / αR4=拓扑溢价 / αR6=跨BU联调溢价</em>
+  <em>PM_j=单BU人月 / PM_bot=自底向上总计 / αR6=跨BU联调溢价</em>
       </div>
       <div class="pro">粒度细，可逐任务审计，BU / EM 可以直接审核自己那部分</div>
       <div class="con">初期 catalog 系数需经 BU 校准和历史回归验证</div>
@@ -1565,8 +1643,8 @@ d_{j,t}(dir) ∈ { new: 1.0,  modify: 0.6,  delete: 0.3 }
   <div class="cards col3">
     <div class="card reveal">
       <div class="card-mark">PRINCIPLE 1</div>
-      <h4>保守定级</h4>
-      <p>六维取 MAX 而非平均或加权，L 等级冲突时取高不取低，确保不因某维度定级过低而低估整体投入。</p>
+      <h4>软件有效定级</h4>
+      <p>PM 估算使用 L_sw = MAX(D1, D3)，仅取系统方案和软件方案二维度，确保硬件/造型/工业化变更不放大软件工时。L_final = MAX(D1~D6) 保留用于文档记录。</p>
     </div>
     <div class="card reveal reveal-d1">
       <div class="card-mark">PRINCIPLE 2</div>
@@ -1601,29 +1679,48 @@ d_{j,t}(dir) ∈ { new: 1.0,  modify: 0.6,  delete: 0.3 }
 <!-- ════════════════ SECTION 5: 下载安装 ════════════════ -->
 <section id="install">
   <h2>下载安装</h2>
-  <p class="section-desc">
-    Skill 安装包托管于飞书云空间，下载后导入 Claude Code 即可使用。
-    首次启动会自动完成数据初始化（历史报价同步、架构数据索引）。
-  </p>
 
   <div class="install-card reveal">
-    <div class="install-title">VAS 投入测算 Skill</div>
-    <div class="install-desc">
-      &gt; skill会引导你安装依赖 &lt;<br>
-      &gt; 需配合 nt35-data-cache skill 使用 &lt;<br>
-      &gt; agent模型能力的差异可能会影响执行效率 &lt;<br>
-      &gt; 使用skill的架构师应是方案分析的第一责任人 &lt;
+    <div class="install-header">
+      <div class="install-title">安装包托管于飞书云空间，下载后导入 Claude Code 即可使用</div>
+      <a class="install-btn" href="https://nio.feishu.cn/drive/folder/MyPPf61zrlSCfVdGREbcjUmCnJz?from=from_copylink" target="_blank" rel="noopener">
+        打开安装包目录 &nbsp;&#x2197;
+      </a>
     </div>
-    <div class="install-version-note">
-      <div class="install-version-label">V3.0 更新说明</div>
-      <ul>
-        <li>历史报价数据源升级为多维表格（Base），支持更灵活的查询与维护</li>
-        <li>新增多车型平台历史报价数据，共 180 条</li>
-      </ul>
-    </div>
-    <a class="install-btn" href="https://nio.feishu.cn/drive/folder/MyPPf61zrlSCfVdGREbcjUmCnJz?from=from_copylink" target="_blank" rel="noopener">
-      打开安装包目录 &nbsp;&#x2197;
-    </a>
+    <ul class="install-notes">
+      <li>首次启动会自动完成数据初始化（历史报价同步、架构数据索引）</li>
+      <li>需配合 nt35-data-cache skill 提供 NT3.5 架构数据</li>
+      <li>skill 会引导你安装所需依赖</li>
+      <li>agent 模型能力的差异可能会影响执行效率</li>
+      <li>使用 skill 的架构师应是方案分析的第一责任人</li>
+    </ul>
+  </div>
+
+  <div class="version-history reveal">
+    <h3>版本历史</h3>
+    <ul class="version-list">
+      <li>
+        <div class="ver-tag">V4.0</div>
+        <div class="ver-body">
+          <strong>软件有效定级与双轨L级</strong>
+          <span>引入 L_sw = MAX(D1, D3) 软件有效等级，PM 估算不再被硬件/造型/工业化变更放大。移除 α_R4 拓扑溢价，L_final 保留用于文档记录。</span>
+        </div>
+      </li>
+      <li>
+        <div class="ver-tag">V3.1</div>
+        <div class="ver-body">
+          <strong>历史报价数据源升级</strong>
+          <span>历史报价数据源升级为多维表格（Base），新增 ONVO / NPD / NPE / FY 多车型平台历史报价数据；脚本支持表自发现与字段语义匹配。</span>
+        </div>
+      </li>
+      <li>
+        <div class="ver-tag">V3.0</div>
+        <div class="ver-body">
+          <strong>风险调整估算与标准化定级</strong>
+          <span>引入 L1-L6 六维独立判级 + MAX 仲裁、P50/P80/Max 三档模型、双路对账、direction_factor 变更方向系数。</span>
+        </div>
+      </li>
+    </ul>
   </div>
 </section>
 
@@ -1632,7 +1729,7 @@ d_{j,t}(dir) ∈ { new: 1.0,  modify: 0.6,  delete: 0.3 }
 <div class="section-rule" aria-hidden="true"></div>
 
 <footer>
-  VAS Investment Analysis Skill &nbsp;&middot;&nbsp; Version 3.0 <span>(Risk-Adjusted)</span> &nbsp;&middot;&nbsp; Developer: <span>quan.yuan3</span> &nbsp;&middot;&nbsp; 2026
+  VAS Investment Analysis Skill &nbsp;&middot;&nbsp; Version 4.0 &nbsp;&middot;&nbsp; Developer: <span>quan.yuan3</span> &nbsp;&middot;&nbsp; 2026
 </footer>
 
 <script>
