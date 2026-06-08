@@ -791,52 +791,50 @@ a.src-link:hover { color: var(--copper); border-bottom-color: var(--copper); }
 .install-card {
   background: var(--elevated);
   border: 1px solid var(--border-b);
-  padding: 28px 36px;
+  padding: 32px 36px 24px;
   margin: 24px 0;
   box-shadow: var(--shadow);
-  text-align: left;
 }
-.install-header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px 24px;
-  padding-bottom: 18px;
-  border-bottom: 1px solid var(--border-b);
+.install-card .install-desc {
+  font-size: 15px; color: var(--text-dim);
+  line-height: 1.72; margin: 0 0 20px 0;
+  max-width: 640px;
 }
 .install-btn {
-  display: inline-block;
-  padding: 10px 28px;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 12px 32px;
   font-family: "Chivo", "PingFang SC", sans-serif;
-  font-size: 12.5px; font-weight: 700;
+  font-size: 13px; font-weight: 700;
   letter-spacing: 0.06em;
   color: #fff;
   background: var(--teal);
-  border: none;
   text-decoration: none;
   white-space: nowrap;
   transition: background 0.2s, box-shadow 0.2s;
-  box-shadow: 0 2px 6px rgba(45,125,138,0.25);
+  box-shadow: 0 2px 8px rgba(45,125,138,0.22);
 }
 .install-btn:hover {
   background: var(--teal-l);
-  box-shadow: 0 3px 12px rgba(45,125,138,0.35);
+  box-shadow: 0 4px 16px rgba(45,125,138,0.32);
+}
+.install-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 24px 0 18px;
 }
 .install-notes {
-  margin: 16px 0 0 0;
-  padding: 0;
+  margin: 0; padding: 0;
   list-style: none;
-  font-size: 12.5px;
-  color: var(--text-dim);
-  line-height: 1.8;
+  font-size: 13px; color: var(--text-dim);
+  line-height: 1.85;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 4px 32px;
+  gap: 2px 36px;
 }
 .install-notes li::before {
-  content: "— ";
-  color: var(--border-b);
+  content: "◇ ";
+  font-size: 6px; color: var(--brass);
+  vertical-align: 0.2em; margin-right: 2px;
 }
 
 /* ── Version history ── */
@@ -846,7 +844,6 @@ a.src-link:hover { color: var(--copper); border-bottom-color: var(--copper); }
   box-shadow: var(--shadow);
   padding: 28px 36px 20px;
   margin: 24px 0;
-  text-align: left;
 }
 .version-history h3 {
   font-family: "Cormorant Garamond", "Noto Serif SC", serif;
@@ -950,8 +947,7 @@ footer span { color: var(--brass); }
   .nav-bar .nav-brand .ver { font-size: 8px; }
   .nav-links { gap: 2px; }
   .nav-links a { padding: 4px 8px; font-size: 11px; }
-  .install-header { flex-direction: column; align-items: flex-start; }
-  .install-card { padding: 20px 20px; }
+  .install-card { padding: 22px 20px; }
   .install-notes { grid-template-columns: 1fr; }
   .version-history { padding: 20px 20px; }
 }
@@ -1738,12 +1734,11 @@ d_{j,t}(dir) ∈ { new: 1.0,  modify: 0.6,  delete: 0.3 }
   <h2>下载安装</h2>
 
   <div class="install-card reveal">
-    <div class="install-header">
-      <p style="margin:0;font-size:14px;color:var(--text-dim);line-height:1.7;flex:1 1 260px;">安装包托管于飞书云空间，下载后导入 Claude Code 即可使用</p>
-      <a class="install-btn" href="https://nio.feishu.cn/drive/folder/MyPPf61zrlSCfVdGREbcjUmCnJz?from=from_copylink" target="_blank" rel="noopener">
-        打开安装包目录 &nbsp;&#x2197;
-      </a>
-    </div>
+    <p class="install-desc">安装包托管于飞书云空间，下载后导入 Claude Code 即可使用</p>
+    <a class="install-btn" href="https://nio.feishu.cn/drive/folder/MyPPf61zrlSCfVdGREbcjUmCnJz?from=from_copylink" target="_blank" rel="noopener">
+      打开安装包目录 &#x2197;
+    </a>
+    <div class="install-divider"></div>
     <ul class="install-notes">
       <li>首次启动会自动完成数据初始化（历史报价同步、架构数据索引）</li>
       <li>需配合 nt35-data-cache skill 提供 NT3.5 架构数据</li>
