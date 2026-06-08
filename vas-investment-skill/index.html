@@ -1342,7 +1342,7 @@ footer span { color: var(--brass); }
 
   <h3>计算数据流</h3>
   <div class="svg-diagram-wrap reveal">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1480 660" font-family="'Chivo','PingFang SC','Microsoft YaHei',sans-serif">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1480 674" font-family="'Chivo','PingFang SC','Microsoft YaHei',sans-serif">
       <defs>
         <filter id="d2-sh"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.08"/></filter>
         <marker id="d2-ma" viewBox="0 0 8 6" refX="7" refY="3" markerWidth="5" markerHeight="4" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#8a867e"/></marker>
@@ -1386,99 +1386,99 @@ footer span { color: var(--brass); }
       <rect x="760" y="122" width="200" height="14" rx="2" fill="#faf7ee" stroke="#e0d4b0" stroke-width="0.7"/>
       <text x="784" y="132" font-size="7.5" fill="#8b6914">engineering_grading.json</text>
       <line x1="860" y1="122" x2="860" y2="116" stroke="#8b6914" stroke-width="0.7" marker-end="url(#d2-mb)"/>
-      <polyline points="1210,88 1210,136 24,136 24,400" fill="none" stroke="#8b6914" stroke-width="1.2" stroke-dasharray="5,3"/>
+      <polyline points="1210,88 1210,136 24,136 24,408" fill="none" stroke="#8b6914" stroke-width="1.2" stroke-dasharray="5,3"/>
       <circle cx="1210" cy="136" r="3.5" fill="#8b6914"/>
       <circle cx="24" cy="136" r="3.5" fill="#8b6914"/>
-      <rect x="12" y="144" width="1456" height="340" rx="3" fill="none" stroke="#e0d8c0" stroke-dasharray="6,3"/>
-      <text x="40" y="166" font-size="10" font-weight="700" fill="#8b6914" letter-spacing="0.1em">LAYER 2 &nbsp;·&nbsp; 三轨纵向并行计算</text>
-      <text x="46" y="186" font-size="9" font-weight="700" fill="#9a4a22">T1</text>
-      <circle cx="24" cy="190" r="3.5" fill="#8b6914"/>
-      <line x1="24" y1="190" x2="76" y2="190" stroke="#8b6914" stroke-width="1.1" marker-end="url(#d2-mb)"/>
-      <rect x="80" y="172" width="180" height="36" rx="3" fill="#fef8f4" stroke="#e4c8b0" stroke-width="1.2" filter="url(#d2-sh)"/>
-      <text x="98" y="190" font-size="9" font-weight="600" fill="#9a4a22">变更方向判定</text>
-      <text x="98" y="204" font-size="7.5" fill="#8a867e">d ∈ { new:1.0, modify:0.6, delete:0.3 }</text>
-      <circle cx="260" cy="190" r="3.5" fill="#9a4a22"/>
-      <line x1="260" y1="190" x2="296" y2="190" stroke="#9a4a22" stroke-width="1.1" marker-end="url(#d2-mc)"/>
-      <rect x="300" y="172" width="140" height="36" rx="3" fill="#fef8f4" stroke="#e4c8b0" stroke-width="1.2" filter="url(#d2-sh)"/>
-      <text x="316" y="190" font-size="10" font-weight="600" fill="#9a4a22" font-family="'JetBrains Mono',monospace">d_factor</text>
-      <text x="316" y="204" font-size="7.5" fill="#8a867e">方向系数</text>
-      <circle cx="440" cy="190" r="3.5" fill="#9a4a22"/>
-      <polyline points="440,190 500,190 500,362" fill="none" stroke="#9a4a22" stroke-width="1.1" stroke-dasharray="4,3" marker-end="url(#d2-mc)"/>
-      <text x="46" y="276" font-size="9" font-weight="700" fill="#2d7d8a">T2</text>
-      <circle cx="24" cy="280" r="3.5" fill="#8b6914"/>
-      <line x1="24" y1="280" x2="76" y2="280" stroke="#8b6914" stroke-width="1.1" marker-end="url(#d2-mb)"/>
-      <rect x="80" y="256" width="180" height="48" rx="4" fill="#f2f7f9" stroke="#b0c8d4" stroke-width="1.5" filter="url(#d2-sh)"/>
-      <text x="98" y="276" font-size="9" font-weight="700" fill="#2d7d8a" letter-spacing="0.06em">STEP 5</text>
-      <text x="98" y="294" font-size="10" font-weight="600" fill="#1a1a18">筛选同类历史样本</text>
-      <circle cx="260" cy="280" r="4" fill="#2d7d8a"/>
-      <line x1="260" y1="280" x2="296" y2="280" stroke="#2d7d8a" stroke-width="1.2" marker-end="url(#d2-mt)"/>
-      <rect x="300" y="252" width="180" height="56" rx="4" fill="#f0f2f5" stroke="#a0a8b8" stroke-width="1.5" filter="url(#d2-sh)"/>
-      <text x="318" y="272" font-size="9" font-weight="700" fill="#2d7d8a" font-family="'JetBrains Mono',monospace">P50 / P80 / Max</text>
-      <text x="318" y="290" font-size="8.5" fill="#5c5a54">P50 = PERCENTILE( 0.50 )</text>
-      <text x="318" y="304" font-size="8.5" fill="#5c5a54">P80 = PERCENTILE( 0.80 )</text>
-      <circle cx="480" cy="280" r="4" fill="#2d7d8a"/>
-      <line x1="480" y1="280" x2="516" y2="280" stroke="#2d7d8a" stroke-width="1.2" marker-end="url(#d2-mt)"/>
-      <rect x="520" y="258" width="170" height="44" rx="3" fill="#f2f7f9" stroke="#b0c8d4" stroke-width="1.2" filter="url(#d2-sh)"/>
-      <text x="538" y="278" font-size="11" font-weight="600" fill="#2d7d8a" font-family="'JetBrains Mono',monospace">PM_top_P80</text>
-      <text x="538" y="294" font-size="8" fill="#8a867e">自顶向下推荐值</text>
-      <circle cx="690" cy="280" r="4" fill="#2d7d8a"/>
-      <rect x="80" y="316" width="180" height="16" rx="2" fill="#faf7ee" stroke="#e0d4b0" stroke-width="0.7"/>
-      <text x="92" y="328" font-size="7.5" fill="#8b6914">vas_data.json (104条历史报价)</text>
-      <line x1="170" y1="316" x2="170" y2="306" stroke="#8b6914" stroke-width="0.7" marker-end="url(#d2-mb)"/>
-      <text x="46" y="396" font-size="9" font-weight="700" fill="#9a4a22">T3</text>
-      <circle cx="24" cy="400" r="3.5" fill="#8b6914"/>
-      <line x1="24" y1="400" x2="76" y2="400" stroke="#8b6914" stroke-width="1.1" marker-end="url(#d2-mb)"/>
-      <rect x="80" y="376" width="180" height="48" rx="4" fill="#fef8f4" stroke="#e0c0a8" stroke-width="1.5" filter="url(#d2-sh)"/>
-      <text x="98" y="396" font-size="9" font-weight="700" fill="#9a4a22" letter-spacing="0.06em">STEP 7</text>
-      <text x="98" y="414" font-size="10" font-weight="600" fill="#1a1a18">变更矩阵展开</text>
-      <circle cx="260" cy="400" r="4" fill="#9a4a22"/>
-      <line x1="260" y1="400" x2="296" y2="400" stroke="#9a4a22" stroke-width="1.2" marker-end="url(#d2-mc)"/>
-      <rect x="300" y="364" width="210" height="72" rx="4" fill="#f0f2f5" stroke="#a0a8b8" stroke-width="1.5" filter="url(#d2-sh)"/>
-      <text x="318" y="384" font-size="10" font-weight="700" fill="#9a4a22" font-family="'JetBrains Mono',monospace">BU Task Catalog</text>
-      <text x="318" y="404" font-size="8.5" fill="#5c5a54">B(L) = 固定基准工时</text>
-      <text x="318" y="418" font-size="8.5" fill="#5c5a54">n · c(L) = 变量 × 单价</text>
-      <text x="318" y="432" font-size="8" fill="#8a867e">× d_factor (方向系数) ←</text>
-      <circle cx="510" cy="400" r="4" fill="#9a4a22"/>
-      <line x1="510" y1="400" x2="546" y2="400" stroke="#9a4a22" stroke-width="1.2" marker-end="url(#d2-mc)"/>
-      <rect x="550" y="370" width="180" height="60" rx="4" fill="#fef8f4" stroke="#e0c0a8" stroke-width="1.2" filter="url(#d2-sh)"/>
-      <text x="568" y="390" font-size="10" font-weight="700" fill="#9a4a22" font-family="'JetBrains Mono',monospace">PM_j = Σ_t [...]</text>
-      <text x="568" y="410" font-size="8.5" fill="#5c5a54">逐 BU 逐任务求和</text>
-      <text x="568" y="426" font-size="8" fill="#8a867e">× ( 1 + αR6 )</text>
-      <circle cx="730" cy="400" r="4" fill="#9a4a22"/>
-      <rect x="300" y="444" width="210" height="16" rx="2" fill="#faf7ee" stroke="#e0d4b0" stroke-width="0.7"/>
-      <text x="314" y="456" font-size="7.5" fill="#8b6914">bu_task_catalog.json (21项平台 + 7类功能BU)</text>
-      <line x1="405" y1="444" x2="405" y2="438" stroke="#8b6914" stroke-width="0.7" marker-end="url(#d2-mb)"/>
-      <rect x="550" y="438" width="180" height="16" rx="2" fill="#fcfcf8" stroke="#d0ccc0" stroke-width="0.7"/>
-      <text x="564" y="450" font-size="7.5" fill="#8b6914">αR6 (跨BU联调)</text>
-      <line x1="640" y1="438" x2="640" y2="432" stroke="#8b6914" stroke-width="0.7" marker-end="url(#d2-mb)"/>
-      <polyline points="690,280 800,280 800,502" fill="none" stroke="#2d7d8a" stroke-width="1.2" marker-end="url(#d2-mt)"/>
-      <polyline points="730,400 760,400 760,502" fill="none" stroke="#9a4a22" stroke-width="1.2" marker-end="url(#d2-mc)"/>
-      <rect x="12" y="494" width="1456" height="96" rx="3" fill="none" stroke="#e0d8c0" stroke-dasharray="6,3"/>
-      <text x="40" y="516" font-size="10" font-weight="700" fill="#8b6914" letter-spacing="0.1em">LAYER 3 &nbsp;·&nbsp; 双路对账 &amp; 最终输出</text>
-      <rect x="380" y="506" width="560" height="66" rx="4" fill="#fcfcf8" stroke="#c8d8c0" stroke-width="1.5" filter="url(#d2-sh)"/>
-      <text x="400" y="526" font-size="10" font-weight="700" fill="#3d6b45" letter-spacing="0.06em">双路对账 &nbsp;·&nbsp; RECONCILIATION</text>
-      <rect x="400" y="534" width="380" height="22" rx="2" fill="#f0f2f5" stroke="#d0d8d0" stroke-width="1"/>
-      <text x="420" y="550" font-size="10" fill="#3d6b45" font-family="'JetBrains Mono',monospace">Δ = | PM_bot − PM_top_P80 | / PM_top_P80</text>
-      <text x="400" y="566" font-size="8.5" fill="#5c5a54">IF Δ &lt; 20% → High 置信度, 推荐 = P80 &nbsp;|&nbsp; 20% ≤ Δ &lt; 50% → Mid 置信度, 推荐 = max(P80, PM_bot) &nbsp;|&nbsp; Δ ≥ 50% → Low 置信度, 强制复盘</text>
-      <line x1="940" y1="539" x2="980" y2="539" stroke="#3d6b45" stroke-width="1.4" marker-end="url(#d2-mg)"/>
-      <rect x="986" y="517" width="80" height="44" rx="4" fill="#eaf5ea" stroke="#6aaa6a" stroke-width="1.5" filter="url(#d2-sh)"/>
-      <text x="1004" y="535" font-size="8" font-weight="700" fill="#3d6b45" letter-spacing="0.06em">OUTPUT</text>
-      <text x="1004" y="553" font-size="11" font-weight="600" fill="#1a1a18">PM</text>
-      <text x="806" y="498" font-size="8" fill="#2d7d8a">PM_top</text>
-      <text x="725" y="498" font-size="8" fill="#9a4a22">PM_bot</text>
-      <rect x="12" y="600" width="1456" height="50" rx="3" fill="#fcfcf8" stroke="#e0dcd0"/>
-      <text x="28" y="620" font-size="8.5" font-weight="700" fill="#5c5a54">图例:</text>
-      <line x1="76" y1="616" x2="110" y2="616" stroke="#8b6914" stroke-width="1.5"/><circle cx="93" cy="616" r="2.5" fill="#8b6914"/>
-      <text x="116" y="620" font-size="8" fill="#5c5a54">L等级信号</text>
-      <line x1="212" y1="616" x2="246" y2="616" stroke="#2d7d8a" stroke-width="1.5"/><circle cx="229" cy="616" r="2.5" fill="#2d7d8a"/>
-      <text x="252" y="620" font-size="8" fill="#5c5a54">自顶向下</text>
-      <line x1="334" y1="616" x2="368" y2="616" stroke="#9a4a22" stroke-width="1.5"/><circle cx="351" cy="616" r="2.5" fill="#9a4a22"/>
-      <text x="374" y="620" font-size="8" fill="#5c5a54">自底向上</text>
-      <line x1="460" y1="616" x2="494" y2="616" stroke="#8b6914" stroke-width="1" stroke-dasharray="4,2"/>
-      <text x="500" y="620" font-size="8" fill="#5c5a54">广播/参数馈线</text>
-      <rect x="620" y="610" width="12" height="10" rx="2" fill="#7ab87a"/>
-      <text x="638" y="620" font-size="8" fill="#5c5a54">端口</text>
-      <text x="28" y="644" font-size="8.5" fill="#5c5a54" font-family="'JetBrains Mono',monospace">L_sw = MAX(D1, D3) &nbsp;·&nbsp; L_final = MAX(D1..D6) &nbsp;·&nbsp; d_factor ∈ {1.0, 0.6, 0.3} &nbsp;·&nbsp; P80 = PERCENTILE(0.80) &nbsp;·&nbsp; PM_j = Σ[(B+n·c)×d] &nbsp;·&nbsp; PM_bot = ΣPM_j × (1+αR6) &nbsp;·&nbsp; Δ = |PM_bot − P80| / P80</text>
+      <rect x="12" y="152" width="1456" height="340" rx="3" fill="none" stroke="#e0d8c0" stroke-dasharray="6,3"/>
+      <text x="40" y="174" font-size="10" font-weight="700" fill="#8b6914" letter-spacing="0.1em">LAYER 2 &nbsp;·&nbsp; 三轨纵向并行计算</text>
+      <text x="46" y="194" font-size="9" font-weight="700" fill="#9a4a22">T1</text>
+      <circle cx="24" cy="198" r="3.5" fill="#8b6914"/>
+      <line x1="24" y1="198" x2="76" y2="198" stroke="#8b6914" stroke-width="1.1" marker-end="url(#d2-mb)"/>
+      <rect x="80" y="180" width="180" height="36" rx="3" fill="#fef8f4" stroke="#e4c8b0" stroke-width="1.2" filter="url(#d2-sh)"/>
+      <text x="98" y="198" font-size="9" font-weight="600" fill="#9a4a22">变更方向判定</text>
+      <text x="98" y="212" font-size="7.5" fill="#8a867e">d ∈ { new:1.0, modify:0.6, delete:0.3 }</text>
+      <circle cx="260" cy="198" r="3.5" fill="#9a4a22"/>
+      <line x1="260" y1="198" x2="296" y2="198" stroke="#9a4a22" stroke-width="1.1" marker-end="url(#d2-mc)"/>
+      <rect x="300" y="180" width="140" height="36" rx="3" fill="#fef8f4" stroke="#e4c8b0" stroke-width="1.2" filter="url(#d2-sh)"/>
+      <text x="316" y="198" font-size="10" font-weight="600" fill="#9a4a22" font-family="'JetBrains Mono',monospace">d_factor</text>
+      <text x="316" y="212" font-size="7.5" fill="#8a867e">方向系数</text>
+      <circle cx="440" cy="198" r="3.5" fill="#9a4a22"/>
+      <polyline points="440,198 500,198 500,370" fill="none" stroke="#9a4a22" stroke-width="1.1" stroke-dasharray="4,3" marker-end="url(#d2-mc)"/>
+      <text x="46" y="284" font-size="9" font-weight="700" fill="#2d7d8a">T2</text>
+      <circle cx="24" cy="288" r="3.5" fill="#8b6914"/>
+      <line x1="24" y1="288" x2="76" y2="288" stroke="#8b6914" stroke-width="1.1" marker-end="url(#d2-mb)"/>
+      <rect x="80" y="264" width="180" height="48" rx="4" fill="#f2f7f9" stroke="#b0c8d4" stroke-width="1.5" filter="url(#d2-sh)"/>
+      <text x="98" y="284" font-size="9" font-weight="700" fill="#2d7d8a" letter-spacing="0.06em">STEP 5</text>
+      <text x="98" y="302" font-size="10" font-weight="600" fill="#1a1a18">筛选同类历史样本</text>
+      <circle cx="260" cy="288" r="4" fill="#2d7d8a"/>
+      <line x1="260" y1="288" x2="296" y2="288" stroke="#2d7d8a" stroke-width="1.2" marker-end="url(#d2-mt)"/>
+      <rect x="300" y="260" width="180" height="56" rx="4" fill="#f0f2f5" stroke="#a0a8b8" stroke-width="1.5" filter="url(#d2-sh)"/>
+      <text x="318" y="280" font-size="9" font-weight="700" fill="#2d7d8a" font-family="'JetBrains Mono',monospace">P50 / P80 / Max</text>
+      <text x="318" y="298" font-size="8.5" fill="#5c5a54">P50 = PERCENTILE( 0.50 )</text>
+      <text x="318" y="312" font-size="8.5" fill="#5c5a54">P80 = PERCENTILE( 0.80 )</text>
+      <circle cx="480" cy="288" r="4" fill="#2d7d8a"/>
+      <line x1="480" y1="288" x2="516" y2="288" stroke="#2d7d8a" stroke-width="1.2" marker-end="url(#d2-mt)"/>
+      <rect x="520" y="266" width="170" height="44" rx="3" fill="#f2f7f9" stroke="#b0c8d4" stroke-width="1.2" filter="url(#d2-sh)"/>
+      <text x="538" y="286" font-size="11" font-weight="600" fill="#2d7d8a" font-family="'JetBrains Mono',monospace">PM_top_P80</text>
+      <text x="538" y="302" font-size="8" fill="#8a867e">自顶向下推荐值</text>
+      <circle cx="690" cy="288" r="4" fill="#2d7d8a"/>
+      <rect x="80" y="324" width="180" height="16" rx="2" fill="#faf7ee" stroke="#e0d4b0" stroke-width="0.7"/>
+      <text x="92" y="336" font-size="7.5" fill="#8b6914">vas_data.json (104条历史报价)</text>
+      <line x1="170" y1="324" x2="170" y2="314" stroke="#8b6914" stroke-width="0.7" marker-end="url(#d2-mb)"/>
+      <text x="46" y="404" font-size="9" font-weight="700" fill="#9a4a22">T3</text>
+      <circle cx="24" cy="408" r="3.5" fill="#8b6914"/>
+      <line x1="24" y1="408" x2="76" y2="408" stroke="#8b6914" stroke-width="1.1" marker-end="url(#d2-mb)"/>
+      <rect x="80" y="384" width="180" height="48" rx="4" fill="#fef8f4" stroke="#e0c0a8" stroke-width="1.5" filter="url(#d2-sh)"/>
+      <text x="98" y="404" font-size="9" font-weight="700" fill="#9a4a22" letter-spacing="0.06em">STEP 7</text>
+      <text x="98" y="422" font-size="10" font-weight="600" fill="#1a1a18">变更矩阵展开</text>
+      <circle cx="260" cy="408" r="4" fill="#9a4a22"/>
+      <line x1="260" y1="408" x2="296" y2="408" stroke="#9a4a22" stroke-width="1.2" marker-end="url(#d2-mc)"/>
+      <rect x="300" y="372" width="210" height="72" rx="4" fill="#f0f2f5" stroke="#a0a8b8" stroke-width="1.5" filter="url(#d2-sh)"/>
+      <text x="318" y="392" font-size="10" font-weight="700" fill="#9a4a22" font-family="'JetBrains Mono',monospace">BU Task Catalog</text>
+      <text x="318" y="412" font-size="8.5" fill="#5c5a54">B(L) = 固定基准工时</text>
+      <text x="318" y="426" font-size="8.5" fill="#5c5a54">n · c(L) = 变量 × 单价</text>
+      <text x="318" y="440" font-size="8" fill="#8a867e">× d_factor (方向系数) ←</text>
+      <circle cx="510" cy="408" r="4" fill="#9a4a22"/>
+      <line x1="510" y1="408" x2="546" y2="408" stroke="#9a4a22" stroke-width="1.2" marker-end="url(#d2-mc)"/>
+      <rect x="550" y="378" width="180" height="60" rx="4" fill="#fef8f4" stroke="#e0c0a8" stroke-width="1.2" filter="url(#d2-sh)"/>
+      <text x="568" y="398" font-size="10" font-weight="700" fill="#9a4a22" font-family="'JetBrains Mono',monospace">PM_j = Σ_t [...]</text>
+      <text x="568" y="418" font-size="8.5" fill="#5c5a54">逐 BU 逐任务求和</text>
+      <text x="568" y="434" font-size="8" fill="#8a867e">× ( 1 + αR6 )</text>
+      <circle cx="730" cy="408" r="4" fill="#9a4a22"/>
+      <rect x="300" y="452" width="210" height="16" rx="2" fill="#faf7ee" stroke="#e0d4b0" stroke-width="0.7"/>
+      <text x="314" y="464" font-size="7.5" fill="#8b6914">bu_task_catalog.json (21项平台 + 7类功能BU)</text>
+      <line x1="405" y1="452" x2="405" y2="446" stroke="#8b6914" stroke-width="0.7" marker-end="url(#d2-mb)"/>
+      <rect x="550" y="446" width="180" height="16" rx="2" fill="#fcfcf8" stroke="#d0ccc0" stroke-width="0.7"/>
+      <text x="564" y="458" font-size="7.5" fill="#8b6914">αR6 (跨BU联调)</text>
+      <line x1="640" y1="446" x2="640" y2="440" stroke="#8b6914" stroke-width="0.7" marker-end="url(#d2-mb)"/>
+      <polyline points="690,288 800,288 800,514" fill="none" stroke="#2d7d8a" stroke-width="1.2" marker-end="url(#d2-mt)"/>
+      <polyline points="730,408 760,408 760,514" fill="none" stroke="#9a4a22" stroke-width="1.2" marker-end="url(#d2-mc)"/>
+      <rect x="12" y="504" width="1456" height="96" rx="3" fill="none" stroke="#e0d8c0" stroke-dasharray="6,3"/>
+      <text x="40" y="526" font-size="10" font-weight="700" fill="#8b6914" letter-spacing="0.1em">LAYER 3 &nbsp;·&nbsp; 双路对账 &amp; 最终输出</text>
+      <rect x="380" y="516" width="560" height="66" rx="4" fill="#fcfcf8" stroke="#c8d8c0" stroke-width="1.5" filter="url(#d2-sh)"/>
+      <text x="400" y="536" font-size="10" font-weight="700" fill="#3d6b45" letter-spacing="0.06em">双路对账 &nbsp;·&nbsp; RECONCILIATION</text>
+      <rect x="400" y="544" width="380" height="22" rx="2" fill="#f0f2f5" stroke="#d0d8d0" stroke-width="1"/>
+      <text x="420" y="560" font-size="10" fill="#3d6b45" font-family="'JetBrains Mono',monospace">Δ = | PM_bot − PM_top_P80 | / PM_top_P80</text>
+      <text x="400" y="576" font-size="8.5" fill="#5c5a54">IF Δ &lt; 20% → High 置信度, 推荐 = P80 &nbsp;|&nbsp; 20% ≤ Δ &lt; 50% → Mid 置信度, 推荐 = max(P80, PM_bot) &nbsp;|&nbsp; Δ ≥ 50% → Low 置信度, 强制复盘</text>
+      <line x1="940" y1="549" x2="980" y2="549" stroke="#3d6b45" stroke-width="1.4" marker-end="url(#d2-mg)"/>
+      <rect x="986" y="527" width="80" height="44" rx="4" fill="#eaf5ea" stroke="#6aaa6a" stroke-width="1.5" filter="url(#d2-sh)"/>
+      <text x="1004" y="545" font-size="8" font-weight="700" fill="#3d6b45" letter-spacing="0.06em">OUTPUT</text>
+      <text x="1004" y="563" font-size="11" font-weight="600" fill="#1a1a18">PM</text>
+      <text x="806" y="508" font-size="8" fill="#2d7d8a">PM_top</text>
+      <text x="725" y="508" font-size="8" fill="#9a4a22">PM_bot</text>
+      <rect x="12" y="612" width="1456" height="50" rx="3" fill="#fcfcf8" stroke="#e0dcd0"/>
+      <text x="28" y="632" font-size="8.5" font-weight="700" fill="#5c5a54">图例:</text>
+      <line x1="76" y1="628" x2="110" y2="628" stroke="#8b6914" stroke-width="1.5"/><circle cx="93" cy="628" r="2.5" fill="#8b6914"/>
+      <text x="116" y="632" font-size="8" fill="#5c5a54">L等级信号</text>
+      <line x1="212" y1="628" x2="246" y2="628" stroke="#2d7d8a" stroke-width="1.5"/><circle cx="229" cy="628" r="2.5" fill="#2d7d8a"/>
+      <text x="252" y="632" font-size="8" fill="#5c5a54">自顶向下</text>
+      <line x1="334" y1="628" x2="368" y2="628" stroke="#9a4a22" stroke-width="1.5"/><circle cx="351" cy="628" r="2.5" fill="#9a4a22"/>
+      <text x="374" y="632" font-size="8" fill="#5c5a54">自底向上</text>
+      <line x1="460" y1="628" x2="494" y2="628" stroke="#8b6914" stroke-width="1" stroke-dasharray="4,2"/>
+      <text x="500" y="632" font-size="8" fill="#5c5a54">广播/参数馈线</text>
+      <rect x="620" y="622" width="12" height="10" rx="2" fill="#7ab87a"/>
+      <text x="638" y="632" font-size="8" fill="#5c5a54">端口</text>
+      <text x="28" y="656" font-size="8.5" fill="#5c5a54" font-family="'JetBrains Mono',monospace">L_sw = MAX(D1, D3) &nbsp;·&nbsp; L_final = MAX(D1..D6) &nbsp;·&nbsp; d_factor ∈ {1.0, 0.6, 0.3} &nbsp;·&nbsp; P80 = PERCENTILE(0.80) &nbsp;·&nbsp; PM_j = Σ[(B+n·c)×d] &nbsp;·&nbsp; PM_bot = ΣPM_j × (1+αR6) &nbsp;·&nbsp; Δ = |PM_bot − P80| / P80</text>
     </svg>
   </div>
 
