@@ -800,14 +800,15 @@ a.src-link:hover { color: var(--copper); border-bottom-color: var(--copper); }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
+  flex-wrap: wrap;
+  gap: 16px 24px;
   padding-bottom: 18px;
   border-bottom: 1px solid var(--border-b);
 }
 .install-header .install-title {
   font-family: "Cormorant Garamond", "Noto Serif SC", serif;
   font-size: 22px; font-weight: 650;
-  flex-shrink: 0;
+  flex: 1 1 280px;
 }
 .install-btn {
   display: inline-block;
@@ -954,6 +955,10 @@ footer span { color: var(--brass); }
   .nav-bar .nav-brand .ver { font-size: 8px; }
   .nav-links { gap: 2px; }
   .nav-links a { padding: 4px 8px; font-size: 11px; }
+  .install-header { flex-direction: column; align-items: flex-start; }
+  .install-card { padding: 20px 20px; }
+  .install-notes { grid-template-columns: 1fr; }
+  .version-history { padding: 20px 20px; }
 }
 @media (max-width: 480px) {
   .cards.col2, .cards.col3, .highlight-grid.col2 { grid-template-columns: 1fr; }
