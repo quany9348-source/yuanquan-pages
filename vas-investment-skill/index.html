@@ -1003,7 +1003,7 @@ footer span { color: var(--brass); }
         </tr>
         <tr>
           <td><code>references/engineering_grading.json</code></td>
-          <td>L1-L6 六维工程开发分级表 + 6 条机械仲裁规则</td>
+          <td>L1-L6 六维工程开发分级表 + 6 条系统仲裁规则</td>
           <td><a class="src-link" href="https://nio.feishu.cn/wiki/Wau7ww9KwiiOc1kHlBzcwXeHnOh" target="_blank" rel="noopener">飞书 Wiki &nbsp;&#x2197;</a></td>
         </tr>
         <tr>
@@ -1166,7 +1166,7 @@ footer span { color: var(--brass); }
       <rect x="24" y="52" width="246" height="22" rx="2" fill="#8b6914"/>
       <text x="38" y="67" font-size="8.5" font-weight="700" fill="#fff" letter-spacing="0.08em">飞书在线数据</text>
       <text x="38" y="90" font-size="9.5" font-weight="600" fill="#5c5a54">历史报价库</text>
-      <text x="38" y="106" font-size="8.5" fill="#8a867e">104条记录 · vas_data.json</text>
+      <text x="38" y="106" font-size="8.5" fill="#8a867e">180条 · ONVO/NPD/NPE/FY</text>
       <text x="38" y="128" font-size="9.5" font-weight="600" fill="#5c5a54">工程开发分级表</text>
       <text x="38" y="144" font-size="8.5" fill="#8a867e">L1-L6判级 + R1-R6规则</text>
       <text x="38" y="166" font-size="9.5" font-weight="600" fill="#5c5a54">BU任务目录 + 方向系数</text>
@@ -1352,7 +1352,7 @@ footer span { color: var(--brass); }
         <marker id="d2-mg" viewBox="0 0 8 6" refX="7" refY="3" markerWidth="5" markerHeight="4" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#3d6b45"/></marker>
       </defs>
       <rect x="12" y="12" width="1456" height="132" rx="3" fill="none" stroke="#e0d8c0" stroke-dasharray="6,3"/>
-      <text x="40" y="34" font-size="10" font-weight="700" fill="#8b6914" letter-spacing="0.1em">LAYER 1 &nbsp;·&nbsp; L 等级机械仲裁</text>
+      <text x="40" y="34" font-size="10" font-weight="700" fill="#8b6914" letter-spacing="0.1em">LAYER 1 &nbsp;·&nbsp; L 等级系统仲裁</text>
       <rect x="40" y="51" width="190" height="52" rx="4" fill="#eaf5ea" stroke="#7ab87a" stroke-width="1.5" filter="url(#d2-sh)"/>
       <text x="58" y="71" font-size="9" font-weight="700" fill="#3d6b45" letter-spacing="0.08em">INPUT</text>
       <text x="58" y="91" font-size="11" font-weight="600" fill="#1a1a18">用户需求</text>
@@ -1423,7 +1423,7 @@ footer span { color: var(--brass); }
       <text x="538" y="302" font-size="8" fill="#8a867e">自顶向下推荐值</text>
       <circle cx="690" cy="288" r="4" fill="#2d7d8a"/>
       <rect x="80" y="324" width="180" height="16" rx="2" fill="#faf7ee" stroke="#e0d4b0" stroke-width="0.7"/>
-      <text x="92" y="336" font-size="7.5" fill="#8b6914">vas_data.json (104条历史报价)</text>
+      <text x="92" y="336" font-size="7.5" fill="#8b6914">vas_data.json (180条历史报价 · 四平台)</text>
       <line x1="170" y1="324" x2="170" y2="314" stroke="#8b6914" stroke-width="0.7" marker-end="url(#d2-mb)"/>
       <text x="46" y="404" font-size="9" font-weight="700" fill="#9a4a22">T3</text>
       <circle cx="24" cy="408" r="3.5" fill="#8b6914"/>
@@ -1584,7 +1584,7 @@ d_{j,t}(dir) ∈ { new: 1.0,  modify: 0.6,  delete: 0.3 }
   <div class="dual-cmp">
     <div class="dc-col">
       <h4>路径 A &nbsp;&middot;&nbsp; 自顶向下 &nbsp;—&nbsp; Step 5</h4>
-      <p>基于 104 条历史评估记录，筛选<strong>同 L 等级 + 同变更类型 + 同架构代际</strong>的相似项目，取 P50 / P80 / Max 三档作为估算区间。</p>
+      <p>基于 180 条历史评估记录，筛选<strong>同 L 等级 + 同变更类型 + 同架构代际</strong>的相似项目，取 P50 / P80 / Max 三档作为估算区间。</p>
       <div class="formula-box" style="font-size:11px;">
         <span class="fb-label">TOP-DOWN</span>
   P50 = PERCENTILE(同类样本, 0.50)
