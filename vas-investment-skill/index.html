@@ -129,6 +129,52 @@ section { padding: 72px 0; position: relative; z-index: 1; }
 }
 .section-desc strong { color: var(--brass-l); font-weight: 600; }
 
+/* ── Nav Bar ── */
+.nav-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 36px; height: 52px;
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  transition: background 0.28s ease, border-color 0.28s ease, box-shadow 0.28s ease;
+}
+.nav-bar.scrolled {
+  background: rgba(248,246,242,0.94);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom-color: var(--border);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.nav-bar .nav-brand {
+  font-family: "Cormorant Garamond", "Noto Serif SC", serif;
+  font-size: 18px; font-weight: 650; letter-spacing: 0.02em;
+  color: var(--text); text-decoration: none;
+  white-space: nowrap;
+}
+.nav-bar .nav-brand .accent { color: var(--brass); }
+.nav-bar .nav-brand .ver {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px; font-weight: 600; color: var(--teal);
+  margin-left: 4px; vertical-align: 0.1em;
+}
+.nav-links {
+  display: flex; align-items: center; gap: 6px;
+  list-style: none; margin: 0; padding: 0;
+}
+.nav-links a {
+  display: block; padding: 6px 14px;
+  font-family: "Chivo", "PingFang SC", sans-serif;
+  font-size: 12.5px; font-weight: 500; letter-spacing: 0.03em;
+  color: var(--text-dim); text-decoration: none;
+  border-radius: var(--radius);
+  transition: color 0.18s, background 0.18s;
+}
+.nav-links a:hover,
+.nav-links a.active {
+  color: var(--brass-l);
+  background: rgba(139,105,20,0.06);
+}
+
 /* ── Hero ── */
 .hero {
   position: relative; z-index: 1;
@@ -903,6 +949,11 @@ footer span { color: var(--brass); }
   .flow-step { width: 90px; padding: 12px 4px; }
   .flow-step .snl { font-size: 11px; }
   .df-pipeline { grid-template-columns: repeat(2, 1fr); }
+  .nav-bar { padding: 0 16px; height: 44px; }
+  .nav-bar .nav-brand { font-size: 15px; }
+  .nav-bar .nav-brand .ver { font-size: 8px; }
+  .nav-links { gap: 2px; }
+  .nav-links a { padding: 4px 8px; font-size: 11px; }
 }
 @media (max-width: 480px) {
   .cards.col2, .cards.col3, .highlight-grid.col2 { grid-template-columns: 1fr; }
@@ -915,6 +966,17 @@ footer span { color: var(--brass); }
 
 <div class="bg-grid" aria-hidden="true"></div>
 <div class="bg-grain" aria-hidden="true"></div>
+
+<!-- ════════════════ NAV ════════════════ -->
+<nav class="nav-bar" id="navBar">
+  <a href="#" class="nav-brand">VAS<span class="accent"> 投入测算 </span><span class="ver">V4.0</span></a>
+  <ul class="nav-links">
+    <li><a href="#intro">简介</a></li>
+    <li><a href="#user">用户关心的</a></li>
+    <li><a href="#methodology">原理和逻辑</a></li>
+    <li><a href="#install">下载安装</a></li>
+  </ul>
+</nav>
 
 <!-- ════════════════ HERO ════════════════ -->
 <header class="hero">
@@ -1755,6 +1817,29 @@ d_{j,t}(dir) ∈ { new: 1.0,  modify: 0.6,  delete: 0.3 }
 
   document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 })();
+
+/* ── Nav bar scroll ── */
+const nav = document.getElementById('navBar');
+const navLinks = nav.querySelectorAll('.nav-links a');
+const sections = [];
+navLinks.forEach(a => {
+  const id = a.getAttribute('href').slice(1);
+  if (id) sections.push(document.getElementById(id));
+});
+
+function onScroll() {
+  nav.classList.toggle('scrolled', window.scrollY > 40);
+  const y = window.scrollY + 80;
+  let current = '';
+  sections.forEach(sec => {
+    if (sec && sec.offsetTop <= y) current = '#' + sec.id;
+  });
+  navLinks.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === current);
+  });
+}
+window.addEventListener('scroll', onScroll, { passive: true });
+onScroll();
 </script>
 
 </body>
