@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VAS 投入测算 V4.0 — 精密估算引擎</title>
+<title>VAS 投入测算 V4.1 — 精密估算引擎</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=JetBrains+Mono:wght@400;500;600&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
@@ -98,6 +98,27 @@ h3.amber::before { color: var(--amber); }
 h3.green { color: var(--green); }
 h3.green::before { color: var(--green); }
 h3.red { color: var(--red); }
+.cards.col3-fixed { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 768px) {
+  .cards.col3-fixed { grid-template-columns: 1fr; }
+}
+
+h4.principle-group {
+  font-family: "Chivo", "PingFang SC", sans-serif;
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.18em;
+  color: var(--text-dim);
+  margin: 36px 0 16px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+h4.principle-group span {
+  font-weight: 400; font-size: 10px;
+  color: var(--text-sub);
+  letter-spacing: 0.08em;
+}
+
 h3.red::before { color: var(--red); }
 
 h4 {
@@ -965,7 +986,7 @@ footer span { color: var(--brass); }
 
 <!-- ════════════════ NAV ════════════════ -->
 <nav class="nav-bar" id="navBar">
-  <a href="#" class="nav-brand">VAS<span class="accent"> 投入测算 </span><span class="ver">V4.0</span></a>
+  <a href="#" class="nav-brand">VAS<span class="accent"> 投入测算 </span><span class="ver">V4.1</span></a>
   <ul class="nav-links">
     <li><a href="#intro">简介</a></li>
     <li><a href="#user">用户关心的</a></li>
@@ -977,7 +998,7 @@ footer span { color: var(--brass); }
 <!-- ════════════════ HERO ════════════════ -->
 <header class="hero">
   <div class="eyebrow">Vehicle Application Software &nbsp;·&nbsp; Investment Estimation Engine</div>
-  <h1>VAS<span class="accent"> 投入测算 </span>SKILL<span class="ver">V4.0</span></h1>
+  <h1>VAS<span class="accent"> 投入测算 </span>SKILL<span class="ver">V4.1</span></h1>
   <p class="sub">
     对新提出的车辆应用软件需求进行<strong>风险调整投入估算</strong>——
     深度系统方案解析，校准软件开发等级，
@@ -1006,7 +1027,7 @@ footer span { color: var(--brass); }
   </div>
 
   <div class="badges">
-    <span class="badge v3">V4.0 · 软件有效定级</span>
+    <span class="badge v3">V4.1 版 分析五原则 + 任务审视</span>
     <span class="badge risk">P50 &nbsp;/&nbsp; P80 &nbsp;/&nbsp; Max 三档模型</span>
     <span class="badge dual">双路核算 &nbsp;·&nbsp; 三角验证</span>
   </div>
@@ -1564,7 +1585,7 @@ footer span { color: var(--brass); }
   </div>
 
   <div class="formula-box">
-    <span class="fb-label">L-GRADE · V4.0 双轨制</span>
+    <span class="fb-label">L-GRADE (V4.1 双轨版)</span>
 D3  = MAX( sw_architecture, service_signal_interface, sw_unit_logic, sw_unit_deployment )
 
 <span style="color:var(--teal-l);font-weight:700;">L_sw    = MAX( D1, D3 )</span>                     ← 软件有效等级，用于 PM 估算
@@ -1693,34 +1714,77 @@ d_{j,t}(dir) ∈ { new: 1.0,  modify: 0.6,  delete: 0.3 }
 
   <!-- Defensive design principles -->
   <h3 class="red">防御性设计原则</h3>
-  <div class="cards col3">
+
+  <!-- Group A: 系统分析 -->
+  <h4 class="principle-group">系统分析 <span>6 项</span></h4>
+  <div class="cards col3-fixed">
     <div class="card reveal">
-      <div class="card-mark">PRINCIPLE 1</div>
+      <div class="card-mark">A1</div>
       <h4>软件有效定级</h4>
       <p>PM 估算使用 L_sw = MAX(D1, D3)，仅取系统方案和软件方案二维度，确保硬件/造型/工业化变更不放大软件工时。L_final = MAX(D1~D6) 保留用于文档记录。</p>
     </div>
     <div class="card reveal reveal-d1">
-      <div class="card-mark">PRINCIPLE 2</div>
-      <h4>全证据链</h4>
-      <p>每条结论必须引用数据来源（JSON 字段路径 / 分级表触发词 / 需求原文段落）。无法判定的维度显式标记。</p>
+      <div class="card-mark">A2</div>
+      <h4>消费者影响筛选 (P1)</h4>
+      <p>服务订阅列表 ≠ 功能影响范围。从 service_topology 查到全部消费者后，必须逐项筛选——只保留"因本次变更需要修改自身逻辑"的消费者，静态订阅但行为不变的不纳入。</p>
     </div>
+    <div class="card reveal reveal-d1">
+      <div class="card-mark">A3</div>
+      <h4>VAS 边界确认 (P2)</h4>
+      <p>对每个点亮 BU 必须追问：此工作由 VAS 内部完成还是外域/供应商负责？外域 BU 仅计 0.3~0.5 PM 接口需求定义，不套完整 catalog。</p>
+    </div>
+    <div class="card reveal reveal-d1">
+      <div class="card-mark">A4</div>
+      <h4>Catalog 任务逐项审视 (P3)</h4>
+      <p>L≥N 和 feature_hit 是必要条件不是充分条件。每项 catalog 任务必须确认该工程活动在本项目中真实需要执行。内置 9 项常见误触发排除表。</p>
+    </div>
+    <div class="card reveal reveal-d1">
+      <div class="card-mark">A5</div>
+      <h4>接口变更 vs 数据源切换 (P4)</h4>
+      <p>消费者侧接口契约不变、仅数据源头变化 → 降维处理为"数据源切换"级别，仅计集成验证+回归+标定微调（0.8~1.2 PM），不按完整 modify 套 catalog。</p>
+    </div>
+    <div class="card reveal reveal-d1">
+      <div class="card-mark">A6</div>
+      <h4>逐 BU 独立有效等级 (P5)</h4>
+      <p>L_sw 是项目级标尺，不能所有 BU 统一按 L_sw 套 catalog。Lighting（数据源切换）在 L5 项目中自身变更仍是轻量的，必须逐 BU 评估实际软件变更复杂度。</p>
+    </div>
+  </div>
+
+  <!-- Group B: 计算统计 -->
+  <h4 class="principle-group">计算统计 <span>2 项</span></h4>
+  <div class="cards col3">
     <div class="card reveal reveal-d2">
-      <div class="card-mark">PRINCIPLE 3</div>
-      <h4>报告可审计</h4>
-      <p>最终报告包含六维仲裁表、方向判定、双路对账过程、历史案例参考、逐 BU 任务明细，完整复现从需求到结论的全链路。</p>
-    </div>
-    <div class="card reveal reveal-d3">
-      <div class="card-mark">PRINCIPLE 4</div>
+      <div class="card-mark">B1</div>
       <h4>小样本退化</h4>
       <p>L5 / L6 级历史样本不足 3 个时，自底向上自动升为主路径，自顶向下仅作参考上限，防止小样本统计偏差。</p>
     </div>
-    <div class="card reveal reveal-d4">
-      <div class="card-mark">PRINCIPLE 5</div>
+    <div class="card reveal reveal-d2">
+      <div class="card-mark">B2</div>
       <h4>大偏差强制复盘</h4>
       <p>Δ ≥ 50% 不输出结论，强制回归检查：是 catalog 系数问题、历史样本异常值、还是需求本身多变性导致？</p>
     </div>
-    <div class="card reveal reveal-d5">
-      <div class="card-mark">PRINCIPLE 6</div>
+  </div>
+
+  <!-- Group C: 证据审计 -->
+  <h4 class="principle-group">证据审计 <span>2 项</span></h4>
+  <div class="cards col3">
+    <div class="card reveal reveal-d3">
+      <div class="card-mark">C1</div>
+      <h4>全证据链</h4>
+      <p>每条结论必须引用数据来源（JSON 字段路径 / 分级表触发词 / 需求原文段落）。无法判定的维度显式标记。</p>
+    </div>
+    <div class="card reveal reveal-d3">
+      <div class="card-mark">C2</div>
+      <h4>报告可审计</h4>
+      <p>最终报告包含六维仲裁表、方向判定、双路对账过程、历史案例参考、逐 BU 任务明细，完整复现从需求到结论的全链路。</p>
+    </div>
+  </div>
+
+  <!-- Group D: 数据治理 -->
+  <h4 class="principle-group">数据治理 <span>1 项</span></h4>
+  <div class="cards col3">
+    <div class="card reveal reveal-d4">
+      <div class="card-mark">D1</div>
       <h4>数据分区隔离</h4>
       <p>架构数据（只读）与投入测算数据（可写）严格分区，架构数据更新必须通过 nt35-data-cache skill，防止交叉污染。</p>
     </div>
@@ -1752,6 +1816,13 @@ d_{j,t}(dir) ∈ { new: 1.0,  modify: 0.6,  delete: 0.3 }
     <h3>版本历史</h3>
     <ul class="version-list">
       <li>
+        <div class="ver-tag">V4.1</div>
+        <div class="ver-body">
+          <strong>分析五原则与任务审视</strong>
+          <span>新增消费者影响筛选(P1)、VAS边界确认(P2)、Catalog任务逐项审视(P3)、数据源切换降维(P4)、逐BU独立等级(P5)。Step 3 新增 3.5a/3.5b 交互门禁，Step 7 新增任务点亮前强制审视（含 9 项常见误触发排除表 + 三级变更降维模型）。</span>
+        </div>
+      </li>
+      <li>
         <div class="ver-tag">V4.0</div>
         <div class="ver-body">
           <strong>软件有效定级与双轨L级</strong>
@@ -1781,7 +1852,7 @@ d_{j,t}(dir) ∈ { new: 1.0,  modify: 0.6,  delete: 0.3 }
 <div class="section-rule" aria-hidden="true"></div>
 
 <footer>
-  VAS Investment Analysis Skill &nbsp;&middot;&nbsp; Version 4.0 &nbsp;&middot;&nbsp; Developer: <span>quan.yuan3</span> &nbsp;&middot;&nbsp; 2026
+  VAS Investment Analysis Skill &nbsp;&middot;&nbsp; Version 4.1 &nbsp;&middot;&nbsp; Developer: <span>quan.yuan3</span> &nbsp;&middot;&nbsp; 2026
 </footer>
 
 <script>
