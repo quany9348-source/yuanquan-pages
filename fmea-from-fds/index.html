@@ -434,10 +434,10 @@ body:has(.ref-page:not(.page-hidden)) .sidebar-backdrop { display: none !importa
           <text x="100" y="72" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#64748b">wiki.feishu.cn/xxx</text>
           <!-- Arrow 1 -->
           <line x1="180" y1="58" x2="230" y2="58" stroke="#1e5fd8" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
-          <!-- parse_fds.py -->
-          <rect x="232" y="30" width="128" height="56" rx="10" fill="#fff" stroke="#64748b" stroke-width="1.2"/>
-          <text x="296" y="50" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="12" font-weight="600" fill="#1a1a1e">parse_fds.py</text>
-          <text x="296" y="70" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="10" fill="#64748b">结构解析</text>
+          <!-- AI 解析 -->
+          <rect x="232" y="30" width="128" height="56" rx="10" fill="#f5f8fd" stroke="#1e5fd8" stroke-width="1.6" stroke-dasharray="4 3"/>
+          <text x="296" y="50" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="12" font-weight="600" fill="#1e5fd8">Claude AI</text>
+          <text x="296" y="70" text-anchor="middle" font-family="DM Sans,Noto Sans SC,sans-serif" font-size="10" fill="#64748b">语义解析 FDS</text>
           <!-- generate_fmea.py -->
           <rect x="232" y="110" width="128" height="56" rx="10" fill="#fff" stroke="#64748b" stroke-width="1.2"/>
           <text x="296" y="130" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="12" font-weight="600" fill="#1a1a1e">generate_fmea.py</text>
@@ -539,9 +539,9 @@ body:has(.ref-page:not(.page-hidden)) .sidebar-backdrop { display: none !importa
         <text x="290" y="76" class="iv-dir-text">scripts/</text>
         <line class="iv-line iv-line-struct" x1="290" y1="82" x2="290" y2="172"/>
 
-        <rect class="iv-box-script" x="250" y="92" width="220" height="44"/>
-        <text x="360" y="112" text-anchor="middle" class="iv-file-text">parse_fds.py</text>
-        <text x="360" y="128" text-anchor="middle" class="iv-file-sub">FDS文档 → 结构化JSON</text>
+        <rect class="iv-box-file" x="250" y="92" width="220" height="44" stroke="#94a3b8" stroke-dasharray="3,3"/>
+        <text x="360" y="112" text-anchor="middle" class="iv-file-text" fill="#94a3b8">parse_fds.py</text>
+        <text x="360" y="128" text-anchor="middle" class="iv-file-sub" fill="#94a3b8">(已由 AI 解析替代)</text>
 
         <rect class="iv-box-script" x="250" y="148" width="220" height="44"/>
         <text x="360" y="168" text-anchor="middle" class="iv-file-text">generate_fmea.py</text>
@@ -679,8 +679,8 @@ body:has(.ref-page:not(.page-hidden)) .sidebar-backdrop { display: none !importa
         <g transform="translate(855,180)"><rect class="arc-node-rect arc-node-artifact" width="200" height="60"/><text x="100" y="26" class="arc-text-title">fds_content.md</text><text x="100" y="46" class="arc-text-sub">文档原始 Markdown</text></g>
 
         <!-- Y=280 -->
-        <g transform="translate(585,280)"><rect class="arc-node-rect arc-node-script" width="200" height="60"/><text x="100" y="26" class="arc-text-title">parse_fds.py</text><text x="100" y="46" class="arc-text-sub">提取结构化功能块/需求</text></g>
-        <g transform="translate(855,280)"><rect class="arc-node-rect arc-node-artifact" width="200" height="60"/><text x="100" y="26" class="arc-text-title">fds_parsed.json</text><text x="100" y="46" class="arc-text-sub">结构化数据源 (过滤未完成项)</text></g>
+        <g transform="translate(315,280)"><rect class="arc-node-rect arc-node-ai" width="200" height="60"/><text x="100" y="26" class="arc-text-title arc-step-heading">Step 1b: AI 语义解析 FDS</text><text x="100" y="46" class="arc-text-sub">提取功能块/需求/ECU/信号</text></g>
+        <g transform="translate(855,280)"><rect class="arc-node-rect arc-node-artifact" width="200" height="60"/><text x="100" y="26" class="arc-text-title">fds_parsed.json</text><text x="100" y="46" class="arc-text-sub">AI 结构化输出 (跳过非VB)</text></g>
 
         <!-- Y=380 -->
         <g transform="translate(315,380)"><rect class="arc-node-rect arc-node-ai" width="200" height="60"/><text x="100" y="26" class="arc-text-title arc-step-heading">Step 2: 展示功能块摘要</text><text x="100" y="46" class="arc-text-sub">向用户展示解析统计</text></g>
@@ -728,10 +728,10 @@ body:has(.ref-page:not(.page-hidden)) .sidebar-backdrop { display: none !importa
         <path class="arc-path-solid arc-path-user" d="M 245 110 L 307 110" marker-end="url(#arc-arrow-blue)"/>
         <path class="arc-path-solid arc-path-ai" d="M 515 110 C 550 110, 550 200, 577 200" marker-end="url(#arc-arrow-purple)"/>
         <path class="arc-path-solid arc-path-script" d="M 785 200 L 847 200" marker-end="url(#arc-arrow-teal)"/>
-        <path class="arc-path-solid arc-path-artifact" d="M 855 220 C 820 220, 820 290, 793 290" marker-end="url(#arc-arrow-amber)"/>
-        <path class="arc-path-solid arc-path-script" d="M 785 310 L 847 310" marker-end="url(#arc-arrow-teal)"/>
-        <path class="arc-path-solid arc-path-artifact" d="M 855 330 C 820 330, 820 400, 523 400" marker-end="url(#arc-arrow-amber)"/>
-        <path class="arc-path-solid arc-path-ai" d="M 315 400 L 253 400" marker-end="url(#arc-arrow-purple)"/>
+        <path class="arc-path-solid arc-path-artifact" d="M 855 220 C 800 220, 700 300, 525 300" marker-end="url(#arc-arrow-amber)"/>
+        <path class="arc-path-solid arc-path-ai" d="M 515 310 L 847 310" marker-end="url(#arc-arrow-purple)"/>
+        <path class="arc-path-solid arc-path-artifact" d="M 855 330 C 800 330, 645 410, 525 410" marker-end="url(#arc-arrow-amber)"/>
+        <path class="arc-path-solid arc-path-ai" d="M 315 410 L 253 410" marker-end="url(#arc-arrow-purple)"/>
         <!-- Step 2b: User confirm → User mode-select (vertical within User lane) -->
         <path class="arc-path-solid arc-path-user" d="M 145 440 L 145 460" marker-end="url(#arc-arrow-blue)"/>
         <!-- Step 2b: User → AI mode selection -->
