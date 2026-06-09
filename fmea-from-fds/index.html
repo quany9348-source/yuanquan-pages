@@ -392,7 +392,7 @@ body:has(.ref-page:not(.page-hidden)) .sidebar-backdrop { display: none !importa
       <a href="#overview" class="sidebar-link" data-sidebar-scroll="overview">总览</a>
       <a href="#internals" class="sidebar-link" data-sidebar-scroll="internals">SKILL 内部全景</a>
       <a href="#architecture" class="sidebar-link" data-sidebar-scroll="architecture">执行架构</a>
-      <a href="#workflow" class="sidebar-link" data-sidebar-scroll="workflow">7步法执行流程</a>
+      <a href="#interaction-mode" class="sidebar-link" data-sidebar-scroll="interaction-mode">交互模式选择</a>
       <a href="#methodology" class="sidebar-link" data-sidebar-scroll="methodology">失效链推导逻辑</a>
       <a href="#risk-rating" class="sidebar-link" data-sidebar-scroll="risk-rating">风险评级 S/O/D → AP</a>
       <a href="#output" class="sidebar-link" data-sidebar-scroll="output">输出格式 (Base)</a>
@@ -770,24 +770,12 @@ body:has(.ref-page:not(.page-hidden)) .sidebar-backdrop { display: none !importa
 </section>
 
 <!-- Workflow Section -->
-<section class="section section-alt" id="workflow">
+<section class="section section-alt" id="interaction-mode">
   <div class="container">
     <div class="section-header">
-      <h2>7 步法执行流程</h2>
-      <p>映射到 AIAG & VDA 标准，从拉取 FDS 到输出飞书 Base 表</p>
+      <h2>交互模式选择</h2>
+      <p>三种模式适配不同场景，选择最适合的工作方式</p>
     </div>
-    <div class="workflow">
-      <div class="workflow-step animate-in"><div class="workflow-step-num">1</div><h4>获取 FDS</h4><p>lark-cli 拉取飞书文档</p></div>
-      <div class="workflow-step animate-in delay-1"><div class="workflow-step-num">2</div><h4>解析结构</h4><p>parse_fds.py 提取功能块/信号/系统</p></div>
-      <div class="workflow-step animate-in delay-1"><div class="workflow-step-num">2b</div><h4>选择模式</h4><p>快速 / 草稿 / 逐块确认</p></div>
-      <div class="workflow-step animate-in delay-2"><div class="workflow-step-num">3</div><h4>创建 Base</h4><p>飞书多维表格 20 字段 Schema</p></div>
-      <div class="workflow-step animate-in delay-2"><div class="workflow-step-num">4</div><h4>AI 生成 FMEA</h4><p>全量推导 FM/FE/FC/S/O/D/AP</p></div>
-      <div class="workflow-step animate-in delay-3"><div class="workflow-step-num">5</div><h4>按模式确认</h4><p>快速: 仅AP=H / 草稿: 无 / 逐块: 3轮</p></div>
-      <div class="workflow-step animate-in delay-4"><div class="workflow-step-num">6</div><h4>汇总报告</h4><p>统计 + 高风险清单 + Docx 报告</p></div>
-    </div>
-
-    <!-- 3-Mode Comparison -->
-    <h3 style="text-align:center;margin-top:3rem;margin-bottom:1.5rem;">交互模式选择（Step 2b）</h3>
     <div class="grid-3" style="max-width:960px;margin:0 auto;">
       <div class="card card-accent-g animate-in" style="text-align:center;">
         <div style="font-size:2.5rem;margin-bottom:.25rem;">⚡</div>
@@ -3968,7 +3956,7 @@ document.querySelectorAll('.card, .workflow-step, .confirm-row, .domain-card, .s
   });
 
   // ── Scroll Spy (only when sidebar is open) ──
-  var sectionIds = ['overview','internals','architecture','workflow','methodology','risk-rating','output','coverage','constraints'];
+  var sectionIds = ['overview','internals','architecture','interaction-mode','methodology','risk-rating','output','coverage','constraints'];
 
   var spyObserver = new IntersectionObserver(function(entries) {
     if (!pageMain || pageMain.classList.contains('page-hidden')) return;
