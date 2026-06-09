@@ -78,6 +78,17 @@ code, .mono { font-family: 'JetBrains Mono', 'Noto Sans SC', monospace; font-siz
 }
 .nav-cta:hover { background: #1a4fc0; }
 
+/* ── Nav Dropdown ── */
+.nav-dropdown { position: relative; display: flex; align-items: center; }
+.nav-dropdown > a { display: flex; align-items: center; gap: .25rem; cursor: pointer; }
+.nav-dropdown > a::after { content: '▾'; font-size: .65rem; color: var(--text-tertiary); transition: transform .2s; }
+.nav-dropdown:hover > a::after { transform: rotate(180deg); }
+.nav-dropdown-menu { position: absolute; top: 100%; left: -0.5rem; padding-top: .5rem; opacity: 0; visibility: hidden; transform: translateY(-4px); transition: all .2s; z-index: 200; }
+.nav-dropdown:hover .nav-dropdown-menu { opacity: 1; visibility: visible; transform: translateY(0); }
+.nav-dropdown-menu-inner { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: .4rem 0; min-width: 220px; }
+.nav-dropdown-menu-inner a { display: block; padding: .45rem 1rem; color: var(--text-secondary); text-decoration: none; font-size: .8rem; font-weight: 500; transition: all .12s; white-space: nowrap; }
+.nav-dropdown-menu-inner a:hover { background: var(--blue-bg); color: var(--blue); }
+
 /* ── Hero ── */
 .hero {
   padding: clamp(3rem, 6vw, 6rem) 0 clamp(3rem, 5vw, 5rem);
@@ -227,6 +238,91 @@ code, .mono { font-family: 'JetBrains Mono', 'Noto Sans SC', monospace; font-siz
 .delay-2 { animation-delay: .2s; }
 .delay-3 { animation-delay: .3s; }
 .delay-4 { animation-delay: .4s; }
+
+/* ── Reference Doc Styles ── */
+.ref-doc { max-width: 960px; margin: 0 auto; }
+.ref-doc h3.ref-h1 { font-size: 1.5rem; font-weight: 700; color: var(--text); margin: 2.5rem 0 1rem; padding-bottom: .5rem; border-bottom: 2px solid var(--border); }
+.ref-doc h3.ref-h2 { font-size: 1.25rem; font-weight: 700; color: var(--text); margin: 2rem 0 .75rem; }
+.ref-doc h4.ref-h3 { font-size: 1.1rem; font-weight: 600; color: var(--blue); margin: 1.5rem 0 .5rem; }
+.ref-doc h4.ref-h4 { font-size: 1rem; font-weight: 600; color: var(--text-secondary); margin: 1.25rem 0 .5rem; }
+.ref-doc p.ref-p { font-size: .9rem; color: var(--text-secondary); line-height: 1.75; margin: .6rem 0; }
+.ref-doc .ref-list { margin: .5rem 0 .5rem 1.5rem; }
+.ref-doc .ref-list li { font-size: .9rem; color: var(--text-secondary); line-height: 1.7; padding: .1rem 0; }
+.ref-doc .ref-list li.ref-ol-li { font-size: .9rem; color: var(--text-secondary); line-height: 1.7; padding: .1rem 0; list-style: decimal; }
+.ref-doc .ref-hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+.ref-doc .ref-quote { border-left: 3px solid var(--blue); padding: .5rem 1rem; margin: .75rem 0; background: var(--blue-bg); border-radius: 0 var(--radius) var(--radius) 0; }
+.ref-doc .ref-quote p { font-size: .85rem; color: var(--text-secondary); }
+.ref-doc .ref-code { background: #1e293b; color: #e2e8f0; padding: 1rem 1.25rem; border-radius: var(--radius); font-family: 'JetBrains Mono', monospace; font-size: .8rem; line-height: 1.65; overflow-x: auto; margin: .75rem 0; }
+.ref-doc .ref-code code { background: none; padding: 0; font-size: inherit; }
+.ref-doc .ref-table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-card); box-shadow: var(--shadow-sm); margin: 1rem 0; }
+.ref-doc .ref-table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+.ref-doc .ref-table th { background: var(--bg-alt); padding: .55rem .65rem; text-align: left; font-weight: 600; font-size: .75rem; color: var(--text-secondary); white-space: nowrap; border-bottom: 2px solid var(--border); }
+.ref-doc .ref-table td { padding: .5rem .65rem; border-bottom: 1px solid var(--border-light); vertical-align: top; line-height: 1.5; }
+.ref-doc .ref-table tr:last-child td { border-bottom: none; }
+.ref-doc strong { color: var(--text); }
+.ref-doc code { background: var(--bg-alt); padding: .15em .4em; border-radius: 3px; font-size: .85em; }
+
+/* ── SPA Page Switching ── */
+.page-hidden { display: none !important; }
+.ref-page { padding: clamp(3rem, 5vw, 5rem) 0; max-width: var(--max-w); margin: 0 auto; padding-left: clamp(2rem, 4vw, 5rem); padding-right: clamp(2rem, 4vw, 5rem); }
+.ref-back-link { display: inline-flex; align-items: center; gap: .35rem; color: var(--blue); text-decoration: none; font-size: .9rem; font-weight: 600; padding: .5rem 0; transition: color .15s; }
+.ref-back-link:hover { color: #1a4fc0; }
+#page-main > section:last-of-type { margin-bottom: 0; }
+
+/* ── Page Layout (Sidebar + Content) ── */
+.page-layout { display: flex; min-height: 100vh; }
+.main-content-wrap { flex: 1; min-width: 0; }
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 240px; min-width: 240px;
+  position: sticky; top: 56px;  /* nav height */
+  height: calc(100vh - 56px);
+  overflow-y: auto;
+  background: var(--bg-card);
+  border-right: 1px solid var(--border);
+  padding: 1.5rem 0 2rem;
+  z-index: 50;
+  font-family: 'DM Sans', 'Noto Sans SC', sans-serif;
+}
+.sidebar-title {
+  font-size: .7rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--text-tertiary);
+  padding: 0 1.25rem; margin-bottom: .75rem;
+}
+.sidebar-nav { display: flex; flex-direction: column; }
+.sidebar-link {
+  display: block; padding: .45rem 1.25rem;
+  font-size: .82rem; font-weight: 500; color: var(--text-secondary);
+  text-decoration: none; line-height: 1.5;
+  border-left: 3px solid transparent;
+  transition: all .15s;
+}
+.sidebar-link:hover { color: var(--blue); background: var(--blue-bg); }
+.sidebar-link.active {
+  color: var(--blue); font-weight: 600;
+  background: var(--blue-bg); border-left-color: var(--blue);
+}
+
+/* Hide sidebar when page-main is hidden */
+#page-main.page-hidden .sidebar { display: none; }
+#page-main.page-hidden .page-layout { display: block; }
+
+/* Reference pages: no sidebar */
+.ref-page .sidebar { display: none; }
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .sidebar { width: 200px; min-width: 200px; }
+}
+@media (max-width: 768px) {
+  .page-layout { flex-direction: column; }
+  .sidebar {
+    position: relative; top: 0; width: 100%; min-width: 100%;
+    height: auto; max-height: 40vh;
+    border-right: none; border-bottom: 1px solid var(--border);
+  }
+}
 </style>
 </head>
 <body>
@@ -234,7 +330,7 @@ code, .mono { font-family: 'JetBrains Mono', 'Noto Sans SC', monospace; font-siz
 <!-- Nav -->
 <nav class="nav">
   <div class="nav-inner">
-    <a href="#" class="nav-logo">
+    <a href="#" class="nav-logo" data-nav-to="main">
       <svg class="nav-logo-icon" viewBox="0 0 28 28" fill="none">
         <rect x="2" y="2" width="24" height="24" rx="5" stroke="#1e5fd8" stroke-width="1.8"/>
         <path d="M8 10h12M8 14h12M8 18h8" stroke="#1e5fd8" stroke-width="1.8" stroke-linecap="round"/>
@@ -242,18 +338,41 @@ code, .mono { font-family: 'JetBrains Mono', 'Noto Sans SC', monospace; font-siz
       fmea-from-fds
     </a>
     <div class="nav-links">
-      <a href="#overview">总览</a>
-      <a href="#workflow">工作流</a>
-      <a href="#methodology">方法论</a>
-      <a href="#output">输出</a>
-      <a href="#architecture">执行架构</a>
-      <a href="#coverage">覆盖范围</a>
+      <span class="nav-dropdown">
+        <a>参考文档</a>
+        <div class="nav-dropdown-menu"><div class="nav-dropdown-menu-inner">
+          <a href="#" data-nav-to="ref" data-ref-page="page-ref-fmea-template">DFMEA 列定义 (7步法)</a>
+          <a href="#" data-nav-to="ref" data-ref-page="page-ref-rating-tables">S/O/D 评分标准 + AP 查表</a>
+          <a href="#" data-nav-to="ref" data-ref-page="page-ref-fds-mapping">FDS → FMEA 映射规则</a>
+          <a href="#" data-nav-to="ref" data-ref-page="page-ref-failure-library">Body 域失效模式库</a>
+          <a href="#" data-nav-to="ref" data-ref-page="page-ref-output-format">输出格式说明 (Base)</a>
+          <a href="#" data-nav-to="ref" data-ref-page="page-ref-nt35-system-map">NT3.5 系统架构地图</a>
+        </div></div>
+      </span>
       <a href="https://nio.feishu.cn/drive/folder/PwgzfFzjtlykTDdtkjwceEX8nzf?from=from_copylink" target="_blank" class="nav-cta">获取 Skill</a>
     </div>
   </div>
 </nav>
 
 <!-- Hero -->
+<div id="page-main">
+  <div class="page-layout">
+  <!-- Left Sidebar TOC -->
+  <aside class="sidebar" id="sidebar">
+    <nav class="sidebar-nav">
+      <div class="sidebar-title">页面导航</div>
+      <a href="#overview" class="sidebar-link" data-sidebar-scroll="overview">总览</a>
+      <a href="#internals" class="sidebar-link" data-sidebar-scroll="internals">SKILL 内部全景</a>
+      <a href="#architecture" class="sidebar-link" data-sidebar-scroll="architecture">执行架构</a>
+      <a href="#workflow" class="sidebar-link" data-sidebar-scroll="workflow">7步法执行流程</a>
+      <a href="#methodology" class="sidebar-link" data-sidebar-scroll="methodology">失效链推导逻辑</a>
+      <a href="#risk-rating" class="sidebar-link" data-sidebar-scroll="risk-rating">风险评级 S/O/D → AP</a>
+      <a href="#output" class="sidebar-link" data-sidebar-scroll="output">输出格式 (Base)</a>
+      <a href="#coverage" class="sidebar-link" data-sidebar-scroll="coverage">Body 域覆盖范围</a>
+      <a href="#constraints" class="sidebar-link" data-sidebar-scroll="constraints">关键约束</a>
+    </nav>
+  </aside>
+    <div class="main-content-wrap">
 <header class="hero">
   <div class="container">
     <div class="hero-grid">
@@ -807,7 +926,7 @@ code, .mono { font-family: 'JetBrains Mono', 'Noto Sans SC', monospace; font-siz
 </section>
 
 <!-- AP + S/O/D Section -->
-<section class="section section-alt">
+<section class="section section-alt" id="risk-rating">
   <div class="container">
     <div class="section-header">
       <h2>风险评级：S / O / D → Action Priority</h2>
@@ -981,7 +1100,7 @@ code, .mono { font-family: 'JetBrains Mono', 'Noto Sans SC', monospace; font-siz
 </section>
 
 <!-- Constraints -->
-<section class="section">
+<section class="section" id="constraints">
   <div class="container">
     <div class="section-header">
       <h2>关键约束</h2>
@@ -1007,6 +1126,2680 @@ code, .mono { font-family: 'JetBrains Mono', 'Noto Sans SC', monospace; font-siz
     </div>
   </div>
 </section>
+  </div><!-- /.main-content-wrap -->
+</div><!-- /.page-layout -->
+</div><!-- /#page-main -->
+
+
+<!-- ── Reference: DFMEA 列定义（AIAG & VDA 2019 7 步法） ── -->
+<div class="ref-page page-hidden" id="page-ref-fmea-template">
+  <div class="container" style="margin-bottom:1rem;">
+    <a href="#" class="ref-back-link" data-nav-to="main">← 返回技能介绍主页</a>
+  </div>
+  <div class="container">
+  <div class="container">
+    <div class="section-header">
+      <h2>DFMEA 列定义（AIAG &amp; VDA 2019 7 步法）</h2>
+      <p>fmea-from-fds 参考文档</p>
+    </div>
+    <div class="ref-doc">
+<h3 class="ref-h1">DFMEA 列定义（AIAG &amp; VDA 2019 7 步法）</h3>
+
+<h3 class="ref-h2">概述</h3>
+
+<p class="ref-p">本模板遵循 AIAG &amp; VDA FMEA Handbook (1st Edition, 2019)，采用 7 步法结构。</p>
+<p class="ref-p">与旧版 AIAG 4th Edition 的关键区别：RPN (S×O×D) 已被 <strong>Action Priority (AP)</strong> 替代，</p>
+<p class="ref-p">AP 通过查表（而非计算乘积）确定 H/M/L，避免低严重度-高 RPN 条目的错误优先排序。</p>
+
+<h3 class="ref-h2">7 步法总览</h3>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>步骤</th>
+<th>名称</th>
+<th>核心活动</th>
+<th>对应 FMEA 列</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>规划与准备</td>
+<td>5T 定义（Team, Timing, Tasks, Tools, Training）</td>
+<td>表头信息</td>
+</tr>
+<tr>
+<td>2</td>
+<td>结构分析</td>
+<td>构建系统/组件树</td>
+<td>系统 → 聚焦要素 → 下一级要素</td>
+</tr>
+<tr>
+<td>3</td>
+<td>功能分析</td>
+<td>定义功能与要求</td>
+<td>功能与要求列</td>
+</tr>
+<tr>
+<td>4</td>
+<td>失效分析</td>
+<td>识别失效链（FE ← FM ← FC）</td>
+<td>失效影响/模式/原因</td>
+</tr>
+<tr>
+<td>5</td>
+<td>风险分析</td>
+<td>评定 S/O/D，确定 AP</td>
+<td>S/O/D/AP 列</td>
+</tr>
+<tr>
+<td>6</td>
+<td>优化</td>
+<td>定义并实施改进措施</td>
+<td>建议措施/措施状态列</td>
+</tr>
+<tr>
+<td>7</td>
+<td>结果文件化</td>
+<td>沟通与归档</td>
+<td>报告输出</td>
+</tr>
+</tbody>
+</table></div>
+
+<h3 class="ref-h2">完整列定义</h3>
+
+<h4 class="ref-h3">表头信息（Step 1）</h4>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>列名</th>
+<th>说明</th>
+<th>示例</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>FMEA 编号</td>
+<td>唯一标识符</td>
+<td>DFMEA-BODY-2101-001</td>
+</tr>
+<tr>
+<td>项目/平台</td>
+<td>车型平台</td>
+<td>NT3.5</td>
+</tr>
+<tr>
+<td>Domain</td>
+<td>功能域</td>
+<td>Body</td>
+</tr>
+<tr>
+<td>功能 ID</td>
+<td>FDS 功能编号</td>
+<td>2101</td>
+</tr>
+<tr>
+<td>编制人</td>
+<td>分析负责人</td>
+<td>留空</td>
+</tr>
+<tr>
+<td>核心团队</td>
+<td>参与分析的跨职能团队</td>
+<td>留空</td>
+</tr>
+<tr>
+<td>初始日期</td>
+<td>首次编制日期</td>
+<td>自动生成</td>
+</tr>
+<tr>
+<td>修订日期</td>
+<td>最后修订日期</td>
+<td>自动生成</td>
+</tr>
+<tr>
+<td>关键日期</td>
+<td>项目里程碑节点</td>
+<td>留空</td>
+</tr>
+</tbody>
+</table></div>
+
+<h4 class="ref-h3">结构分析列（Step 2）</h4>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>列名</th>
+<th>数据库字段</th>
+<th>说明</th>
+<th>数据来源</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>**系统 / 上一级要素**</td>
+<td>`higher_level_element`</td>
+<td>FMEA 分析的直接上级系统</td>
+<td>FDS 文档标题 + Domain 名</td>
+</tr>
+<tr>
+<td>**聚焦要素**</td>
+<td>`focus_element`</td>
+<td>当前分析的对象</td>
+<td>FDS 功能块标题（如 "Speed Lock"）</td>
+</tr>
+<tr>
+<td>**下一级要素 / 特性**</td>
+<td>`lower_level_element`</td>
+<td>组成聚焦要素的组件/信号</td>
+<td>参与 ECU 列表 + 关键信号</td>
+</tr>
+</tbody>
+</table></div>
+
+<p class="ref-p"><strong>结构树示例</strong>：</p>
+<pre class="ref-code"><code>NT3.5 Door Lock/Unlock Control (System)
+  ├── Side Door Button Lock/Unlock (Focus Element)
+  │     ├── ZONE_LE (ECU)
+  │     ├── VDF_A (ECU)
+  │     ├── DoorLockMgr.DoorLockSts (Signal)
+  │     └── VehState.VehStateInfo (Signal)
+  ├── Speed Lock (Focus Element)
+  │     ├── ZONE_LE (ECU)
+  │     └── MotionCtrlInfo.IfCommInfo (Signal)
+  └── ...</code></pre>
+
+<h4 class="ref-h3">功能分析列（Step 3）</h4>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>列名</th>
+<th>数据库字段</th>
+<th>说明</th>
+<th>数据来源</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>**上一级功能与要求**</td>
+<td>`higher_level_function`</td>
+<td>系统级功能描述</td>
+<td>FDS 文档目的描述</td>
+</tr>
+<tr>
+<td>**聚焦要素功能与要求**</td>
+<td>`focus_element_function`</td>
+<td>当前分析对象的功能与性能要求</td>
+<td>FDS 需求语句（`shall xxx`）</td>
+</tr>
+<tr>
+<td>**下一级功能与特性**</td>
+<td>`lower_level_function`</td>
+<td>子组件/信号的特性规格</td>
+<td>接口信号表 + 信号值域</td>
+</tr>
+</tbody>
+</table></div>
+
+<h4 class="ref-h3">失效分析列（Step 4）</h4>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>列名</th>
+<th>数据库字段</th>
+<th>说明</th>
+<th>推导方法</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>**失效影响 (FE)**</td>
+<td>`failure_effect`</td>
+<td>失效模式对上一级系统/最终用户/法规的后果</td>
+<td>从 ECU 级 → 系统级 → 整车级 → 用户感知逐级上溯</td>
+</tr>
+<tr>
+<td>**严重度 (S)**</td>
+<td>`severity`</td>
+<td>失效影响的严重程度评级 (1-10)</td>
+<td>查 S 评分表</td>
+</tr>
+<tr>
+<td>**分类 (SC/CC)**</td>
+<td>`classification`</td>
+<td>特殊特性分类</td>
+<td>SC=安全关键, CC=法规关键, 留空=无特殊分类</td>
+</tr>
+<tr>
+<td>**失效模式 (FM)**</td>
+<td>`failure_mode`</td>
+<td>聚焦要素未能满足功能要求的具体方式</td>
+<td>功能要求的 5 类否定模板</td>
+</tr>
+<tr>
+<td>**失效原因 (FC)**</td>
+<td>`failure_cause`</td>
+<td>导致失效模式的直接原因（设计层面的弱点）</td>
+<td>从信号/ECU/通信/逻辑/参数维度分析</td>
+</tr>
+</tbody>
+</table></div>
+
+<p class="ref-p"><strong>失效链（Failure Net）逻辑</strong>：</p>
+<pre class="ref-code"><code>失效原因 (FC) → 失效模式 (FM) → 失效影响 (FE)
+   (为什么)        (怎么失效)        (后果是什么)</code></pre>
+
+<h4 class="ref-h3">风险分析列（Step 5）</h4>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>列名</th>
+<th>数据库字段</th>
+<th>说明</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>**预防控制 (PC)**</td>
+<td>`prevention_control`</td>
+<td>现有设计措施—防止失效原因发生或降低其频度</td>
+</tr>
+<tr>
+<td>**频度 (O)**</td>
+<td>`occurrence`</td>
+<td>在设计中失效原因发生的可能性 (1-10)</td>
+</tr>
+<tr>
+<td>**探测控制 (DC)**</td>
+<td>`detection_control`</td>
+<td>现有设计措施—在量产前探测到失效模式/原因</td>
+</tr>
+<tr>
+<td>**探测度 (D)**</td>
+<td>`detection`</td>
+<td>探测控制发现失效模式/原因的有效性 (1-10)</td>
+</tr>
+<tr>
+<td>**措施优先级 (AP)**</td>
+<td>`action_priority`</td>
+<td>H=高优先级行动, M=中优先级行动, L=低优先级行动</td>
+</tr>
+</tbody>
+</table></div>
+
+<p class="ref-p"><strong>预防 vs 探测的区别</strong>：</p>
+<ul class="ref-list">
+<li>预防：从源头防止失效发生（如冗余设计、降额设计、FUSA 安全机制）</li>
+<li>探测：在失效发生后发现它（如 E2E 测试、诊断监控、下线检测）</li>
+</ul>
+
+<h4 class="ref-h3">优化列（Step 6）</h4>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>列名</th>
+<th>数据库字段</th>
+<th>说明</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>**建议措施**</td>
+<td>`recommended_action`</td>
+<td>针对 AP=H/M 的改进建议</td>
+</tr>
+<tr>
+<td>**责任 + 目标日期**</td>
+<td>`responsibility`</td>
+<td>措施负责人和计划完成日期</td>
+</tr>
+<tr>
+<td>**采取的措施 + 日期**</td>
+<td>`action_taken`</td>
+<td>实际执行的措施及完成日期</td>
+</tr>
+<tr>
+<td>**新 S**</td>
+<td>`new_severity`</td>
+<td>改进后重新评定的严重度</td>
+</tr>
+<tr>
+<td>**新 O**</td>
+<td>`new_occurrence`</td>
+<td>改进后重新评定的频度</td>
+</tr>
+<tr>
+<td>**新 D**</td>
+<td>`new_detection`</td>
+<td>改进后重新评定的探测度</td>
+</tr>
+<tr>
+<td>**新 AP**</td>
+<td>`new_action_priority`</td>
+<td>改进后重新评定的措施优先级</td>
+</tr>
+</tbody>
+</table></div>
+
+<p class="ref-p">Step 6 的 4 列在初次 FMEA 生成时留空，待团队讨论和实施改进后回填。</p>
+
+<h3 class="ref-h2">Base 表字段对应</h3>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>Base 字段名</th>
+<th>字段类型</th>
+<th>选项/约束</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>序号</td>
+<td>自动编号</td>
+<td>—</td>
+</tr>
+<tr>
+<td>系统/上一级要素</td>
+<td>文本</td>
+<td>—</td>
+</tr>
+<tr>
+<td>聚焦要素</td>
+<td>文本</td>
+<td>—</td>
+</tr>
+<tr>
+<td>下一级要素</td>
+<td>文本</td>
+<td>—</td>
+</tr>
+<tr>
+<td>上一级功能与要求</td>
+<td>多行文本</td>
+<td>—</td>
+</tr>
+<tr>
+<td>聚焦要素功能与要求</td>
+<td>多行文本</td>
+<td>—</td>
+</tr>
+<tr>
+<td>下一级功能与特性</td>
+<td>多行文本</td>
+<td>—</td>
+</tr>
+<tr>
+<td>失效影响 (FE)</td>
+<td>多行文本</td>
+<td>—</td>
+</tr>
+<tr>
+<td>严重度 (S)</td>
+<td>单选</td>
+<td>1,2,3,4,5,6,7,8,9,10</td>
+</tr>
+<tr>
+<td>分类 (SC/CC)</td>
+<td>单选</td>
+<td>SC, CC, —</td>
+</tr>
+<tr>
+<td>失效模式 (FM)</td>
+<td>多行文本</td>
+<td>—</td>
+</tr>
+<tr>
+<td>失效原因 (FC)</td>
+<td>多行文本</td>
+<td>—</td>
+</tr>
+<tr>
+<td>预防控制</td>
+<td>多行文本</td>
+<td>—</td>
+</tr>
+<tr>
+<td>频度 (O)</td>
+<td>单选</td>
+<td>1,2,3,4,5,6,7,8,9,10</td>
+</tr>
+<tr>
+<td>探测控制</td>
+<td>多行文本</td>
+<td>—</td>
+</tr>
+<tr>
+<td>探测度 (D)</td>
+<td>单选</td>
+<td>1,2,3,4,5,6,7,8,9,10</td>
+</tr>
+<tr>
+<td>措施优先级 (AP)</td>
+<td>单选</td>
+<td>H, M, L</td>
+</tr>
+<tr>
+<td>建议措施</td>
+<td>多行文本</td>
+<td>—</td>
+</tr>
+<tr>
+<td>责任 + 目标日期</td>
+<td>文本</td>
+<td>留空</td>
+</tr>
+<tr>
+<td>采取的措施 + 日期</td>
+<td>多行文本</td>
+<td>留空</td>
+</tr>
+<tr>
+<td>新 S/O/D + 新 AP</td>
+<td>文本</td>
+<td>留空</td>
+</tr>
+<tr>
+<td>功能块来源</td>
+<td>文本</td>
+<td>FDS Section 编号</td>
+</tr>
+</tbody>
+</table></div>
+
+    </div>
+  </div>
+
+  </div></div>
+
+
+<!-- ── Reference: S/O/D 评分标准 + AP 查表 ── -->
+<div class="ref-page page-hidden" id="page-ref-rating-tables">
+  <div class="container" style="margin-bottom:1rem;">
+    <a href="#" class="ref-back-link" data-nav-to="main">← 返回技能介绍主页</a>
+  </div>
+  <div class="container">
+  <div class="container">
+    <div class="section-header">
+      <h2>S/O/D 评分标准 + AP 查表</h2>
+      <p>fmea-from-fds 参考文档</p>
+    </div>
+    <div class="ref-doc">
+<h3 class="ref-h1">S/O/D 评分标准 + AP 查表</h3>
+
+<h3 class="ref-h2">严重度 (Severity, S) 评分标准</h3>
+
+<p class="ref-p">评估失效影响对最终用户/车辆的严重程度。</p>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>S</th>
+<th>严重度等级</th>
+<th>失效影响的最终后果</th>
+<th>Body 域示例</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>10</td>
+<td>极高 — 影响安全运营/不符合法规（无预警）</td>
+<td>危及乘员或行人生命安全，且失效发生前无任何预警</td>
+<td>碰撞后门锁未解锁，乘员无法逃生</td>
+</tr>
+<tr>
+<td>9</td>
+<td>很高 — 影响安全运营/不符合法规（有预警）</td>
+<td>危及乘员或行人生命安全，失效发生前有预警</td>
+<td>碰撞后门锁解锁延迟超过规定时间，但最终解锁</td>
+</tr>
+<tr>
+<td>8</td>
+<td>很高 — 功能完全丧失</td>
+<td>车辆主要功能丧失，车辆不可用或无法正常驾驶</td>
+<td>四门均无法上锁，车辆无法安全停放</td>
+</tr>
+<tr>
+<td>7</td>
+<td>高 — 功能显著降级</td>
+<td>主要功能严重降级，显著影响正常驾驶/使用体验</td>
+<td>遥控钥匙全部失效，只能用机械钥匙进入</td>
+</tr>
+<tr>
+<td>6</td>
+<td>中高 — 功能部分丧失</td>
+<td>功能部分丧失，驾驶/使用体验明显受到影响</td>
+<td>单侧车门按钮锁止失效，用户需使用中控锁</td>
+</tr>
+<tr>
+<td>5</td>
+<td>中 — 舒适性/便利性显著降级</td>
+<td>舒适性/便利性功能降级，多数用户会注意到并感到不满</td>
+<td>门把手灯迎宾功能失效（日间模式）</td>
+</tr>
+<tr>
+<td>4</td>
+<td>中低 — 舒适性/便利性中度降级</td>
+<td>舒适性/便利性功能降级，多数用户能注意到</td>
+<td>门锁状态指示灯偶发不亮（不影响锁功能）</td>
+</tr>
+<tr>
+<td>3</td>
+<td>低 — 轻微影响</td>
+<td>轻微的功能降级，少数用户能注意到</td>
+<td>门把手灯亮度偏差（超出规格但不影响识别）</td>
+</tr>
+<tr>
+<td>2</td>
+<td>很低 — 几乎无影响</td>
+<td>精明的用户可能注意到</td>
+<td>门锁声音与设计意图有轻微差异</td>
+</tr>
+<tr>
+<td>1</td>
+<td>无影响</td>
+<td>没有可察觉到的影响</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+
+<h4 class="ref-h3">严重度评定规则</h4>
+
+<ul class="ref-list">
+<li><strong>安全相关（S=9,10）</strong>：失效可能直接导致人身伤害或违反安全法规（如 GB 11551, ECE R94 碰撞后车门解锁要求）</li>
+<li><strong>法规相关（S=9,10）</strong>：失效导致不符合法规要求的，标记分类为 CC</li>
+<li><strong>功能丧失（S=7,8）</strong>：主要功能完全或基本丧失，但不涉及安全</li>
+<li><strong>功能降级（S=4-6）</strong>：功能部分丧失或性能下降</li>
+<li><strong>外观/感知问题（S=1-3）</strong>：仅影响主观感受，不影响功能使用</li>
+</ul>
+
+<h3 class="ref-h2">频度 (Occurrence, O) 评分标准</h3>
+
+<p class="ref-p">评估失效原因在设计生命周期内发生的可能性。</p>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>O</th>
+<th>频度等级</th>
+<th>设计成熟度参考</th>
+<th>接口复杂度参考</th>
+<th>Body 域示例</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>10</td>
+<td>极高</td>
+<td>全新设计，无历史经验</td>
+<td>—</td>
+<td>全新架构的门锁控制策略，未经验证</td>
+</tr>
+<tr>
+<td>9</td>
+<td>很高</td>
+<td>全新设计，仅基于类似设计推断</td>
+<td>—</td>
+<td>新开发的 PE 天线布局方案</td>
+</tr>
+<tr>
+<td>8</td>
+<td>高</td>
+<td>已有设计但在新环境/边界条件下应用</td>
+<td>接口数量 >20，复杂交互</td>
+<td>已有门锁策略应用到新 ZONE 架构</td>
+</tr>
+<tr>
+<td>7</td>
+<td>中高</td>
+<td>已有设计，但有显著修改</td>
+<td>接口数量 11-20</td>
+<td>门锁策略在新平台上需要适配新信号</td>
+</tr>
+<tr>
+<td>6</td>
+<td>中</td>
+<td>类似设计在类似环境下已验证</td>
+<td>接口数量 6-10</td>
+<td>门锁逻辑复用 NT3.0 设计，信号微调</td>
+</tr>
+<tr>
+<td>5</td>
+<td>中低</td>
+<td>类似设计在类似环境下充分验证</td>
+<td>接口数量 3-5</td>
+<td>车窗防夹逻辑复用前代已验证设计</td>
+</tr>
+<tr>
+<td>4</td>
+<td>低</td>
+<td>成熟设计，有工程分析/仿真支持</td>
+<td>接口数量 ≤2</td>
+<td>PE 解锁逻辑经过多代车型验证</td>
+</tr>
+<tr>
+<td>3</td>
+<td>很低</td>
+<td>成熟设计，有充分测试验证</td>
+<td>简单接口</td>
+<td>门锁状态指示灯控制（纯逻辑）</td>
+</tr>
+<tr>
+<td>2</td>
+<td>极低</td>
+<td>成熟设计，有多代量产数据支撑</td>
+<td>—</td>
+<td>机械应急解锁（纯机械结构）</td>
+</tr>
+<tr>
+<td>1</td>
+<td>几乎不可能</td>
+<td>失效原因被现有预防控制完全消除</td>
+<td>—</td>
+<td>（理论上存在，实践中极少出现）</td>
+</tr>
+</tbody>
+</table></div>
+
+<h4 class="ref-h3">频度评定规则</h4>
+
+<ul class="ref-list">
+<li>基于<strong>设计成熟度</strong>而非制造过程</li>
+<li>考虑接口复杂度：信号越多、通信链路越长，O 越高</li>
+<li>考虑历史数据：同类功能在量产中的问题频率</li>
+<li>时序裕度：FDS 中的 Latency 要求越严格，达到要求的难度越大</li>
+</ul>
+
+<h3 class="ref-h2">探测度 (Detection, D) 评分标准</h3>
+
+<p class="ref-p">评估现有设计控制手段在量产前探测到失效模式/原因的有效性。</p>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>D</th>
+<th>探测度等级</th>
+<th>探测方法成熟度</th>
+<th>Body 域示例</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>10</td>
+<td>无法探测</td>
+<td>没有已知的探测方法</td>
+<td>锁电机微动开关磨损（无诊断反馈）</td>
+</tr>
+<tr>
+<td>9</td>
+<td>极难探测</td>
+<td>仅通过随机抽查/人为判断</td>
+<td>门锁声音品质偏差（依赖主观评价）</td>
+</tr>
+<tr>
+<td>8</td>
+<td>很难探测</td>
+<td>通过人工检查（非系统化）</td>
+<td>门锁拉线行程偏差（手工测量）</td>
+</tr>
+<tr>
+<td>7</td>
+<td>较难探测</td>
+<td>通过有限的手动测试</td>
+<td>有限次数的门锁循环耐久试验</td>
+</tr>
+<tr>
+<td>6</td>
+<td>中等偏难</td>
+<td>通过系统化手动测试</td>
+<td>系统化的门锁功能测试（覆盖主要场景）</td>
+</tr>
+<tr>
+<td>5</td>
+<td>中等</td>
+<td>通过半自动化测试</td>
+<td>HIL 台架门锁功能自动化回归测试</td>
+</tr>
+<tr>
+<td>4</td>
+<td>中等偏易</td>
+<td>通过自动化测试 + 人工确认</td>
+<td>HIL + 耐久试验，覆盖边界条件</td>
+</tr>
+<tr>
+<td>3</td>
+<td>较易探测</td>
+<td>通过成熟的自动化测试</td>
+<td>全面的 MIL/SIL/HIL 测试 + 诊断覆盖</td>
+</tr>
+<tr>
+<td>2</td>
+<td>很容易探测</td>
+<td>设计即带有自诊断</td>
+<td>锁状态信号硬件回读 + E2E 保护 + 诊断</td>
+</tr>
+<tr>
+<td>1</td>
+<td>一定能探测</td>
+<td>设计保证了失效不可能逃逸</td>
+<td>冗余独立路径判断 + 故障注入测试通过</td>
+</tr>
+</tbody>
+</table></div>
+
+<h4 class="ref-h3">探测度评定规则</h4>
+
+<ul class="ref-list">
+<li>关注<strong>设计发布前</strong>的探测，而非量产后的客户发现</li>
+<li>预防控制（PC）不能作为探测控制（DC）——预防从源头阻止失效，探测在失效后捕获</li>
+<li>考虑探测的<strong>技术成熟度</strong>和<strong>覆盖范围</strong>，不仅是&quot;有没有&quot;探测</li>
+</ul>
+
+<h3 class="ref-h2">措施优先级 (Action Priority, AP) 查表</h3>
+
+<p class="ref-p"><strong>不使用 RPN = S × O × D</strong>。AP 通过以下查表规则确定，优先保障安全相关条目的行动优先级。</p>
+
+<h4 class="ref-h3">AP 查表</h4>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>S</th>
+<th>O</th>
+<th>D</th>
+<th>AP</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>9-10</td>
+<td>6-10</td>
+<td>7-10</td>
+<td>**H**</td>
+</tr>
+<tr>
+<td>9-10</td>
+<td>6-10</td>
+<td>5-6</td>
+<td>**H**</td>
+</tr>
+<tr>
+<td>9-10</td>
+<td>6-10</td>
+<td>1-4</td>
+<td>**H**</td>
+</tr>
+<tr>
+<td>9-10</td>
+<td>4-5</td>
+<td>7-10</td>
+<td>**H**</td>
+</tr>
+<tr>
+<td>9-10</td>
+<td>4-5</td>
+<td>5-6</td>
+<td>**H**</td>
+</tr>
+<tr>
+<td>9-10</td>
+<td>4-5</td>
+<td>1-4</td>
+<td>M</td>
+</tr>
+<tr>
+<td>9-10</td>
+<td>2-3</td>
+<td>7-10</td>
+<td>**H**</td>
+</tr>
+<tr>
+<td>9-10</td>
+<td>2-3</td>
+<td>5-6</td>
+<td>M</td>
+</tr>
+<tr>
+<td>9-10</td>
+<td>2-3</td>
+<td>1-4</td>
+<td>M</td>
+</tr>
+<tr>
+<td>9-10</td>
+<td>1</td>
+<td>1-10</td>
+<td>M</td>
+</tr>
+<tr>
+<td>7-8</td>
+<td>6-10</td>
+<td>7-10</td>
+<td>**H**</td>
+</tr>
+<tr>
+<td>7-8</td>
+<td>6-10</td>
+<td>5-6</td>
+<td>**H**</td>
+</tr>
+<tr>
+<td>7-8</td>
+<td>6-10</td>
+<td>1-4</td>
+<td>M</td>
+</tr>
+<tr>
+<td>7-8</td>
+<td>4-5</td>
+<td>7-10</td>
+<td>**H**</td>
+</tr>
+<tr>
+<td>7-8</td>
+<td>4-5</td>
+<td>5-6</td>
+<td>M</td>
+</tr>
+<tr>
+<td>7-8</td>
+<td>4-5</td>
+<td>1-4</td>
+<td>M</td>
+</tr>
+<tr>
+<td>7-8</td>
+<td>2-3</td>
+<td>7-10</td>
+<td>M</td>
+</tr>
+<tr>
+<td>7-8</td>
+<td>2-3</td>
+<td>5-6</td>
+<td>M</td>
+</tr>
+<tr>
+<td>7-8</td>
+<td>2-3</td>
+<td>1-4</td>
+<td>L</td>
+</tr>
+<tr>
+<td>7-8</td>
+<td>1</td>
+<td>1-10</td>
+<td>L</td>
+</tr>
+<tr>
+<td>4-6</td>
+<td>6-10</td>
+<td>7-10</td>
+<td>**H**</td>
+</tr>
+<tr>
+<td>4-6</td>
+<td>6-10</td>
+<td>5-6</td>
+<td>M</td>
+</tr>
+<tr>
+<td>4-6</td>
+<td>6-10</td>
+<td>1-4</td>
+<td>M</td>
+</tr>
+<tr>
+<td>4-6</td>
+<td>4-5</td>
+<td>7-10</td>
+<td>M</td>
+</tr>
+<tr>
+<td>4-6</td>
+<td>4-5</td>
+<td>5-6</td>
+<td>M</td>
+</tr>
+<tr>
+<td>4-6</td>
+<td>4-5</td>
+<td>1-4</td>
+<td>L</td>
+</tr>
+<tr>
+<td>4-6</td>
+<td>2-3</td>
+<td>7-10</td>
+<td>M</td>
+</tr>
+<tr>
+<td>4-6</td>
+<td>2-3</td>
+<td>5-6</td>
+<td>L</td>
+</tr>
+<tr>
+<td>4-6</td>
+<td>2-3</td>
+<td>1-4</td>
+<td>L</td>
+</tr>
+<tr>
+<td>4-6</td>
+<td>1</td>
+<td>1-10</td>
+<td>L</td>
+</tr>
+<tr>
+<td>1-3</td>
+<td>6-10</td>
+<td>7-10</td>
+<td>M</td>
+</tr>
+<tr>
+<td>1-3</td>
+<td>6-10</td>
+<td>5-6</td>
+<td>L</td>
+</tr>
+<tr>
+<td>1-3</td>
+<td>6-10</td>
+<td>1-4</td>
+<td>L</td>
+</tr>
+<tr>
+<td>1-3</td>
+<td>4-5</td>
+<td>7-10</td>
+<td>L</td>
+</tr>
+<tr>
+<td>1-3</td>
+<td>4-5</td>
+<td>5-6</td>
+<td>L</td>
+</tr>
+<tr>
+<td>1-3</td>
+<td>4-5</td>
+<td>1-4</td>
+<td>L</td>
+</tr>
+<tr>
+<td>1-3</td>
+<td>2-3</td>
+<td>1-10</td>
+<td>L</td>
+</tr>
+<tr>
+<td>1-3</td>
+<td>1</td>
+<td>1-10</td>
+<td>L</td>
+</tr>
+</tbody>
+</table></div>
+
+<h4 class="ref-h3">AP 优先级含义</h4>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>AP</th>
+<th>含义</th>
+<th>要求行动</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>**H**</td>
+<td>高优先级</td>
+<td>**必须**定义改进措施，否则需书面说明不采取措施的理由</td>
+</tr>
+<tr>
+<td>**M**</td>
+<td>中优先级</td>
+<td>**应该**定义改进措施</td>
+</tr>
+<tr>
+<td>**L**</td>
+<td>低优先级</td>
+<td>**可以**定义改进措施，但不是必须</td>
+</tr>
+</tbody>
+</table></div>
+
+<h4 class="ref-h3">AP 查表逻辑（用于编程实现）</h4>
+
+<pre class="ref-code"><code>def get_action_priority(S: int, O: int, D: int) -&gt; str:
+    &quot;&quot;&quot;根据 AIAG &amp; VDA 2019 AP 查表返回措施优先级&quot;&quot;&quot;
+    if S &gt;= 9:
+        if O &gt;= 4:
+            return &quot;H&quot;
+        elif O &gt;= 2:
+            if D &gt;= 7:
+                return &quot;H&quot;
+            return &quot;M&quot;
+        else:  # O == 1
+            return &quot;M&quot;
+    elif S &gt;= 7:
+        if O &gt;= 6:
+            if D &gt;= 5:
+                return &quot;H&quot;
+            return &quot;M&quot;
+        elif O &gt;= 4:
+            if D &gt;= 7:
+                return &quot;H&quot;
+            return &quot;M&quot;
+        elif O &gt;= 2:
+            if D &gt;= 7:
+                return &quot;M&quot;
+            return &quot;L&quot;
+        else:  # O == 1
+            return &quot;L&quot;
+    elif S &gt;= 4:
+        if O &gt;= 6:
+            if D &gt;= 7:
+                return &quot;H&quot;
+            return &quot;M&quot;
+        elif O &gt;= 4:
+            if D &gt;= 7:
+                return &quot;M&quot;
+            elif D &gt;= 5:
+                return &quot;M&quot;
+            return &quot;L&quot;
+        elif O &gt;= 2:
+            if D &gt;= 7:
+                return &quot;M&quot;
+            return &quot;L&quot;
+        else:  # O == 1
+            return &quot;L&quot;
+    else:  # S &lt;= 3
+        if O &gt;= 6 and D &gt;= 7:
+            return &quot;M&quot;
+        return &quot;L&quot;</code></pre>
+
+    </div>
+  </div>
+
+  </div></div>
+
+
+<!-- ── Reference: FDS → FMEA 映射规则 ── -->
+<div class="ref-page page-hidden" id="page-ref-fds-mapping">
+  <div class="container" style="margin-bottom:1rem;">
+    <a href="#" class="ref-back-link" data-nav-to="main">← 返回技能介绍主页</a>
+  </div>
+  <div class="container">
+  <div class="container">
+    <div class="section-header">
+      <h2>FDS → FMEA 映射规则</h2>
+      <p>fmea-from-fds 参考文档</p>
+    </div>
+    <div class="ref-doc">
+<h3 class="ref-h1">FDS → FMEA 映射规则</h3>
+
+<h3 class="ref-h2">映射总览</h3>
+
+<p class="ref-p">NIO FDS 文档的各组成部分与 AIAG &amp; VDA FMEA 列的对应关系。</p>
+
+<blockquote class="ref-quote"><p><strong>辅助数据源</strong>:</p></blockquote>
+<blockquote class="ref-quote"><p>- <code>nt35_function_catalog.md</code> — NT3.5 平台 1057 个已审批子功能，含真实 ASIL 等级和安全标记，用于校准 S 评级基线</p></blockquote>
+<blockquote class="ref-quote"><p>- <code>nt35_system_map.md</code> — VMBC 22 系统架构，含中英文名和子系统，用于填充 FMEA 系统/上一级要素列</p></blockquote>
+
+<pre class="ref-code"><code>FDS 文档                     FMEA 表
+────────────────────────────────────────────────
+文档元数据（标题/平台/Domain）  →  表头 / 系统（上一级要素）
+功能块层次结构                 →  结构分析（Step 2）
+需求语句（shall / 逻辑描述）    →  功能分析（Step 3）
+信号接口 + 参与ECU            →  失效原因候选（Step 4）
+故障降级策略                   →  预防/探测控制（Step 5）
+时序要求 / 安全等级            →  O/D/S 评级参考</code></pre>
+
+<h3 class="ref-h2">详细映射规则</h3>
+
+<h4 class="ref-h3">规则 1: 文档元数据 → 系统/上一级要素</h4>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>FDS 字段</th>
+<th>FMEA 目标列</th>
+<th>映射方式</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>文档标题（如 "NIO-NT3.5-FDS-2101-Door Lock/Unlock Control"）</td>
+<td>`higher_level_element`</td>
+<td>直接引用</td>
+</tr>
+<tr>
+<td>功能 ID（如 2101）</td>
+<td>表头</td>
+<td>用于生成 FMEA 编号</td>
+</tr>
+<tr>
+<td>平台（如 NT3.5）</td>
+<td>表头</td>
+<td>项目/平台列</td>
+</tr>
+<tr>
+<td>Domain（从功能 ID 推断：2xxx=Body）</td>
+<td>表头</td>
+<td>Domain 列</td>
+</tr>
+</tbody>
+</table></div>
+
+<h4 class="ref-h3">规则 2: 功能块标题 → 聚焦要素</h4>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>FDS 字段</th>
+<th>FMEA 目标列</th>
+<th>映射方式</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Section 标题（如 "3.5 Speed Lock Functional Logic Design"）</td>
+<td>`focus_element`</td>
+<td>去掉编号和 "Functional Logic Design" 后缀，取功能名</td>
+</tr>
+<tr>
+<td>Section 编号（如 "3.5"）</td>
+<td>`section_ref`（辅助列）</td>
+<td>直接引用</td>
+</tr>
+</tbody>
+</table></div>
+
+<p class="ref-p"><strong>提取正则</strong>: <code>^\d+\.\d+\s+(.+?)(?:\s+Functional Logic Design)?$</code> → 取捕获组 1</p>
+
+<h4 class="ref-h3">规则 3: 需求语句 → 聚焦要素功能与要求</h4>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>FDS 内容</th>
+<th>FMEA 目标列</th>
+<th>映射方式</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>"shall" 语句</td>
+<td>`focus_element_function`</td>
+<td>原文引用</td>
+</tr>
+<tr>
+<td>激活条件描述（如 "a && b && (c</td>
+<td></td>
+<td>d)"）</td>
+<td>`focus_element_function`</td>
+<td>转为自然语言需求</td>
+</tr>
+<tr>
+<td>状态转换逻辑</td>
+<td>`focus_element_function`</td>
+<td>抽取前置条件 + 后置条件</td>
+</tr>
+<tr>
+<td>时序描述（如 "send signal for 5s"）</td>
+<td>`focus_element_function`</td>
+<td>转写为性能需求</td>
+</tr>
+<tr>
+<td>ICS 显示逻辑</td>
+<td>`focus_element_function`</td>
+<td>转写为用户可见行为需求</td>
+</tr>
+</tbody>
+</table></div>
+
+<p class="ref-p"><strong>需求提取优先级</strong>：</p>
+<li class="ref-ol-li">显式的 &quot;shall&quot; / &quot;should&quot; 语句</li>
+<li class="ref-ol-li">结构化的激活/去激活条件（a &amp;&amp; b &amp;&amp; c 格式）</li>
+<li class="ref-ol-li">时序要求（&quot;send X for Y seconds&quot;）</li>
+<li class="ref-ol-li">状态反馈/显示逻辑</li>
+
+<h4 class="ref-h3">规则 4: 参与系统 + 接口信号 → 下一级要素 + 失效原因</h4>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>FDS 内容</th>
+<th>FMEA 目标列</th>
+<th>映射方式</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>参与系统表（System Name + Description）</td>
+<td>`lower_level_element`</td>
+<td>列出所有参与 ECU + 软件组件</td>
+</tr>
+<tr>
+<td>接口信号表（Signal Name + Source + Values）</td>
+<td>`lower_level_function`</td>
+<td>列出信号名、来源模块、值域</td>
+</tr>
+<tr>
+<td>信号流向（Provider → Consumer）</td>
+<td>`failure_cause`（辅助判断）</td>
+<td>信号源故障、信号传输中断、信号值异常</td>
+</tr>
+</tbody>
+</table></div>
+
+<p class="ref-p"><strong>失效原因推导维度</strong>：</p>
+<pre class="ref-code"><code>信号维度:
+  - 信号丢失（发送方故障 / 网络中断）
+  - 信号错误（值域异常 / 校验失败 / E2E 错误）
+  - 信号延迟（网络拥塞 / 周期偏差）
+  - 信号非预期（幽灵报文 / 发送方逻辑错误）
+
+ECU 维度:
+  - ECU 硬件故障（MCU / 电源 / 看门狗复位）
+  - ECU 软件故障（死循环 / 内存溢出 / 任务超时）
+  - ECU 配置错误（标定参数 / Variant Coding 错误）
+
+执行器维度:
+  - 电机/电磁铁故障（卡滞 / 开路 / 短路 / 过热）
+  - 传感器故障（偏移 / 漂移 / 开路 / 短路）
+
+通信维度:
+  - CAN/LIN 总线故障（Bus-off / 物理层故障）
+  - 网关路由错误（信号转发失败 / 超时）</code></pre>
+
+<h4 class="ref-h3">规则 5: 故障降级策略 → 预防/探测控制</h4>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>FDS 内容</th>
+<th>FMEA 目标列</th>
+<th>映射方式</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Fault Degradation 描述</td>
+<td>`prevention_control` + `detection_control`</td>
+<td>分类提取</td>
+</tr>
+<tr>
+<td>信号冗余机制（如 "双路 CAN 信号"）</td>
+<td>`prevention_control`（冗余设计）</td>
+<td>直接引用</td>
+</tr>
+<tr>
+<td>监控/诊断描述（如 "30s timeout"）</td>
+<td>`detection_control`（超时监控）</td>
+<td>直接引用</td>
+</tr>
+<tr>
+<td>安全状态定义（如 "release PNC_DFT"）</td>
+<td>`prevention_control`（安全降级）</td>
+<td>直接引用</td>
+</tr>
+<tr>
+<td>硬件回读（如 "PWM 反馈信号"）</td>
+<td>`detection_control`（硬件诊断）</td>
+<td>直接引用</td>
+</tr>
+</tbody>
+</table></div>
+
+<h4 class="ref-h3">规则 6: 非功能需求 → 评级参考</h4>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>FDS 内容</th>
+<th>影响</th>
+<th>说明</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Latency（如 "<100ms"）</td>
+<td>频度 O</td>
+<td>越严格，设计越复杂，O 可能越高</td>
+</tr>
+<tr>
+<td>Operating Voltage（如 "9-16V"）</td>
+<td>频度 O</td>
+<td>电压范围越宽，设计需求越成熟</td>
+</tr>
+<tr>
+<td>ASIL 等级标注</td>
+<td>严重度 S</td>
+<td>S≥9 + 分类 SC</td>
+</tr>
+<tr>
+<td>Cybersecurity 标注</td>
+<td>严重度 S</td>
+<td>考虑 S≥8（远程攻击可能导致功能丧失）</td>
+</tr>
+</tbody>
+</table></div>
+
+<h4 class="ref-h3">规则 7: 功能块状态 → 分析范围</h4>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>FDS 状态</th>
+<th>是否纳入 FMEA</th>
+<th>说明</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>VB1 (100% completed, pending review)</td>
+<td>纳入</td>
+<td>已完成，待评审</td>
+</tr>
+<tr>
+<td>VB2 (reviewed, pending next milestone)</td>
+<td>纳入</td>
+<td>已评审，较成熟</td>
+</tr>
+<tr>
+<td>VB3 (released)</td>
+<td>纳入</td>
+<td>已发布</td>
+</tr>
+<tr>
+<td>TT (template/TBD)</td>
+<td>**不纳入**</td>
+<td>仅占位，无实际内容</td>
+</tr>
+<tr>
+<td>PP (partially populated)</td>
+<td>不纳入（默认）</td>
+<td>内容不全，若用户要求可尝试</td>
+</tr>
+<tr>
+<td>Reserved</td>
+<td>**不纳入**</td>
+<td>预留功能，暂无设计</td>
+</tr>
+<tr>
+<td>Draft</td>
+<td>**不纳入**</td>
+<td>初稿，内容不稳定</td>
+</tr>
+</tbody>
+</table></div>
+
+<h3 class="ref-h2">失效模式推导流程</h3>
+
+<p class="ref-p">对每个功能块的每条需求，按以下流程推导：</p>
+
+<pre class="ref-code"><code>1. 读入需求文本
+     │
+2. 查阅 failure_mode_library.md
+     │  是否有该功能类别的预置失效模式？
+     │
+3. 套用 5 类失效模板
+     ├── 功能丧失 (Loss)
+     ├── 功能错误 (Degradation)
+     ├── 功能间歇 (Intermittent)
+     ├── 非预期激活 (Unintended Activation)
+     └── 功能延迟 (Delayed Response)
+     │
+4. 筛选: 该需求逻辑上可能发生哪些类型？
+     │  移除物理上不可能/逻辑矛盾的项
+     │
+5. 对每条筛选后的失效模式:
+     ├── 推导失效影响 (Function → System → Vehicle → User)
+     ├── 推导失效原因 (从参与系统/信号/通信维度)
+     ├── 识别现有预防/探测控制 (从 FDS 故障降级描述)
+     └── 评定 S/O/D/AP
+     │
+6. 输出 FMEA 条目列表</code></pre>
+
+<h3 class="ref-h2">约束</h3>
+
+<ul class="ref-list">
+<li><strong>对每条需求至少生成 1 条失效模式，一般 3-5 条</strong></li>
+<li><strong>避免&quot;万能失效模式&quot;</strong>：如&quot;软件 Bug 导致 X 不工作&quot;——需要具体到哪个组件/信号/逻辑</li>
+<li><strong>失效影响必须逐级上溯</strong>：不能直接跳到&quot;车辆不可用&quot;，应展示推理链</li>
+<li><strong>引用 FDS 原文作为证据</strong>：需求和控制的来源应标注 FDS 原文或 section 引用</li>
+</ul>
+
+    </div>
+  </div>
+
+  </div></div>
+
+
+<!-- ── Reference: Body 域常见失效模式库 ── -->
+<div class="ref-page page-hidden" id="page-ref-failure-library">
+  <div class="container" style="margin-bottom:1rem;">
+    <a href="#" class="ref-back-link" data-nav-to="main">← 返回技能介绍主页</a>
+  </div>
+  <div class="container">
+  <div class="container">
+    <div class="section-header">
+      <h2>Body 域常见失效模式库</h2>
+      <p>fmea-from-fds 参考文档</p>
+    </div>
+    <div class="ref-doc">
+<h3 class="ref-h1">Body 域常见失效模式库</h3>
+
+<p class="ref-p">本知识库为 AI 推导提供起点：对于 Body 域常见功能，预置了典型失效模式、影响、原因和评级区间，减少从零推导的偏差。</p>
+
+<blockquote class="ref-quote"><p><strong>数据源</strong>: 本手册的 S/O/D 参考区间已对齐 <code>nt35_function_catalog.md</code> 中 NT3.5 平台真实功能的 ASIL 等级。</p></blockquote>
+<blockquote class="ref-quote"><p>安全相关标记 (safety_related=Yes) 的功能 → S≥9；ASIL≥B 的功能 → S≥9+SC 分类。</p></blockquote>
+<blockquote class="ref-quote"><p>真实功能名称与系统归属参见 <code>nt35_system_map.md</code>（VMBC 22 系统）和 <code>nt35_function_catalog.md</code>（1057 子功能）。</p></blockquote>
+<p class="ref-p">&gt;</p>
+<blockquote class="ref-quote"><p><strong>NT3.5 真实功能对照</strong>: 以下章节中的示例失效模式，其&quot;典型功能&quot;列均对应 NT3.5 真实已审批子功能。</p></blockquote>
+<blockquote class="ref-quote"><p>ASIL 等级标注基于 <code>function_hierarchy.json</code> 中的实际值。例如:</p></blockquote>
+<blockquote class="ref-quote"><p>- <code>Entry Control / Crash Unlock</code> → ASIL=A, safety_related=Yes → S≥9</p></blockquote>
+<blockquote class="ref-quote"><p>- <code>Entry Control / Auto lock via vehicle speed</code> → ASIL=QM → S 基于功能影响评定</p></blockquote>
+<blockquote class="ref-quote"><p>- <code>Exterior Lighting / Exterior Light Hazard Lighting Control</code> → ASIL=A, safety_related=Yes → S≥9</p></blockquote>
+
+<h3 class="ref-h2">使用方式</h3>
+
+<p class="ref-p">AI 推导时:</p>
+<li class="ref-ol-li">匹配当前功能块的功能类别</li>
+<li class="ref-ol-li">使用预置失效模式作为候选</li>
+<li class="ref-ol-li">根据 FDS 具体需求调整失效模式的描述和评级</li>
+<li class="ref-ol-li">用户在第 2 轮确认时可以修改/增删</li>
+
+<hr class="ref-hr">
+
+<h3 class="ref-h2">1. 门锁控制 (Door Lock/Unlock Control)</h3>
+
+<h4 class="ref-h3">1.1 PE (Passive Entry) 锁止/解锁</h4>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>#</th>
+<th>失效模式</th>
+<th>典型失效影响</th>
+<th>典型失效原因</th>
+<th>参考 S 区间</th>
+<th>参考 O 区间</th>
+<th>参考 D 区间</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>PE-01</td>
+<td>PE 解锁完全不响应（钥匙靠近把手无反应）</td>
+<td>用户无法进入车辆 (S=7-8)</td>
+<td>LF 天线驱动故障 / 钥匙电池耗尽 / BCM 未唤醒 / 天线阻抗不匹配</td>
+<td>7-8</td>
+<td>2-4</td>
+<td>3-5</td>
+</tr>
+<tr>
+<td>PE-02</td>
+<td>PE 解锁响应延迟 >500ms</td>
+<td>用户等待，体验差 (S=4-5)</td>
+<td>天线轮询周期过长 / CAN 网络负载高 / BCM 任务调度延迟</td>
+<td>4-5</td>
+<td>3-5</td>
+<td>4-6</td>
+</tr>
+<tr>
+<td>PE-03</td>
+<td>PE 解锁误触发（无钥匙靠近时意外解锁）</td>
+<td>车辆安全隐患 (S=8-9)</td>
+<td>天线覆盖范围过大 / RSSI 阈值设定过低 / 天线校准偏差</td>
+<td>8-9</td>
+<td>2-4</td>
+<td>4-6</td>
+</tr>
+<tr>
+<td>PE-04</td>
+<td>PE 解锁间歇性失效</td>
+<td>用户有时需要多次尝试 (S=5-6)</td>
+<td>天线触点接触不良 / 钥匙电池接触不良 / RF 环境干扰</td>
+<td>5-6</td>
+<td>3-5</td>
+<td>5-7</td>
+</tr>
+<tr>
+<td>PE-05</td>
+<td>PE 锁止失败（离开后车未锁）</td>
+<td>车辆被盗风险 (S=8)</td>
+<td>门未关好信号误报 / 钥匙仍在车内检测误判 / 锁电机卡滞</td>
+<td>8</td>
+<td>2-4</td>
+<td>2-4</td>
+</tr>
+</tbody>
+</table></div>
+
+<h4 class="ref-h3">1.2 侧门按钮锁止/解锁</h4>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>#</th>
+<th>失效模式</th>
+<th>典型失效影响</th>
+<th>典型失效原因</th>
+<th>参考 S 区间</th>
+<th>参考 O 区间</th>
+<th>参考 D 区间</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>BTN-01</td>
+<td>门锁按钮按下后无响应</td>
+<td>乘员无法锁止车门 (S=7)</td>
+<td>按钮微动开关失效 / ZONE_LE 输入端口故障 / 按钮线束断开</td>
+<td>7</td>
+<td>2-4</td>
+<td>2-4</td>
+</tr>
+<tr>
+<td>BTN-02</td>
+<td>门锁按钮信号抖动（多次触发）</td>
+<td>门锁频繁动作 (S=5-6)</td>
+<td>按钮触点氧化 / 去抖时间过短 / 电磁干扰</td>
+<td>5-6</td>
+<td>3-5</td>
+<td>3-5</td>
+</tr>
+<tr>
+<td>BTN-03</td>
+<td>行驶中按钮非预期解锁</td>
+<td>安全隐患—行驶中车门可打开 (S=9)</td>
+<td>解锁条件中 speed < 8 km/h 判断失效 / 速度信号无效但未阻止解锁</td>
+<td>9</td>
+<td>1-3</td>
+<td>2-4</td>
+</tr>
+<tr>
+<td>BTN-04</td>
+<td>按钮反馈灯不亮</td>
+<td>用户困惑是否锁好 (S=3-4)</td>
+<td>LED 灯珠故障 / ZONE_LE 输出端口故障 / LED 驱动电流异常</td>
+<td>3-4</td>
+<td>2-4</td>
+<td>3-5</td>
+</tr>
+</tbody>
+</table></div>
+
+<h4 class="ref-h3">1.3 速度锁 (Speed Lock)</h4>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>#</th>
+<th>失效模式</th>
+<th>典型失效影响</th>
+<th>典型失效原因</th>
+<th>参考 S 区间</th>
+<th>参考 O 区间</th>
+<th>参考 D 区间</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>SL-01</td>
+<td>车速 >8km/h 后未自动锁止</td>
+<td>行驶中车门未上锁，安全风险 (S=8-9)</td>
+<td>车速信号无效/丢失 / 速度阈值标定错误 / 门开状态信号卡在开门</td>
+<td>8-9</td>
+<td>1-3</td>
+<td>2-4</td>
+</tr>
+<tr>
+<td>SL-02</td>
+<td>自动锁止后立即自动解锁</td>
+<td>无效保护 (S=6-7)</td>
+<td>锁状态回读信号抖动 / 锁止-解锁逻辑竞争</td>
+<td>6-7</td>
+<td>2-4</td>
+<td>3-5</td>
+</tr>
+<tr>
+<td>SL-03</td>
+<td>速度信号跳变导致锁止时机不当</td>
+<td>低速行驶时锁止 (S=5-6)</td>
+<td>速度传感器信号噪声 / 滤波算法不足</td>
+<td>5-6</td>
+<td>2-4</td>
+<td>2-4</td>
+</tr>
+</tbody>
+</table></div>
+
+<h4 class="ref-h3">1.4 碰撞解锁 (Crash Unlock)</h4>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>#</th>
+<th>失效模式</th>
+<th>典型失效影响</th>
+<th>典型失效原因</th>
+<th>参考 S 区间</th>
+<th>参考 O 区间</th>
+<th>参考 D 区间</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>CR-01</td>
+<td>碰撞后门锁未解锁</td>
+<td>乘员无法逃生 (S=10) — GB 11551/ECE R94 法规要求</td>
+<td>ACM 碰撞信号未发出 / 碰撞 PWM 信号接收电路故障 / 碰撞解锁逻辑被其他状态阻塞 / 锁电机供电在碰撞中断开</td>
+<td>10</td>
+<td>1-2</td>
+<td>1-3</td>
+</tr>
+<tr>
+<td>CR-02</td>
+<td>碰撞解锁延迟 > 法规要求</td>
+<td>不符合法规 (S=10)</td>
+<td>碰撞确认逻辑过于保守 / 软件任务优先级不足 / CAN 网络拥塞</td>
+<td>10</td>
+<td>1-2</td>
+<td>2-4</td>
+</tr>
+<tr>
+<td>CR-03</td>
+<td>非碰撞场景误触发解锁</td>
+<td>行驶中意外解锁 (S=9)</td>
+<td>碰撞信号阈值过低 / PWM 信号受干扰 / 地偏移导致信号误判</td>
+<td>9</td>
+<td>1-2</td>
+<td>1-3</td>
+</tr>
+<tr>
+<td>CR-04</td>
+<td>碰撞后仅部分车门解锁</td>
+<td>部分乘员被困 (S=10)</td>
+<td>个别锁电机供电中断 / 解锁顺序逻辑缺陷 / CAN 信号仅到达部分 ECU</td>
+<td>10</td>
+<td>1-2</td>
+<td>2-4</td>
+</tr>
+</tbody>
+</table></div>
+
+<h4 class="ref-h3">1.5 儿童锁 (Child Lock)</h4>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>#</th>
+<th>失效模式</th>
+<th>典型失效影响</th>
+<th>典型失效原因</th>
+<th>参考 S 区间</th>
+<th>参考 O 区间</th>
+<th>参考 D 区间</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>CH-01</td>
+<td>儿童锁失效（内部仍可开门）</td>
+<td>儿童可能在行驶中开门 (S=9)</td>
+<td>儿童锁电机故障 / 儿童锁指示信号错误 / 软件配置覆盖错误</td>
+<td>9</td>
+<td>2-3</td>
+<td>2-4</td>
+</tr>
+<tr>
+<td>CH-02</td>
+<td>儿童锁无法关闭（外部无法开门）</td>
+<td>无法从外部打开车门 (S=6-7)</td>
+<td>儿童锁卡在锁止位置 / 儿童锁机械结构卡死</td>
+<td>6-7</td>
+<td>2-3</td>
+<td>3-5</td>
+</tr>
+</tbody>
+</table></div>
+
+<hr class="ref-hr">
+
+<h3 class="ref-h2">2. 进入控制 (Entry Control)</h3>
+
+<h4 class="ref-h3">2.1 无钥匙进入 (Keyless Entry)</h4>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>#</th>
+<th>失效模式</th>
+<th>典型失效影响</th>
+<th>典型失效原因</th>
+<th>参考 S 区间</th>
+<th>参考 O 区间</th>
+<th>参考 D 区间</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>KE-01</td>
+<td>钥匙定位失败（车内/车外误判）</td>
+<td>钥匙在车内却锁车 / 钥匙在车外却启动 (S=7-8)</td>
+<td>车内天线覆盖盲区 / 天线 RSSI 测量误差 / 多路径反射干扰</td>
+<td>7-8</td>
+<td>2-4</td>
+<td>3-5</td>
+</tr>
+<tr>
+<td>KE-02</td>
+<td>钥匙电池低电量未预警</td>
+<td>突然无法进入车辆 (S=6-7)</td>
+<td>低电量检测阈值偏差 / 预警显示逻辑错误</td>
+<td>6-7</td>
+<td>2-4</td>
+<td>3-5</td>
+</tr>
+<tr>
+<td>KE-03</td>
+<td>多钥匙场景冲突</td>
+<td>两把钥匙同时存在时功能异常 (S=6)</td>
+<td>多钥匙仲裁逻辑缺陷 / 优先级规则错误</td>
+<td>6</td>
+<td>2-4</td>
+<td>4-6</td>
+</tr>
+</tbody>
+</table></div>
+
+<h4 class="ref-h3">2.2 外部把手拉手解锁</h4>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>#</th>
+<th>失效模式</th>
+<th>典型失效影响</th>
+<th>典型失效原因</th>
+<th>参考 S 区间</th>
+<th>参考 O 区间</th>
+<th>参考 D 区间</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>HL-01</td>
+<td>把手拉动后无解锁响应</td>
+<td>用户无法进入 (S=7-8)</td>
+<td>把手微动开关故障 / 把手线束断开 / 把手霍尔传感器失效</td>
+<td>7-8</td>
+<td>2-3</td>
+<td>2-4</td>
+</tr>
+<tr>
+<td>HL-02</td>
+<td>把手信号常通（卡在激活状态）</td>
+<td>门锁反复动作 / 无法锁车 (S=7)</td>
+<td>微动开关卡滞 / 霍尔传感器磁铁移位</td>
+<td>7</td>
+<td>2-3</td>
+<td>3-5</td>
+</tr>
+<tr>
+<td>HL-03</td>
+<td>冰冻条件下把手无法操作</td>
+<td>寒冷地区用户无法进入 (S=7)</td>
+<td>把手未做破冰设计 / 破冰电流不足 / 密封失效进水</td>
+<td>7</td>
+<td>3-5</td>
+<td>5-7</td>
+</tr>
+</tbody>
+</table></div>
+
+<hr class="ref-hr">
+
+<h3 class="ref-h2">3. 车窗控制 (Window Control)</h3>
+
+<h4 class="ref-h3">3.1 电动车窗升降</h4>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>#</th>
+<th>失效模式</th>
+<th>典型失效影响</th>
+<th>典型失效原因</th>
+<th>参考 S 区间</th>
+<th>参考 O 区间</th>
+<th>参考 D 区间</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>WN-01</td>
+<td>车窗无法升降</td>
+<td>用户无法控制车窗 (S=6-7)</td>
+<td>窗电机故障 / 窗开关失效 / 窗导轨卡滞 / 热保护误触发</td>
+<td>6-7</td>
+<td>2-4</td>
+<td>2-4</td>
+</tr>
+<tr>
+<td>WN-02</td>
+<td>车窗自动升降误反转（防夹误触发）</td>
+<td>车窗无法关闭 (S=6)</td>
+<td>防夹力阈值过低 / 窗导轨阻力增大 / 霍尔脉冲计数错误</td>
+<td>6</td>
+<td>3-5</td>
+<td>3-5</td>
+</tr>
+<tr>
+<td>WN-03</td>
+<td>防夹功能失效</td>
+<td>夹伤风险 (S=9)</td>
+<td>防夹算法错误 / 霍尔传感器故障 / 防夹区域标定偏差</td>
+<td>9</td>
+<td>1-3</td>
+<td>1-3</td>
+</tr>
+<tr>
+<td>WN-04</td>
+<td>一键升降功能丢失</td>
+<td>用户需手动保持开关 (S=4)</td>
+<td>位置记忆丢失 / 初始化未完成 / 断电后未自学习</td>
+<td>4</td>
+<td>3-5</td>
+<td>2-4</td>
+</tr>
+<tr>
+<td>WN-05</td>
+<td>遥控关窗功能失效</td>
+<td>锁车后车窗未上升 (S=5-6)</td>
+<td>遥控关窗配置未使能 / CAN 指令丢失 / 窗电机连续工作时间限制</td>
+<td>5-6</td>
+<td>2-4</td>
+<td>3-5</td>
+</tr>
+</tbody>
+</table></div>
+
+<hr class="ref-hr">
+
+<h3 class="ref-h2">4. 座椅控制 (Seat Control)</h3>
+
+<h4 class="ref-h3">4.1 座椅记忆</h4>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>#</th>
+<th>失效模式</th>
+<th>典型失效影响</th>
+<th>典型失效原因</th>
+<th>参考 S 区间</th>
+<th>参考 O 区间</th>
+<th>参考 D 区间</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>SM-01</td>
+<td>座椅记忆位置偏移</td>
+<td>用户需重新调整 (S=4-5)</td>
+<td>霍尔传感器累积误差 / 位置计数器溢出 / 机械磨损导致位置漂移</td>
+<td>4-5</td>
+<td>3-5</td>
+<td>4-6</td>
+</tr>
+<tr>
+<td>SM-02</td>
+<td>座椅记忆调用失败</td>
+<td>用户无法恢复设定位置 (S=5)</td>
+<td>记忆模块通信故障 / EEPROM 数据损坏 / 座椅模块软件异常</td>
+<td>5</td>
+<td>2-4</td>
+<td>2-4</td>
+</tr>
+<tr>
+<td>SM-03</td>
+<td>座椅移动中检测到障碍物不停</td>
+<td>挤压风险 (S=8)</td>
+<td>防夹检测失效 / 电流阈值设定过高</td>
+<td>8</td>
+<td>1-3</td>
+<td>2-4</td>
+</tr>
+</tbody>
+</table></div>
+
+<h4 class="ref-h3">4.2 便利进入 (Easy Entry)</h4>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>#</th>
+<th>失效模式</th>
+<th>典型失效影响</th>
+<th>典型失效原因</th>
+<th>参考 S 区间</th>
+<th>参考 O 区间</th>
+<th>参考 D 区间</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>EE-01</td>
+<td>便利进入不触发</td>
+<td>驾驶员上下车不便 (S=4)</td>
+<td>门开信号检测失败 / 座椅位置判断错误 / 功能配置未启用</td>
+<td>4</td>
+<td>2-4</td>
+<td>3-5</td>
+</tr>
+<tr>
+<td>EE-02</td>
+<td>便利进入时座椅与方向盘/踏板运动冲突</td>
+<td>可能损坏内饰 (S=5-6)</td>
+<td>运动协调逻辑缺陷 / 各模块之间通信时序错误</td>
+<td>5-6</td>
+<td>2-3</td>
+<td>3-5</td>
+</tr>
+<tr>
+<td>EE-03</td>
+<td>便利进入后不恢复原位</td>
+<td>驾驶员需手动调回 (S=5)</td>
+<td>恢复条件不满足 / 原始位置数据丢失 / 门关信号未触发</td>
+<td>5</td>
+<td>2-4</td>
+<td>2-4</td>
+</tr>
+</tbody>
+</table></div>
+
+<hr class="ref-hr">
+
+<h3 class="ref-h2">5. 灯光控制 (Light Control)</h3>
+
+<h4 class="ref-h3">5.1 外部灯光（门把手灯/迎宾灯）</h4>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>#</th>
+<th>失效模式</th>
+<th>典型失效影响</th>
+<th>典型失效原因</th>
+<th>参考 S 区间</th>
+<th>参考 O 区间</th>
+<th>参考 D 区间</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>LT-01</td>
+<td>门把手灯不亮</td>
+<td>夜间用户找不到把手 (S=4-5)</td>
+<td>LED 驱动输出故障 / LED 灯珠或灯带断路 / 供电回路故障</td>
+<td>4-5</td>
+<td>2-4</td>
+<td>2-4</td>
+</tr>
+<tr>
+<td>LT-02</td>
+<td>门把手灯常亮不灭</td>
+<td>车辆静态电流超标，可能亏电 (S=6-7)</td>
+<td>灯控逻辑卡在 ON / 睡眠唤醒信号异常 / 灯驱动芯片锁存</td>
+<td>6-7</td>
+<td>2-3</td>
+<td>2-4</td>
+</tr>
+<tr>
+<td>LT-03</td>
+<td>门把手灯亮度异常（过亮/过暗）</td>
+<td>视觉不适或效果不明显 (S=3)</td>
+<td>PWM 占空比错误 / 电流设定偏差 / LED 色温漂移</td>
+<td>3</td>
+<td>2-4</td>
+<td>3-5</td>
+</tr>
+<tr>
+<td>LT-04</td>
+<td>日夜间模式切换错误</td>
+<td>灯光强度与环境不匹配 (S=3)</td>
+<td>RLS 光传感器信号异常 / 日夜间判断阈值偏差</td>
+<td>3</td>
+<td>3-5</td>
+<td>3-5</td>
+</tr>
+<tr>
+<td>LT-05</td>
+<td>迎宾灯渐变效果异常</td>
+<td>灯光动态效果不流畅 (S=2-3)</td>
+<td>渐变算法实现错误 / PWM 分辨率不足 / 更新周期过长</td>
+<td>2-3</td>
+<td>2-4</td>
+<td>3-5</td>
+</tr>
+</tbody>
+</table></div>
+
+<h4 class="ref-h3">5.2 内部灯光（氛围灯）</h4>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>#</th>
+<th>失效模式</th>
+<th>典型失效影响</th>
+<th>典型失效原因</th>
+<th>参考 S 区间</th>
+<th>参考 O 区间</th>
+<th>参考 D 区间</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>AM-01</td>
+<td>氛围灯颜色偏差</td>
+<td>座舱视觉氛围不一致 (S=2)</td>
+<td>LED RGB 通道电流偏差 / 色彩标定错误 / LED bin 差异</td>
+<td>2</td>
+<td>3-5</td>
+<td>3-5</td>
+</tr>
+<tr>
+<td>AM-02</td>
+<td>氛围灯闪烁</td>
+<td>用户视觉不适 (S=4)</td>
+<td>LIN 通信干扰 / 电源纹波过大 / 调光 PWM 频率过低</td>
+<td>4</td>
+<td>2-4</td>
+<td>2-4</td>
+</tr>
+</tbody>
+</table></div>
+
+<hr class="ref-hr">
+
+<h3 class="ref-h2">6. 后视镜 (Mirror Control)</h3>
+
+<h4 class="ref-h3">6.1 后视镜折叠</h4>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>#</th>
+<th>失效模式</th>
+<th>典型失效影响</th>
+<th>典型失效原因</th>
+<th>参考 S 区间</th>
+<th>参考 O 区间</th>
+<th>参考 D 区间</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>MR-01</td>
+<td>后视镜折叠不到位</td>
+<td>可能超出法规宽度 / 停车刮擦风险 (S=6)</td>
+<td>折叠电机堵转检测阈值不对 / 折叠机构机械卡滞 / 位置传感器失效</td>
+<td>6</td>
+<td>2-4</td>
+<td>2-4</td>
+</tr>
+<tr>
+<td>MR-02</td>
+<td>后视镜折叠不展开</td>
+<td>无法行驶 (S=7-8)</td>
+<td>展开电机故障 / 冰冻导致卡死 / 折叠后逻辑不允许展开</td>
+<td>7-8</td>
+<td>2-3</td>
+<td>2-4</td>
+</tr>
+</tbody>
+</table></div>
+
+<h4 class="ref-h3">6.2 自动防眩目</h4>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>#</th>
+<th>失效模式</th>
+<th>典型失效影响</th>
+<th>典型失效原因</th>
+<th>参考 S 区间</th>
+<th>参考 O 区间</th>
+<th>参考 D 区间</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>AD-01</td>
+<td>防眩目功能不触发</td>
+<td>夜间被后车远光灯晃眼 (S=5)</td>
+<td>前后光传感器方向判断错误 / EC 镜驱动电压异常 / 传感器污染</td>
+<td>5</td>
+<td>2-4</td>
+<td>3-5</td>
+</tr>
+<tr>
+<td>AD-02</td>
+<td>防眩目常开不恢复</td>
+<td>白天后视镜太暗看不清 (S=5-6)</td>
+<td>光传感器故障 / EC 镜放电回路异常</td>
+<td>5-6</td>
+<td>2-3</td>
+<td>2-4</td>
+</tr>
+</tbody>
+</table></div>
+
+<hr class="ref-hr">
+
+<h3 class="ref-h2">失效原因通用分类（可用于所有功能类别）</h3>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>原因类别</th>
+<th>子类别</th>
+<th>典型描述模板</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>传感器故障</td>
+<td>开路/短路/漂移/噪声</td>
+<td>`<sensor_name> 信号<开路/对地短路/对电源短路> / <sensor_name> 测量值漂移超出精度范围`</td>
+</tr>
+<tr>
+<td>执行器故障</td>
+<td>卡滞/开路/短路/过热</td>
+<td>`<actuator_name> <机械卡滞/线圈开路/电机短路/热保护触发>`</td>
+</tr>
+<tr>
+<td>通信故障</td>
+<td>丢失/超时/错误/网络事件</td>
+<td>`<signal_name> CAN/LIN 报文<丢失/超时/校验错误> / <ECU_name> Bus-off / <gateway_name> 路由失败`</td>
+</tr>
+<tr>
+<td>供电故障</td>
+<td>过压/欠压/反接/瞬断</td>
+<td>`<ECU_name> 供电<欠压/过压/瞬断> / KL30/KL15 切换异常`</td>
+</tr>
+<tr>
+<td>软件故障</td>
+<td>逻辑错误/时序错误/状态机卡死</td>
+<td>`<module_name> <状态机卡死在XX状态/任务超时/死循环/内存越界/初始化失败>`</td>
+</tr>
+<tr>
+<td>参数/配置故障</td>
+<td>标定错误/配置错误</td>
+<td>`<function_name> <标定参数超出范围/Variant Coding 错误/EOL 配置缺失>`</td>
+</tr>
+<tr>
+<td>环境因素</td>
+<td>温度/湿度/EMC/振动</td>
+<td>`<component_name> 在<高温/低温/高湿/强EMC>条件下<性能降级/功能失效>`</td>
+</tr>
+</tbody>
+</table></div>
+
+    </div>
+  </div>
+
+  </div></div>
+
+
+<!-- ── Reference: 输出格式说明 — 飞书多维表格 (Base) ── -->
+<div class="ref-page page-hidden" id="page-ref-output-format">
+  <div class="container" style="margin-bottom:1rem;">
+    <a href="#" class="ref-back-link" data-nav-to="main">← 返回技能介绍主页</a>
+  </div>
+  <div class="container">
+  <div class="container">
+    <div class="section-header">
+      <h2>输出格式说明 — 飞书多维表格 (Base)</h2>
+      <p>fmea-from-fds 参考文档</p>
+    </div>
+    <div class="ref-doc">
+<h3 class="ref-h1">输出格式说明 — 飞书多维表格 (Base)</h3>
+
+<h3 class="ref-h2">概述</h3>
+
+<p class="ref-p">FMEA 主输出为飞书多维表格（Base），每条失效模式一行。Base 表可嵌入飞书 Docx/Wiki 文档作为视图模块。</p>
+
+<h3 class="ref-h2">Base 表字段定义</h3>
+
+<h4 class="ref-h3">创建命令</h4>
+
+<pre class="ref-code"><code>source ~/.magic_skills/.feishu_auth_env &amp;&amp; lark-cli base +create \
+  --name &quot;&lt;FDS标题&gt;_DFMEA_V0.1&quot; \
+  --fields &#x27;&lt;fields_json&gt;&#x27;</code></pre>
+
+<h4 class="ref-h3">字段 Schema</h4>
+
+<pre class="ref-code"><code>{
+  &quot;fields&quot;: [
+    {&quot;name&quot;: &quot;系统/上一级要素&quot;, &quot;type&quot;: &quot;text&quot;},
+    {&quot;name&quot;: &quot;聚焦要素&quot;, &quot;type&quot;: &quot;text&quot;},
+    {&quot;name&quot;: &quot;下一级要素&quot;, &quot;type&quot;: &quot;text&quot;},
+    {&quot;name&quot;: &quot;上一级功能与要求&quot;, &quot;type&quot;: &quot;multiline_text&quot;},
+    {&quot;name&quot;: &quot;聚焦要素功能与要求&quot;, &quot;type&quot;: &quot;multiline_text&quot;},
+    {&quot;name&quot;: &quot;下一级功能与特性&quot;, &quot;type&quot;: &quot;multiline_text&quot;},
+    {&quot;name&quot;: &quot;失效影响 (FE)&quot;, &quot;type&quot;: &quot;multiline_text&quot;},
+    {
+      &quot;name&quot;: &quot;严重度 (S)&quot;,
+      &quot;type&quot;: &quot;select&quot;,
+      &quot;options&quot;: [&quot;1&quot;,&quot;2&quot;,&quot;3&quot;,&quot;4&quot;,&quot;5&quot;,&quot;6&quot;,&quot;7&quot;,&quot;8&quot;,&quot;9&quot;,&quot;10&quot;]
+    },
+    {
+      &quot;name&quot;: &quot;分类 (SC/CC)&quot;,
+      &quot;type&quot;: &quot;select&quot;,
+      &quot;options&quot;: [&quot;SC&quot;, &quot;CC&quot;, &quot;—&quot;]
+    },
+    {&quot;name&quot;: &quot;失效模式 (FM)&quot;, &quot;type&quot;: &quot;multiline_text&quot;},
+    {&quot;name&quot;: &quot;失效原因 (FC)&quot;, &quot;type&quot;: &quot;multiline_text&quot;},
+    {&quot;name&quot;: &quot;预防控制&quot;, &quot;type&quot;: &quot;multiline_text&quot;},
+    {
+      &quot;name&quot;: &quot;频度 (O)&quot;,
+      &quot;type&quot;: &quot;select&quot;,
+      &quot;options&quot;: [&quot;1&quot;,&quot;2&quot;,&quot;3&quot;,&quot;4&quot;,&quot;5&quot;,&quot;6&quot;,&quot;7&quot;,&quot;8&quot;,&quot;9&quot;,&quot;10&quot;]
+    },
+    {&quot;name&quot;: &quot;探测控制&quot;, &quot;type&quot;: &quot;multiline_text&quot;},
+    {
+      &quot;name&quot;: &quot;探测度 (D)&quot;,
+      &quot;type&quot;: &quot;select&quot;,
+      &quot;options&quot;: [&quot;1&quot;,&quot;2&quot;,&quot;3&quot;,&quot;4&quot;,&quot;5&quot;,&quot;6&quot;,&quot;7&quot;,&quot;8&quot;,&quot;9&quot;,&quot;10&quot;]
+    },
+    {
+      &quot;name&quot;: &quot;措施优先级 (AP)&quot;,
+      &quot;type&quot;: &quot;select&quot;,
+      &quot;options&quot;: [&quot;H&quot;, &quot;M&quot;, &quot;L&quot;]
+    },
+    {&quot;name&quot;: &quot;建议措施&quot;, &quot;type&quot;: &quot;multiline_text&quot;},
+    {&quot;name&quot;: &quot;责任 + 目标日期&quot;, &quot;type&quot;: &quot;text&quot;},
+    {&quot;name&quot;: &quot;采取的措施 + 日期&quot;, &quot;type&quot;: &quot;multiline_text&quot;},
+    {&quot;name&quot;: &quot;新 S/O/D + 新 AP&quot;, &quot;type&quot;: &quot;text&quot;},
+    {&quot;name&quot;: &quot;功能块来源&quot;, &quot;type&quot;: &quot;text&quot;}
+  ]
+}</code></pre>
+
+<h4 class="ref-h3">字段说明</h4>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>字段</th>
+<th>类型</th>
+<th>用途</th>
+<th>AI 自动填充</th>
+<th>用户填充</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>系统/上一级要素</td>
+<td>文本</td>
+<td>FMEA 结构分析</td>
+<td>✓</td>
+<td>—</td>
+</tr>
+<tr>
+<td>聚焦要素</td>
+<td>文本</td>
+<td>FMEA 结构分析</td>
+<td>✓</td>
+<td>—</td>
+</tr>
+<tr>
+<td>下一级要素</td>
+<td>文本</td>
+<td>FMEA 结构分析</td>
+<td>✓</td>
+<td>—</td>
+</tr>
+<tr>
+<td>上一级功能与要求</td>
+<td>多行文本</td>
+<td>FMEA 功能分析</td>
+<td>✓</td>
+<td>—</td>
+</tr>
+<tr>
+<td>聚焦要素功能与要求</td>
+<td>多行文本</td>
+<td>FMEA 功能分析</td>
+<td>✓</td>
+<td>—</td>
+</tr>
+<tr>
+<td>下一级功能与特性</td>
+<td>多行文本</td>
+<td>FMEA 功能分析</td>
+<td>✓</td>
+<td>—</td>
+</tr>
+<tr>
+<td>失效影响 (FE)</td>
+<td>多行文本</td>
+<td>FMEA 失效分析</td>
+<td>✓</td>
+<td>可修改</td>
+</tr>
+<tr>
+<td>严重度 (S)</td>
+<td>单选 1-10</td>
+<td>风险评级</td>
+<td>✓ (AI 预评)</td>
+<td>确认/修改</td>
+</tr>
+<tr>
+<td>分类 (SC/CC)</td>
+<td>单选</td>
+<td>特殊特性标记</td>
+<td>✓ (AI 预判)</td>
+<td>确认/修改</td>
+</tr>
+<tr>
+<td>失效模式 (FM)</td>
+<td>多行文本</td>
+<td>FMEA 失效分析</td>
+<td>✓</td>
+<td>可修改</td>
+</tr>
+<tr>
+<td>失效原因 (FC)</td>
+<td>多行文本</td>
+<td>FMEA 失效分析</td>
+<td>✓</td>
+<td>可修改</td>
+</tr>
+<tr>
+<td>预防控制</td>
+<td>多行文本</td>
+<td>FMEA 风险分析</td>
+<td>✓ (从 FDS 提取)</td>
+<td>补充</td>
+</tr>
+<tr>
+<td>频度 (O)</td>
+<td>单选 1-10</td>
+<td>风险评级</td>
+<td>✓ (AI 预评)</td>
+<td>确认/修改</td>
+</tr>
+<tr>
+<td>探测控制</td>
+<td>多行文本</td>
+<td>FMEA 风险分析</td>
+<td>✓ (从 FDS 提取)</td>
+<td>补充</td>
+</tr>
+<tr>
+<td>探测度 (D)</td>
+<td>单选 1-10</td>
+<td>风险评级</td>
+<td>✓ (AI 预评)</td>
+<td>确认/修改</td>
+</tr>
+<tr>
+<td>措施优先级 (AP)</td>
+<td>单选 H/M/L</td>
+<td>风险评级</td>
+<td>✓ (自动查表)</td>
+<td>—</td>
+</tr>
+<tr>
+<td>建议措施</td>
+<td>多行文本</td>
+<td>优化</td>
+<td>✓ (AI 建议)</td>
+<td>确认/修改</td>
+</tr>
+<tr>
+<td>责任 + 目标日期</td>
+<td>文本</td>
+<td>优化</td>
+<td>—</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>采取的措施 + 日期</td>
+<td>多行文本</td>
+<td>优化</td>
+<td>—</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>新 S/O/D + 新 AP</td>
+<td>文本</td>
+<td>优化</td>
+<td>—</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>功能块来源</td>
+<td>文本</td>
+<td>追溯</td>
+<td>✓ (FDS Section #)</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+
+<h3 class="ref-h2">写入 Base 表</h3>
+
+<h4 class="ref-h3">批量写入格式</h4>
+
+<pre class="ref-code"><code>[
+  {
+    &quot;fields&quot;: {
+      &quot;系统/上一级要素&quot;: &quot;NIO-NT3.5-FDS-2101-Door Lock/Unlock Control&quot;,
+      &quot;聚焦要素&quot;: &quot;Speed Lock&quot;,
+      &quot;下一级要素&quot;: &quot;ZONE_LE, VDF_A, MotionCtrlInfo&quot;,
+      &quot;聚焦要素功能与要求&quot;: &quot;当车速 &gt;= 8 km/h 且所有车门关闭时，自动锁止所有车门&quot;,
+      &quot;失效影响 (FE)&quot;: &quot;行驶中车门未上锁，存在乘员（尤其儿童）意外开门的安全风险&quot;,
+      &quot;严重度 (S)&quot;: &quot;9&quot;,
+      &quot;分类 (SC/CC)&quot;: &quot;SC&quot;,
+      &quot;失效模式 (FM)&quot;: &quot;车速 &gt;8km/h 后未自动锁止&quot;,
+      &quot;失效原因 (FC)&quot;: &quot;1) 车速信号 bcu_veh_spd 无效或丢失\n2) 门开状态信号 DoorOpenSts 卡在开门状态\n3) 速度阈值标定错误&quot;,
+      &quot;预防控制&quot;: &quot;1) 速度信号有效性校验 (bcu_veh_spd_sts = valid)\n2) 门状态信号去抖滤波\n3) 速度锁 Hysteresis 设计 (锁&gt;8km/h, 解&lt;7km/h)&quot;,
+      &quot;频度 (O)&quot;: &quot;2&quot;,
+      &quot;探测控制&quot;: &quot;1) 门锁状态回读 (cent_lock_unlock_sts)\n2) 速度锁功能 E2E 测试用例\n3) 锁状态不一致触发 DTC 告警&quot;,
+      &quot;探测度 (D)&quot;: &quot;3&quot;,
+      &quot;措施优先级 (AP)&quot;: &quot;H&quot;,
+      &quot;建议措施&quot;: &quot;1) 增加独立的 ESP 车速信号作为交叉校验源\n2) 门状态信号增加 E2E CRC 保护\n3) 速度锁激活状态周期性广播 (含 checksum)&quot;,
+      &quot;责任 + 目标日期&quot;: &quot;&quot;,
+      &quot;采取的措施 + 日期&quot;: &quot;&quot;,
+      &quot;新 S/O/D + 新 AP&quot;: &quot;&quot;,
+      &quot;功能块来源&quot;: &quot;3.5&quot;
+    }
+  }
+]</code></pre>
+
+<h4 class="ref-h3">写入命令</h4>
+
+<p class="ref-p">使用 <code>lark-base</code> skill 的 <code>base +record batch-add</code> 命令（实际命令参考 lark-base skill 文档）：</p>
+
+<pre class="ref-code"><code>source ~/.magic_skills/.feishu_auth_env &amp;&amp; lark-cli base +record batch-add \
+  --table-id &lt;table_id&gt; \
+  --data &lt;json_file&gt;</code></pre>
+
+<h3 class="ref-h2">嵌入飞书文档</h3>
+
+<li class="ref-ol-li">在飞书 Docx/Wiki 文档编辑器中，输入 <code>/base</code> 或插入多维表格视图</li>
+<li class="ref-ol-li">选择已创建的 DFMEA Base 表</li>
+<li class="ref-ol-li">选择要嵌入的视图（默认全量视图 / 高风险视图 / 安全相关视图）</li>
+<li class="ref-ol-li">调整嵌入尺寸</li>
+
+<h3 class="ref-h2">可选: 生成飞书 Docx 评审报告</h3>
+
+<p class="ref-p">如需生成正式评审报告（含封面、修订历史、分析摘要），使用 <code>lark-doc</code> skill：</p>
+
+<pre class="ref-code"><code>source ~/.magic_skills/.feishu_auth_env &amp;&amp; lark-cli docs +create \
+  --title &quot;&lt;FDS标题&gt;_DFMEA_评审报告_V0.1&quot; \
+  --folder-token &lt;target_folder_token&gt; \
+  --api-version v2</code></pre>
+
+<p class="ref-p">报告结构：</p>
+<li class="ref-ol-li">封面页</li>
+<li class="ref-ol-li">修订历史</li>
+<li class="ref-ol-li">DFMEA 分析范围与边界</li>
+<li class="ref-ol-li">功能块统计表</li>
+<li class="ref-ol-li">AP 分布（H/M/L 饼图/柱状图）</li>
+<li class="ref-ol-li">高风险项清单（AP=H 详细列表）</li>
+<li class="ref-ol-li">安全相关项清单（S≥9 详细列表）</li>
+<li class="ref-ol-li">嵌入的 Base 表视图</li>
+
+    </div>
+  </div>
+
+  </div></div>
+
+
+<!-- ── Reference: NT3.5 VMBC 系统架构地图 ── -->
+<div class="ref-page page-hidden" id="page-ref-nt35-system-map">
+  <div class="container" style="margin-bottom:1rem;">
+    <a href="#" class="ref-back-link" data-nav-to="main">← 返回技能介绍主页</a>
+  </div>
+  <div class="container">
+  <div class="container">
+    <div class="section-header">
+      <h2>NT3.5 VMBC 系统架构地图</h2>
+      <p>fmea-from-fds 参考文档</p>
+    </div>
+    <div class="ref-doc">
+<h3 class="ref-h1">NT3.5 VMBC 系统架构地图</h3>
+
+<p class="ref-p">基于 NT3.5 平台真实 VMBC 系统层定义。数据源: </p>
+
+<p class="ref-p">共 22 个系统，3 条功能线。</p>
+
+<h3 class="ref-h2">Body (11 系统)</h3>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>Sys ID</th>
+<th>中文名</th>
+<th>英文名</th>
+<th>子系统数</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Sys-01</td>
+<td>进入系统</td>
+<td>EntrySystem</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Sys-02</td>
+<td>智能外设系统</td>
+<td>SmartDeviceSystem</td>
+<td>3</td>
+</tr>
+<tr>
+<td>Sys-03</td>
+<td>可视系统</td>
+<td>VisibilitySystem</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Sys-04</td>
+<td>座舱舒适系统</td>
+<td>CabinComfortSystem</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Sys-05</td>
+<td>乘员安全系统</td>
+<td>OccupantSafetySystem</td>
+<td>3</td>
+</tr>
+<tr>
+<td>Sys-06</td>
+<td>空调系统</td>
+<td>ClimateSystem</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Sys-07</td>
+<td>热管理系统</td>
+<td>ThermalSystem</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Sys-08</td>
+<td>低压能量管理</td>
+<td>LVEM</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Sys-09</td>
+<td>高压能量管理</td>
+<td>HVEM</td>
+<td>6</td>
+</tr>
+<tr>
+<td>Sys-10</td>
+<td>外灯系统</td>
+<td>ExteriorLighting</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Sys-11</td>
+<td>内灯系统</td>
+<td>InteriorLighting</td>
+<td>2</td>
+</tr>
+</tbody>
+</table></div>
+
+<h3 class="ref-h2">Motion (6 系统)</h3>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>Sys ID</th>
+<th>中文名</th>
+<th>英文名</th>
+<th>子系统数</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Sys-12</td>
+<td>运动控制系统</td>
+<td>VMC</td>
+<td>6</td>
+</tr>
+<tr>
+<td>Sys-13</td>
+<td>驱动系统</td>
+<td>DriveTorqueSystem</td>
+<td>10</td>
+</tr>
+<tr>
+<td>Sys-14</td>
+<td>制动系统</td>
+<td>BrakeSystem</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Sys-15</td>
+<td>转向系统</td>
+<td>SteeringSystem</td>
+<td>3</td>
+</tr>
+<tr>
+<td>Sys-16</td>
+<td>悬架系统</td>
+<td>SuspensionSystem</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Sys-17</td>
+<td>拖挂系统</td>
+<td>TrailerSystem</td>
+<td>3</td>
+</tr>
+</tbody>
+</table></div>
+
+<h3 class="ref-h2">Platform (5 系统)</h3>
+
+<div class="ref-table-wrap"><table class="ref-table">
+<thead><tr>
+<th>Sys ID</th>
+<th>中文名</th>
+<th>英文名</th>
+<th>子系统数</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Sys-18</td>
+<td>舱外融合感知系统</td>
+<td>ExternalPerceptionFusion</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Sys-19</td>
+<td>舱内融合感知系统</td>
+<td>CabinPerceptionFusion</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Sys-20</td>
+<td>数据管理系统</td>
+<td>DataManagement</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Sys-21</td>
+<td>人机交互系统</td>
+<td>HMI</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Sys-22</td>
+<td>模式管理系统</td>
+<td>ModeManagement</td>
+<td>1</td>
+</tr>
+</tbody>
+</table></div>
+
+    </div>
+  </div>
+
+  </div></div>
+
 
 <!-- Footer -->
 <footer class="footer">
@@ -1027,5 +3820,167 @@ document.querySelectorAll('.card, .workflow-step, .confirm-row, .domain-card, .s
 });
 // Also observe elements already animated by hero
 </script>
-</body>
+
+<!-- SPA Navigation + Sidebar Scroll Spy -->
+<script>
+(function() {
+  'use strict';
+
+  const pageMain = document.getElementById('page-main');
+  const sidebar = document.getElementById('sidebar');
+  const refPages = document.querySelectorAll('.ref-page');
+  const sidebarLinks = document.querySelectorAll('[data-sidebar-scroll]');
+
+  // ── Page Switching ──
+
+  function hideAllPages() {
+    if (pageMain) pageMain.classList.add('page-hidden');
+    refPages.forEach(p => p.classList.add('page-hidden'));
+  }
+
+  function navigateTo(target, scrollToId, refPageId) {
+    hideAllPages();
+
+    if (target === 'main') {
+      if (pageMain) {
+        pageMain.classList.remove('page-hidden');
+      }
+      if (scrollToId) {
+        const el = document.getElementById(scrollToId);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      history.pushState({target: 'main', scrollTo: scrollToId}, '', scrollToId ? '#' + scrollToId : window.location.pathname);
+    } else if (target === 'ref' && refPageId) {
+      const refPage = document.getElementById(refPageId);
+      if (refPage) {
+        refPage.classList.remove('page-hidden');
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        history.pushState({target: 'ref', refPage: refPageId}, '', '#' + refPageId.replace('page-', ''));
+      }
+    }
+  }
+
+  // Delegate all nav clicks
+  document.addEventListener('click', function(e) {
+    const link = e.target.closest('a');
+    if (!link) return;
+
+    const navTo = link.getAttribute('data-nav-to');
+    if (navTo) {
+      e.preventDefault();
+      const scrollTo = link.getAttribute('data-scroll-to');
+      const refPage = link.getAttribute('data-ref-page');
+      navigateTo(navTo, scrollTo, refPage);
+      return;
+    }
+
+    // Sidebar scroll links
+    const sidebarScroll = link.getAttribute('data-sidebar-scroll');
+    if (sidebarScroll) {
+      e.preventDefault();
+      // Ensure main page is visible
+      if (pageMain) pageMain.classList.remove('page-hidden');
+      refPages.forEach(p => p.classList.add('page-hidden'));
+      const el = document.getElementById(sidebarScroll);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.pushState({target: 'main', scrollTo: sidebarScroll}, '', '#' + sidebarScroll);
+      }
+      return;
+    }
+
+    // Handle main content relative links (from within ref-page or standalone)
+    const href = link.getAttribute('href');
+    if (href && href.startsWith('#') && href.length > 1 && !link.hasAttribute('target')) {
+      const inRefPage = link.closest('.ref-page');
+      if (inRefPage) return;
+      e.preventDefault();
+      navigateTo('main', href.substring(1));
+    }
+  });
+
+  // ── Scroll Spy ──
+  const sectionIds = ['overview','internals','architecture','workflow','methodology','risk-rating','output','coverage','constraints'];
+
+  const observer = new IntersectionObserver(function(entries) {
+    // Only run spy when main page is visible
+    if (!pageMain || pageMain.classList.contains('page-hidden')) return;
+
+    let activeId = null;
+    // Find the topmost visible section
+    for (const entry of entries) {
+      if (entry.isIntersecting) {
+        if (!activeId || entry.boundingClientRect.top < 0) {
+          activeId = entry.target.id;
+        }
+      }
+    }
+    // If nothing is intersecting, use the first section above viewport
+    if (!activeId) {
+      let best = null;
+      let bestTop = Infinity;
+      for (const entry of entries) {
+        const top = entry.boundingClientRect.top;
+        if (top < 0 && Math.abs(top) < Math.abs(bestTop)) {
+          best = entry.target.id;
+          bestTop = top;
+        }
+      }
+      activeId = best;
+    }
+
+    if (activeId) {
+      sidebarLinks.forEach(link => {
+        const target = link.getAttribute('data-sidebar-scroll');
+        if (target === activeId) {
+          link.classList.add('active');
+        } else {
+          link.classList.remove('active');
+        }
+      });
+    }
+  }, { rootMargin: '-10% 0px -80% 0px', threshold: 0 });
+
+  // Observe all sections
+  sectionIds.forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
+
+  // ── Browser back/forward ──
+  window.addEventListener('popstate', function(e) {
+    if (e.state) {
+      if (e.state.target === 'main') {
+        navigateTo('main', e.state.scrollTo);
+      } else if (e.state.target === 'ref') {
+        navigateTo('ref', null, e.state.refPage);
+      }
+    } else {
+      navigateTo('main');
+    }
+  });
+
+  // ── Initial load ──
+  const hash = window.location.hash.substring(1);
+  if (hash) {
+    const refPageEl = document.getElementById('page-ref-' + hash);
+    if (refPageEl) {
+      navigateTo('ref', null, 'page-ref-' + hash);
+    } else {
+      const mainEl = document.getElementById(hash);
+      if (mainEl && pageMain && pageMain.contains(mainEl)) {
+        setTimeout(function() {
+          hideAllPages();
+          pageMain.classList.remove('page-hidden');
+          mainEl.scrollIntoView();
+        }, 100);
+      }
+    }
+  }
+})();
+</script></body>
 </html>
