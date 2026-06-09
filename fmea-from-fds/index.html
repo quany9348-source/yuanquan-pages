@@ -269,33 +269,64 @@ code, .mono { font-family: 'JetBrains Mono', 'Noto Sans SC', monospace; font-siz
 .ref-back-link:hover { color: #1a4fc0; }
 #page-main > section:last-of-type { margin-bottom: 0; }
 
-/* ── Page Layout (Sidebar + Content) ── */
-.page-layout { display: flex; min-height: 100vh; }
-.main-content-wrap { flex: 1; min-width: 0; }
-
-/* ── Sidebar ── */
+/* ── Floating Sidebar Overlay ── */
 .sidebar {
-  width: 240px; min-width: 240px;
-  position: sticky; top: 56px;  /* nav height */
-  height: calc(100vh - 56px);
+  position: fixed; top: 56px; left: 0;
+  width: 260px; height: calc(100vh - 56px);
   overflow-y: auto;
-  background: var(--bg-card);
+  background: linear-gradient(135deg, rgba(255,255,255,.96) 0%, rgba(248,250,252,.96) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-right: 1px solid var(--border);
-  padding: 1.5rem 0 2rem;
-  z-index: 50;
+  box-shadow: 4px 0 24px rgba(0,0,0,.08);
+  padding: 1.5rem 1rem 2rem;
+  z-index: 200;
+  transform: translateX(-100%);
+  transition: transform .3s cubic-bezier(.4,0,.2,1);
   font-family: 'DM Sans', 'Noto Sans SC', sans-serif;
 }
+.sidebar.open { transform: translateX(0); }
+
+/* Sidebar backdrop */
+.sidebar-backdrop {
+  position: fixed; inset: 0; top: 56px;
+  background: rgba(15,23,42,.12);
+  z-index: 199;
+  opacity: 0; visibility: hidden;
+  transition: opacity .3s, visibility .3s;
+}
+.sidebar-backdrop.show { opacity: 1; visibility: visible; }
+
+/* Sidebar toggle button */
+.sidebar-toggle {
+  position: fixed; top: 72px; left: 0;
+  width: 32px; height: 56px;
+  background: var(--bg-card);
+  border: 1px solid var(--border); border-left: none;
+  border-radius: 0 8px 8px 0;
+  box-shadow: 2px 0 8px rgba(0,0,0,.06);
+  z-index: 201;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: left .3s cubic-bezier(.4,0,.2,1), background .15s;
+  font-size: .85rem; color: var(--text-secondary);
+  padding: 0; line-height: 1;
+}
+.sidebar-toggle:hover { background: var(--blue-bg); color: var(--blue); }
+.sidebar-toggle.moved { left: 260px; }
+
+/* Sidebar title */
 .sidebar-title {
   font-size: .7rem; font-weight: 700; text-transform: uppercase;
   letter-spacing: .06em; color: var(--text-tertiary);
-  padding: 0 1.25rem; margin-bottom: .75rem;
+  margin-bottom: .75rem;
 }
 .sidebar-nav { display: flex; flex-direction: column; }
 .sidebar-link {
-  display: block; padding: .45rem 1.25rem;
+  display: block; padding: .45rem .75rem;
   font-size: .82rem; font-weight: 500; color: var(--text-secondary);
   text-decoration: none; line-height: 1.5;
-  border-left: 3px solid transparent;
+  border-left: 3px solid transparent; border-radius: 0 6px 6px 0;
   transition: all .15s;
 }
 .sidebar-link:hover { color: var(--blue); background: var(--blue-bg); }
@@ -304,24 +335,20 @@ code, .mono { font-family: 'JetBrains Mono', 'Noto Sans SC', monospace; font-siz
   background: var(--blue-bg); border-left-color: var(--blue);
 }
 
-/* Hide sidebar when page-main is hidden */
-#page-main.page-hidden .sidebar { display: none; }
-#page-main.page-hidden .page-layout { display: block; }
+/* Hide sidebar elements when page-main is hidden */
+#page-main.page-hidden ~ .sidebar,
+#page-main.page-hidden ~ .sidebar-toggle,
+#page-main.page-hidden ~ .sidebar-backdrop { display: none !important; }
 
-/* Reference pages: no sidebar */
-.ref-page .sidebar { display: none; }
+/* Reference pages: no sidebar at all */
+body:has(.ref-page:not(.page-hidden)) .sidebar,
+body:has(.ref-page:not(.page-hidden)) .sidebar-toggle,
+body:has(.ref-page:not(.page-hidden)) .sidebar-backdrop { display: none !important; }
 
 /* ── Responsive ── */
-@media (max-width: 1024px) {
-  .sidebar { width: 200px; min-width: 200px; }
-}
 @media (max-width: 768px) {
-  .page-layout { flex-direction: column; }
-  .sidebar {
-    position: relative; top: 0; width: 100%; min-width: 100%;
-    height: auto; max-height: 40vh;
-    border-right: none; border-bottom: 1px solid var(--border);
-  }
+  .sidebar { width: 100%; }
+  .sidebar-toggle.moved { left: 100%; }
 }
 </style>
 </head>
@@ -356,9 +383,16 @@ code, .mono { font-family: 'JetBrains Mono', 'Noto Sans SC', monospace; font-siz
 
 <!-- Hero -->
 <div id="page-main">
-  <div class="page-layout">
   <!-- Left Sidebar TOC -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+  <button class="sidebar-toggle" id="sidebarToggle" title="展开目录">☰</button>
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+  <button class="sidebar-toggle" id="sidebarToggle" title="展开目录">☰</button>
   <aside class="sidebar" id="sidebar">
+    <nav class="sidebar-nav">
+      <div class="sidebar-title">页面导航</div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-title">页面导航</div>
     <nav class="sidebar-nav">
       <div class="sidebar-title">页面导航</div>
       <a href="#overview" class="sidebar-link" data-sidebar-scroll="overview">总览</a>
@@ -372,7 +406,6 @@ code, .mono { font-family: 'JetBrains Mono', 'Noto Sans SC', monospace; font-siz
       <a href="#constraints" class="sidebar-link" data-sidebar-scroll="constraints">关键约束</a>
     </nav>
   </aside>
-    <div class="main-content-wrap">
 <header class="hero">
   <div class="container">
     <div class="hero-grid">
@@ -1126,8 +1159,6 @@ code, .mono { font-family: 'JetBrains Mono', 'Noto Sans SC', monospace; font-siz
     </div>
   </div>
 </section>
-  </div><!-- /.main-content-wrap -->
-</div><!-- /.page-layout -->
 </div><!-- /#page-main -->
 
 
@@ -3821,15 +3852,52 @@ document.querySelectorAll('.card, .workflow-step, .confirm-row, .domain-card, .s
 // Also observe elements already animated by hero
 </script>
 
-<!-- SPA Navigation + Sidebar Scroll Spy -->
+<!-- SPA Navigation + Floating Sidebar -->
 <script>
 (function() {
   'use strict';
 
   const pageMain = document.getElementById('page-main');
   const sidebar = document.getElementById('sidebar');
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  const sidebarBackdrop = document.getElementById('sidebarBackdrop');
   const refPages = document.querySelectorAll('.ref-page');
   const sidebarLinks = document.querySelectorAll('[data-sidebar-scroll]');
+
+  // ── Sidebar Toggle ──
+  function openSidebar() {
+    if (!sidebar || !sidebarToggle) return;
+    sidebar.classList.add('open');
+    sidebarToggle.classList.add('moved');
+    sidebarToggle.textContent = '✕';
+    sidebarToggle.title = '折叠目录';
+    if (sidebarBackdrop) sidebarBackdrop.classList.add('show');
+  }
+
+  function closeSidebar() {
+    if (!sidebar || !sidebarToggle) return;
+    sidebar.classList.remove('open');
+    sidebarToggle.classList.remove('moved');
+    sidebarToggle.textContent = '☰';
+    sidebarToggle.title = '展开目录';
+    if (sidebarBackdrop) sidebarBackdrop.classList.remove('show');
+  }
+
+  if (sidebarToggle) {
+    sidebarToggle.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (sidebar.classList.contains('open')) {
+        closeSidebar();
+      } else {
+        openSidebar();
+      }
+    });
+  }
+
+  // Backdrop click closes sidebar
+  if (sidebarBackdrop) {
+    sidebarBackdrop.addEventListener('click', closeSidebar);
+  }
 
   // ── Page Switching ──
 
@@ -3840,13 +3908,14 @@ document.querySelectorAll('.card, .workflow-step, .confirm-row, .domain-card, .s
 
   function navigateTo(target, scrollToId, refPageId) {
     hideAllPages();
+    closeSidebar();
 
     if (target === 'main') {
       if (pageMain) {
         pageMain.classList.remove('page-hidden');
       }
       if (scrollToId) {
-        const el = document.getElementById(scrollToId);
+        var el = document.getElementById(scrollToId);
         if (el) {
           el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
@@ -3855,7 +3924,7 @@ document.querySelectorAll('.card, .workflow-step, .confirm-row, .domain-card, .s
       }
       history.pushState({target: 'main', scrollTo: scrollToId}, '', scrollToId ? '#' + scrollToId : window.location.pathname);
     } else if (target === 'ref' && refPageId) {
-      const refPage = document.getElementById(refPageId);
+      var refPage = document.getElementById(refPageId);
       if (refPage) {
         refPage.classList.remove('page-hidden');
         window.scrollTo({ top: 0, behavior: 'instant' });
@@ -3866,26 +3935,27 @@ document.querySelectorAll('.card, .workflow-step, .confirm-row, .domain-card, .s
 
   // Delegate all nav clicks
   document.addEventListener('click', function(e) {
-    const link = e.target.closest('a');
+    var link = e.target.closest('a');
     if (!link) return;
 
-    const navTo = link.getAttribute('data-nav-to');
+    var navTo = link.getAttribute('data-nav-to');
     if (navTo) {
       e.preventDefault();
-      const scrollTo = link.getAttribute('data-scroll-to');
-      const refPage = link.getAttribute('data-ref-page');
+      var scrollTo = link.getAttribute('data-scroll-to');
+      var refPage = link.getAttribute('data-ref-page');
       navigateTo(navTo, scrollTo, refPage);
       return;
     }
 
-    // Sidebar scroll links
-    const sidebarScroll = link.getAttribute('data-sidebar-scroll');
+    // Sidebar scroll links: navigate + auto-hide sidebar
+    var sidebarScroll = link.getAttribute('data-sidebar-scroll');
     if (sidebarScroll) {
       e.preventDefault();
+      closeSidebar();
       // Ensure main page is visible
       if (pageMain) pageMain.classList.remove('page-hidden');
-      refPages.forEach(p => p.classList.add('page-hidden'));
-      const el = document.getElementById(sidebarScroll);
+      refPages.forEach(function(p) { p.classList.add('page-hidden'); });
+      var el = document.getElementById(sidebarScroll);
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         history.pushState({target: 'main', scrollTo: sidebarScroll}, '', '#' + sidebarScroll);
@@ -3893,50 +3963,46 @@ document.querySelectorAll('.card, .workflow-step, .confirm-row, .domain-card, .s
       return;
     }
 
-    // Handle main content relative links (from within ref-page or standalone)
-    const href = link.getAttribute('href');
-    if (href && href.startsWith('#') && href.length > 1 && !link.hasAttribute('target')) {
-      const inRefPage = link.closest('.ref-page');
+    // Handle main content relative links
+    var href = link.getAttribute('href');
+    if (href && href.indexOf('#') === 0 && href.length > 1 && !link.hasAttribute('target')) {
+      var inRefPage = link.closest('.ref-page');
       if (inRefPage) return;
       e.preventDefault();
       navigateTo('main', href.substring(1));
     }
   });
 
-  // ── Scroll Spy ──
-  const sectionIds = ['overview','internals','architecture','workflow','methodology','risk-rating','output','coverage','constraints'];
+  // ── Scroll Spy (only when sidebar is open) ──
+  var sectionIds = ['overview','internals','architecture','workflow','methodology','risk-rating','output','coverage','constraints'];
 
-  const observer = new IntersectionObserver(function(entries) {
-    // Only run spy when main page is visible
+  var spyObserver = new IntersectionObserver(function(entries) {
     if (!pageMain || pageMain.classList.contains('page-hidden')) return;
 
-    let activeId = null;
-    // Find the topmost visible section
-    for (const entry of entries) {
+    var activeId = null;
+    for (var i = 0; i < entries.length; i++) {
+      var entry = entries[i];
       if (entry.isIntersecting) {
         if (!activeId || entry.boundingClientRect.top < 0) {
           activeId = entry.target.id;
         }
       }
     }
-    // If nothing is intersecting, use the first section above viewport
     if (!activeId) {
-      let best = null;
-      let bestTop = Infinity;
-      for (const entry of entries) {
-        const top = entry.boundingClientRect.top;
-        if (top < 0 && Math.abs(top) < Math.abs(bestTop)) {
-          best = entry.target.id;
-          bestTop = top;
+      var best = null, bestTop = Infinity;
+      for (var j = 0; j < entries.length; j++) {
+        var e2 = entries[j];
+        if (e2.boundingClientRect.top < 0 && Math.abs(e2.boundingClientRect.top) < Math.abs(bestTop)) {
+          best = e2.target.id;
+          bestTop = e2.boundingClientRect.top;
         }
       }
       activeId = best;
     }
 
     if (activeId) {
-      sidebarLinks.forEach(link => {
-        const target = link.getAttribute('data-sidebar-scroll');
-        if (target === activeId) {
+      sidebarLinks.forEach(function(link) {
+        if (link.getAttribute('data-sidebar-scroll') === activeId) {
           link.classList.add('active');
         } else {
           link.classList.remove('active');
@@ -3945,10 +4011,9 @@ document.querySelectorAll('.card, .workflow-step, .confirm-row, .domain-card, .s
     }
   }, { rootMargin: '-10% 0px -80% 0px', threshold: 0 });
 
-  // Observe all sections
   sectionIds.forEach(function(id) {
-    const el = document.getElementById(id);
-    if (el) observer.observe(el);
+    var el = document.getElementById(id);
+    if (el) spyObserver.observe(el);
   });
 
   // ── Browser back/forward ──
@@ -3964,14 +4029,62 @@ document.querySelectorAll('.card, .workflow-step, .confirm-row, .domain-card, .s
     }
   });
 
+  // ── Hover left edge to auto-expand ──
+  var hoverTimer = null;
+  var EDGE_WIDTH = 28;
+
+  document.addEventListener('mousemove', function(e) {
+    if (!pageMain || pageMain.classList.contains('page-hidden')) return;
+    var refVisible = false;
+    refPages.forEach(function(p) { if (!p.classList.contains('page-hidden')) refVisible = true; });
+    if (refVisible) return;
+
+    if (e.clientX <= EDGE_WIDTH) {
+      clearTimeout(hoverTimer);
+      if (sidebar && !sidebar.classList.contains('open')) {
+        openSidebar();
+      }
+    }
+  });
+
+  // Auto-collapse when mouse leaves sidebar area
+  function setupAutoCollapse() {
+    if (!sidebar) return;
+    sidebar.addEventListener('mouseleave', function() {
+      hoverTimer = setTimeout(function() {
+        if (sidebarToggle && !sidebarToggle.matches(':hover')) {
+          closeSidebar();
+        }
+      }, 400);
+    });
+
+    if (sidebarToggle) {
+      sidebarToggle.addEventListener('mouseenter', function() { clearTimeout(hoverTimer); });
+      sidebarToggle.addEventListener('mouseleave', function() {
+        hoverTimer = setTimeout(function() {
+          if (sidebar && !sidebar.matches(':hover')) closeSidebar();
+        }, 400);
+      });
+    }
+  }
+
+  setupAutoCollapse();
+
+  // Escape key closes sidebar
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && sidebar && sidebar.classList.contains('open')) {
+      closeSidebar();
+    }
+  });
+
   // ── Initial load ──
-  const hash = window.location.hash.substring(1);
+  var hash = window.location.hash.substring(1);
   if (hash) {
-    const refPageEl = document.getElementById('page-ref-' + hash);
+    var refPageEl = document.getElementById('page-ref-' + hash);
     if (refPageEl) {
       navigateTo('ref', null, 'page-ref-' + hash);
     } else {
-      const mainEl = document.getElementById(hash);
+      var mainEl = document.getElementById(hash);
       if (mainEl && pageMain && pageMain.contains(mainEl)) {
         setTimeout(function() {
           hideAllPages();
