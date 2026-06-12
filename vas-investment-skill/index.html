@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VAS 投入测算 V4.1 — 精密估算引擎</title>
+<title>VAS 投入测算 V4.2 — 精密估算引擎</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=JetBrains+Mono:wght@400;500;600&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
@@ -986,7 +986,7 @@ footer span { color: var(--brass); }
 
 <!-- ════════════════ NAV ════════════════ -->
 <nav class="nav-bar" id="navBar">
-  <a href="#" class="nav-brand">VAS<span class="accent"> 投入测算 </span><span class="ver">V4.1</span></a>
+  <a href="#" class="nav-brand">VAS<span class="accent"> 投入测算 </span><span class="ver">V4.2</span></a>
   <ul class="nav-links">
     <li><a href="#intro">简介</a></li>
     <li><a href="#user">用户关心的</a></li>
@@ -998,7 +998,7 @@ footer span { color: var(--brass); }
 <!-- ════════════════ HERO ════════════════ -->
 <header class="hero">
   <div class="eyebrow">Vehicle Application Software &nbsp;·&nbsp; Investment Estimation Engine</div>
-  <h1>VAS<span class="accent"> 投入测算 </span>SKILL<span class="ver">V4.1</span></h1>
+  <h1>VAS<span class="accent"> 投入测算 </span>SKILL<span class="ver">V4.2</span></h1>
   <p class="sub">
     对新提出的车辆应用软件需求进行<strong>风险调整投入估算</strong>——
     深度系统方案解析，校准软件开发等级，
@@ -1027,7 +1027,7 @@ footer span { color: var(--brass); }
   </div>
 
   <div class="badges">
-    <span class="badge v3">V4.1 版 分析五原则 + 任务审视</span>
+    <span class="badge v3">V4.2 版 双路飞书访问 + 五原则审视</span>
     <span class="badge risk">P50 &nbsp;/&nbsp; P80 &nbsp;/&nbsp; Max 三档模型</span>
     <span class="badge dual">双路核算 &nbsp;·&nbsp; 三角验证</span>
   </div>
@@ -1585,7 +1585,7 @@ footer span { color: var(--brass); }
   </div>
 
   <div class="formula-box">
-    <span class="fb-label">L-GRADE (V4.1 双轨版)</span>
+    <span class="fb-label">L-GRADE (V4.2 双轨版)</span>
 D3  = MAX( sw_architecture, service_signal_interface, sw_unit_logic, sw_unit_deployment )
 
 <span style="color:var(--teal-l);font-weight:700;">L_sw    = MAX( D1, D3 )</span>                     ← 软件有效等级，用于 PM 估算
@@ -1816,6 +1816,13 @@ d_{j,t}(dir) ∈ { new: 1.0,  modify: 0.6,  delete: 0.3 }
     <h3>版本历史</h3>
     <ul class="version-list">
       <li>
+        <div class="ver-tag">V4.2</div>
+        <div class="ver-body">
+          <strong>增加 LarkCLI(Python) 和 LarkCLI(node) 的双路飞书访问方式</strong>
+          <span>新增 LarkCLI(Python) 与 LarkCLI(node) 双路飞书数据访问通道，用户可在两种方式间灵活切换，提升数据同步的鲁棒性与环境兼容性。</span>
+        </div>
+      </li>
+      <li>
         <div class="ver-tag">V4.1</div>
         <div class="ver-body">
           <strong>分析五原则与任务审视</strong>
@@ -1852,7 +1859,7 @@ d_{j,t}(dir) ∈ { new: 1.0,  modify: 0.6,  delete: 0.3 }
 <div class="section-rule" aria-hidden="true"></div>
 
 <footer>
-  VAS Investment Analysis Skill &nbsp;&middot;&nbsp; Version 4.1 &nbsp;&middot;&nbsp; Developer: <span>quan.yuan3</span> &nbsp;&middot;&nbsp; 2026
+  VAS Investment Analysis Skill &nbsp;&middot;&nbsp; Version 4.2 &nbsp;&middot;&nbsp; Developer: <span>quan.yuan3</span> &nbsp;&middot;&nbsp; 2026
 </footer>
 
 <script>
